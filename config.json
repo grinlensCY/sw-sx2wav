@@ -1,11 +1,4 @@
 {
-    "//input": ["USB","BLE","File","pcAudio"],
-    "input": "USB",
-    "ble_list": ["C3:9F:71:6B:B2:B5","D3:C5:CD:E5:D5:A9","D3:03:41:91:40:BF","C3:24:3A:ED:2C:1C","DD:CF:BF:A4:B4:DE","F5:7F:0D:7F:40:05"],
-    "//ble_list": ["D2:6A:EF:C4:5E:0D","C1:25:A4:EC:8D:02","EB:BD:02:E6:37:29","C0:8D:B4:16:2F:BF","D3:C6:65:3B:7A:FE","EF:B4:D3:5C:3D:45","test","D2:6A:EF:C4:5E:0D"],
-    "//large_ble_list" : ["D2:6A:EF:C4:5E:0D","C1:25:A4:EC:8D:02"],
-    "//dual_ble_list": ["C3:9F:71:6B:B2:B5"],
-    "comport_list": ["COM3","COM8"],
     "loadFileList": {
         "which": "3",
         "1": {"dir":"G:\\.shortcut-targets-by-id\\1Q7Wn72L_mqTIqoUDDdLG5rgbAS4DQ2Zn\\寶寶音資料庫\\By Rocket Baby Ver2\\34W 3Day 仰躺 no gain\\C125A4EC8D02 搭配三獨立矽膠套",
@@ -18,45 +11,13 @@
                 "fnkw": "2021-02-11-22-43-18-audio"}
     },
     "dirToloadFile": "G:\\.shortcut-targets-by-id\\1Q7Wn72L_mqTIqoUDDdLG5rgbAS4DQ2Zn\\寶寶音資料庫\\By Rocket Baby Ver3\\37W 7Day\\PC Flutter 收音比對\\C5_61_7C_AC_79_21 Small 三獨立矽膠套 Flutter App收錄",
+    "dirToloadFile": "\\\\192.168.50.250\\寶寶音資料庫\\新生兒1M~2M_baby_patch_v1\\raw_data\\2021-04-22",
     "kwtoloadFile": "",
-    "pc_audio_input_name": "Conexant HD Audio",
-    "//pc_audio_input_name": "nRF52",
-    "pc_audio_output_name": "Beo",
-    "mic_gain":[0,0,0,1],
-    "stft_ch_list": [0,2,3],
-    "stft_gain": 1,
-    "mic_offset": [0,0,0,0],
     "mic_visible_sec": 5,
     "trend_chart_min": 10,
     "curv_visible_sec": 10,
     "ecg_visible_sec": 4,
-    "ecgfilter": {
-        "fcut":[4],
-        "typ":"highpass"
-    },
     "rec_projectName": "test",
-    "playback_shift": 160,
-    "playback_gain": 400,
-    "fetal_CL_th": 0.65,
-    "adult_CL_th": 0.65,
     "Eng_Mode": 10,
-    "calcHR": {
-        "band1": {"typ":"bandpass", "fcut":[30,150]},
-        "band2": {"typ":"bandpass", "fcut":[40,150]}
-    },
-    "//detectors":["Fetal_Movement"],
-    "detectors":["Fetal_Movement"],
-    "findFM":{
-        "th_nonpk_percentile": 67,
-        "th_PK_SNR": [830,600,2800],
-        "fcut" : [100,500],
-        "th_lowVol": [1e-7,1e-8,1e-10],
-        "minInterval_pairingPk": 0.3,
-        "minInterval_pickingPk": 0.1,
-        "showMsg": 10,
-        "th_PK_SNR_typ2": 1600
-    },
-    "temp_autoRec": 29,
-    "autoRec": 0,
     "SX2Wav":1
 }

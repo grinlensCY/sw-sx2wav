@@ -77,7 +77,7 @@ class PackageHandler:
         self.prepare_statistic_output()
         # == rec
         if self.engine.thd_rec_flag.is_set():
-            print('\ndual dual')
+            # print('\ndual dual')
             self.engine.recThd_audio.addData(dat)
             # print('mic_pkg',np.array(dat[:5]).shape)
     

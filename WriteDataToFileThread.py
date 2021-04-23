@@ -27,11 +27,11 @@ class RecThread(threading.Thread):
         if job == 'mic':
             self.filename_new.append(f'{self.filename_prefix}-audio-main01.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-env01.wav')
-            self.filename_new.append(f'{self.filename_prefix}-audio-main02.wav')
-            self.filename_new.append(f'{self.filename_prefix}-audio-main03.wav')
+            # self.filename_new.append(f'{self.filename_prefix}-audio-main02.wav')
+            # self.filename_new.append(f'{self.filename_prefix}-audio-main03.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-ts.wav')
         elif job != 'ecg':
-            for i in range(3):
+            for i in range(1):
                 self.filename_new.append(f'{self.filename_prefix}-{job}-{i+1:02d}.wav')
         elif job == 'ecg':
             self.filename_new.append(f'{self.filename_prefix}-{job}.wav')
@@ -72,15 +72,15 @@ class RecThread(threading.Thread):
                                 subtype=self.subtype_audio) as file1,\
                 sf.SoundFile(self.filename_new[2], mode='x',
                                 samplerate=self.sampleRate, channels=self.channels,
-                                subtype=self.subtype_audio) as file2,\
-                sf.SoundFile(self.filename_new[3], mode='x',
-                                samplerate=self.sampleRate, channels=self.channels,
-                                subtype=self.subtype_audio) as file3,\
-                sf.SoundFile(self.filename_new[4], mode='x',
-                                samplerate=self.sampleRate, channels=self.channels,
-                                subtype=self.subtype_NonAudio) as file4:
+                                subtype=self.subtype_audio) as file2:
+                # sf.SoundFile(self.filename_new[3], mode='x',
+                #                 samplerate=self.sampleRate, channels=self.channels,
+                #                 subtype=self.subtype_audio) as file3,\
+                # sf.SoundFile(self.filename_new[4], mode='x',
+                #                 samplerate=self.sampleRate, channels=self.channels,
+                #                 subtype=self.subtype_NonAudio) as file4:
                 
-                fileList = [file0, file1, file2, file3, file4]
+                fileList = [file0, file1, file2]    #, file3, file4]
                 t0 = None
 
                 while not self._stop_event.is_set():
@@ -97,7 +97,7 @@ class RecThread(threading.Thread):
                         emptyCnt = 0
                     else:
                         emptyCnt += 1
-                        if emptyCnt > 100:
+                        if emptyCnt > 200:
                             print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
                             self.stop()
                         time.sleep(self.waitTime)
@@ -105,19 +105,19 @@ class RecThread(threading.Thread):
         elif self.job != 'ecg':
             with sf.SoundFile(self.filename_new[0], mode='x',
                                 samplerate=self.sampleRate, channels=self.channels,
-                                subtype=self.subtype_NonAudio) as file0,\
-                sf.SoundFile(self.filename_new[1], mode='x',
-                                samplerate=self.sampleRate, channels=self.channels,
-                                subtype=self.subtype_NonAudio) as file1,\
-                sf.SoundFile(self.filename_new[2], mode='x',
-                                samplerate=self.sampleRate, channels=self.channels,
-                                subtype=self.subtype_NonAudio) as file2:
-                fileList = [file0, file1, file2]
-                data = [[],[],[]]
+                                subtype=self.subtype_NonAudio) as file0:
+                # sf.SoundFile(self.filename_new[1], mode='x',
+                #                 samplerate=self.sampleRate, channels=self.channels,
+                #                 subtype=self.subtype_NonAudio) as file1,\
+                # sf.SoundFile(self.filename_new[2], mode='x',
+                #                 samplerate=self.sampleRate, channels=self.channels,
+                #                 subtype=self.subtype_NonAudio) as file2:
+                fileList = [file0]#, file1, file2]
+                data = [[]]   #[[],[],[]]
                 t0 = [None, None, None]
                 while not self._stop_event.is_set():
                     hasData = False
-                    for i in range(3):
+                    for i in range(1):
                         # if not self.qMulti[i].empty():
                         #     data[i].append(self.qMulti[i].get_nowait())
                         # else:
@@ -132,7 +132,7 @@ class RecThread(threading.Thread):
                     if emptyCnt > 100:
                         print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
                         self.stop()
-                    for i in range(3):
+                    for i in range(1):
                         if len(data[i])==2:
                             # print(f'ch{i} ts={data[i][0][0]},{data[i][1][0]} len={len(data[i][0][1])},{len(data[i][1][1])}')
                             if t0[i] is None:

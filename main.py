@@ -61,11 +61,11 @@ class Engine:
             print(self.strPkgSpd)
             isRun = False
             isRun |= not self.recThd_audio.stopped()
-            print(isRun,'self.recThd_audio.stopped()', self.recThd_audio.stopped())
+            print('\nisRun',isRun,'self.recThd_audio.stopped()', self.recThd_audio.stopped())
             isRun |= not self.recThd_acc.stopped()
             print(isRun,'self.recThd_acc.stopped()', self.recThd_acc.stopped())
-            isRun |= not self.recThd_ecg.stopped()
-            print(isRun,'self.recThd_ecg.stopped()', self.recThd_ecg.stopped())
+            # isRun |= not self.recThd_ecg.stopped()
+            # print(isRun,'self.recThd_ecg.stopped()', self.recThd_ecg.stopped())
             isRun |= not self.recThd_gyro.stopped()
             print(isRun,'self.recThd_gyro.stopped()', self.recThd_gyro.stopped())
             isRun |= not self.recThd_mag.stopped()
@@ -116,10 +116,10 @@ class Engine:
                                         4, 0.01, fn_ts,'acc',
                                         self.datainfo['acc']['fullscale'])
             self.recThd_acc.start()
-            self.recThd_ecg = RecThread(self.datainfo['ecg']['sr'],
-                                        2, 0.01, fn_ts, 'ecg',
-                                        self.datainfo['ecg']['fullscale'])
-            self.recThd_ecg.start()
+            # self.recThd_ecg = RecThread(self.datainfo['ecg']['sr'],
+            #                             2, 0.01, fn_ts, 'ecg',
+            #                             self.datainfo['ecg']['fullscale'])
+            # self.recThd_ecg.start()
             self.recThd_gyro = RecThread(int(self.datainfo['gyro']['sr']),
                                         4, 0.01, fn_ts, 'gyro',
                                         self.datainfo['gyro']['fullscale'])
@@ -143,10 +143,10 @@ class Engine:
             self.recThd_acc.join(0.5)
             # print('self.recThd_acc ',self.recThd_acc.is_alive())
             self.recThd_acc = None
-            self.recThd_ecg.stop()
-            self.recThd_ecg.join(0.5)
-            # print('self.recThd_ecg ',self.recThd_ecg.is_alive())
-            self.recThd_ecg = None
+            # self.recThd_ecg.stop()
+            # self.recThd_ecg.join(0.5)
+            # # print('self.recThd_ecg ',self.recThd_ecg.is_alive())
+            # self.recThd_ecg = None
             self.recThd_gyro.stop()
             self.recThd_gyro.join(0.5)
             # print('self.recThd_gyro ',self.recThd_gyro.is_alive())
@@ -186,6 +186,7 @@ def findFileset(config, kw='audio-main',srcdir=''):
     fns = [f'{srcdir}\\{fn}' for fn in os.listdir(srcdir)
             if os.path.basename(tfn)[:19] == fn[:19]
                 and (not kw2 or kw2 in fn or kw in fn)]
+        fns = [f'{srcdir}\\{fn}' for fn in os.listdir(srcdir)
     fns.sort()
     [print(os.path.basename(fn)) for fn in fns]
     return fns
