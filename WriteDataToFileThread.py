@@ -129,7 +129,7 @@ class RecThread(threading.Thread):
                             # print(f'{self.job}: timeout while getting data of ch{i}')
                             pass
                     if not hasData: emptyCnt += 1
-                    if emptyCnt > 100:
+                    if emptyCnt > 200:
                         print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
                         self.stop()
                     for i in range(1):
@@ -161,7 +161,7 @@ class RecThread(threading.Thread):
                             emptyCnt = 0
                         else:
                             emptyCnt += 1
-                            if emptyCnt > 100:
+                            if emptyCnt > 200:
                                 print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
                                 self.stop()
                             time.sleep(self.waitTime)
