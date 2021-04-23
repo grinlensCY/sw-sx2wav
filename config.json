@@ -17,6 +17,7 @@
     "trend_chart_min": 10,
     "curv_visible_sec": 10,
     "ecg_visible_sec": 4,
+    "load_all_sx": 10,
     "rec_projectName": "test",
     "Eng_Mode": 10,
     "SX2Wav":1

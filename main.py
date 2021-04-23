@@ -173,7 +173,7 @@ def updateConfig(engine=None):
     print('update config')
     return config
 
-def findFileset(config, kw='audio-main',srcdir=''):
+def findFileset(config, kw='audio-main',srcdir='', loadall=True):
     root = tk.Tk()
     root.withdraw()
 
@@ -182,11 +182,14 @@ def findFileset(config, kw='audio-main',srcdir=''):
     if not tfn:
         return ''
     srcdir = os.path.dirname(tfn)
-    kw2 = 'audio-main01' if 'ts' in kw else ''
-    fns = [f'{srcdir}\\{fn}' for fn in os.listdir(srcdir)
-            if os.path.basename(tfn)[:19] == fn[:19]
-                and (not kw2 or kw2 in fn or kw in fn)]
+    # kw2 = 'audio-main01' if 'ts' in kw else ''
+    if loadall:
         fns = [f'{srcdir}\\{fn}' for fn in os.listdir(srcdir)
+                if fn.endswith('.sx')]
+    else:
+        fns = [f'{srcdir}\\{fn}' for fn in os.listdir(srcdir)
+                if os.path.basename(tfn)[:19] == fn[:19]]
+                    # and (not kw2 or kw2 in fn or kw in fn)]
     fns.sort()
     [print(os.path.basename(fn)) for fn in fns]
     return fns
@@ -204,6 +207,6 @@ if __name__ == "__main__":
     engine = Engine(datainfo, config)
     kw = ''
     sdir = config['dirToloadFile']
-    fns = findFileset(config,kw=kw,srcdir=sdir)
+    fns = findFileset(config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'])
     # for fn in fns:
     engine.set_files_source(reset=False,f_name=fns[0])
