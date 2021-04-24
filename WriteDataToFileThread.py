@@ -7,7 +7,7 @@ import queue
 import numpy as np
 
 class RecThread(threading.Thread):    
-    def __init__(self, sampleRate, channels, waitTime, fn_ts, job, fullscale):
+    def __init__(self, sampleRate, channels, waitTime, fn_prefix, job, fullscale, isdualmic):
         #QtCore.QThread.__init__(self)
         super(RecThread, self).__init__()
         self.sampleRate = sampleRate
@@ -16,19 +16,21 @@ class RecThread(threading.Thread):
         self.q = queue.Queue()
         self.qMulti = [queue.Queue() for i in range(3)]
         self._stop_event = threading.Event()
-        self.filename_prefix = f'{os.path.dirname(__file__)}/record/{fn_ts}'
+        # self.filename_prefix = f'{os.path.dirname(__file__)}/record/{fn_prefix}'
+        self.filename_prefix = fn_prefix
         self.filename_new = []
         self.daemon = True
         self.job = job
         self.subtype_audio = 'PCM_16'
         self.subtype_NonAudio = 'float'
         self.fullscale = fullscale
+        self.isdualmic = isdualmic
         self.name = f'{job}_rec'
         if job == 'mic':
             self.filename_new.append(f'{self.filename_prefix}-audio-main01.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-env01.wav')
-            # self.filename_new.append(f'{self.filename_prefix}-audio-main02.wav')
-            # self.filename_new.append(f'{self.filename_prefix}-audio-main03.wav')
+            self.filename_new.append(f'{self.filename_prefix}-audio-main02.wav')
+            self.filename_new.append(f'{self.filename_prefix}-audio-main03.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-ts.wav')
         elif job != 'ecg':
             for i in range(1):
@@ -72,15 +74,15 @@ class RecThread(threading.Thread):
                                 subtype=self.subtype_audio) as file1,\
                 sf.SoundFile(self.filename_new[2], mode='x',
                                 samplerate=self.sampleRate, channels=self.channels,
-                                subtype=self.subtype_audio) as file2:
-                # sf.SoundFile(self.filename_new[3], mode='x',
-                #                 samplerate=self.sampleRate, channels=self.channels,
-                #                 subtype=self.subtype_audio) as file3,\
-                # sf.SoundFile(self.filename_new[4], mode='x',
-                #                 samplerate=self.sampleRate, channels=self.channels,
-                #                 subtype=self.subtype_NonAudio) as file4:
+                                subtype=self.subtype_audio) as file2,\
+                sf.SoundFile(self.filename_new[3], mode='x',
+                                samplerate=self.sampleRate, channels=self.channels,
+                                subtype=self.subtype_audio) as file3,\
+                sf.SoundFile(self.filename_new[4], mode='x',
+                                samplerate=self.sampleRate, channels=self.channels,
+                                subtype=self.subtype_NonAudio) as file4:
                 
-                fileList = [file0, file1, file2]    #, file3, file4]
+                fileList = [file0, file1, file2, file3, file4]
                 t0 = None
 
                 while not self._stop_event.is_set():
@@ -102,6 +104,11 @@ class RecThread(threading.Thread):
                             self.stop()
                         time.sleep(self.waitTime)
                         # break
+            if self.isdualmic:
+                print(f'recording> remove({self.filename_new[2]})')
+                os.remove(self.filename_new[2])
+                print(f'recording> remove({self.filename_new[3]})')
+                os.remove(self.filename_new[3])
         elif self.job != 'ecg':
             with sf.SoundFile(self.filename_new[0], mode='x',
                                 samplerate=self.sampleRate, channels=self.channels,

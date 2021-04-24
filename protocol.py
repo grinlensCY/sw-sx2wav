@@ -454,7 +454,7 @@ class Protocol:
                 if(not is_busy):
                     # print('protocol not is_busy, emptyCnt=',emptyCnt)
                     emptyCnt += 1
-                    if emptyCnt > 30:
+                    if emptyCnt > 50:
                         print('protocol empty cnt=',emptyCnt)
                         self.endingTX_callback()
                     time.sleep(0.01)

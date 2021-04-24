@@ -1,24 +1,12 @@
 {
-    "loadFileList": {
-        "which": "3",
-        "1": {"dir":"G:\\.shortcut-targets-by-id\\1Q7Wn72L_mqTIqoUDDdLG5rgbAS4DQ2Zn\\寶寶音資料庫\\By Rocket Baby Ver2\\34W 3Day 仰躺 no gain\\C125A4EC8D02 搭配三獨立矽膠套",
-              "fnkw": "2021-02-03-06-16-19-audio-main02"},
-        "2": {"dir":"G:\\.shortcut-targets-by-id\\1Q7Wn72L_mqTIqoUDDdLG5rgbAS4DQ2Zn\\寶寶音資料庫\\By Rocket Baby Ver3\\37W 2Day\\仰躺 清醒 活動 位置2\\F3929F3CA107 3mm三獨立矽膠套",
-              "fnkw": ""},
-        "3": {"dir":"G:\\My Drive\\Experiment\\胎動\\30W 6Day 仰躺",
-              "fnkw": ""},
-        "4": {"dir":"G:\\My Drive\\Experiment\\胎動\\C5617CAC7921",
-                "fnkw": "2021-02-11-22-43-18-audio"}
-    },
-    "dirToloadFile": "G:\\.shortcut-targets-by-id\\1Q7Wn72L_mqTIqoUDDdLG5rgbAS4DQ2Zn\\寶寶音資料庫\\By Rocket Baby Ver3\\37W 7Day\\PC Flutter 收音比對\\C5_61_7C_AC_79_21 Small 三獨立矽膠套 Flutter App收錄",
+    "//dirToloadFile": "G:\\.shortcut-targets-by-id\\1Q7Wn72L_mqTIqoUDDdLG5rgbAS4DQ2Zn\\寶寶音資料庫\\By Rocket Baby Ver3\\37W 7Day\\PC Flutter 收音比對\\C5_61_7C_AC_79_21 Small 三獨立矽膠套 Flutter App收錄",
     "dirToloadFile": "\\\\192.168.50.250\\寶寶音資料庫\\新生兒1M~2M_baby_patch_v1\\raw_data\\2021-04-22",
+    "//dirToloadFile": "G:\\My Drive\\Code\\sx2wav\\test_files",
+    "dir_Export": "",
     "kwtoloadFile": "",
     "mic_visible_sec": 5,
     "trend_chart_min": 10,
     "curv_visible_sec": 10,
     "ecg_visible_sec": 4,
-    "load_all_sx": 10,
-    "rec_projectName": "test",
-    "Eng_Mode": 10,
-    "SX2Wav":1
+    "load_all_sx": 10
 }

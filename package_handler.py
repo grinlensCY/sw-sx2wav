@@ -31,6 +31,7 @@ class PackageHandler:
         self.is_usb_pwr=False
 
         self.engine = engine
+        self.bleaddr = None
     
     def prepare_statistic_output(self):
         if(self.pre_ts==0):
@@ -69,8 +70,24 @@ class PackageHandler:
         self.sys_t=dat[4]
         self.is_usb_pwr=dat[6]
         self.engine.sysinfo = dat
+        if not self.engine.flag_checked_fileformat.is_set():
+            tmp = dat[5].hex()
+            addr = ''
+            for c in range(-2,-len(tmp)-1,-2):
+                addr += f'{tmp[c]}{tmp[c+1]}:' if c!=-len(tmp)else tmp[c]+tmp[c+1]
+            print('BLE addr:',addr.upper(),addr.replace(':','').upper())
+            self.bleaddr = addr.replace(':','').upper()
 
     def handle_dual_mic_pkg(self,dat):
+        if not self.engine.flag_checked_fileformat.is_set():
+            self.engine.flag_dualmic.set()
+            if len(dat[1]) == 64:
+                self.engine.flag_4kHz.set()
+            else:
+                self.engine.flag_4kHz.clear()
+                print('dualmic: not 4kHz, pkg size=', len(dat[1]))
+        if self.bleaddr is not None:
+            self.engine.flag_checked_fileformat.set()
         # q.put_nowait(dat)
 
         self.mic_pkg_cnt+=1
@@ -82,6 +99,15 @@ class PackageHandler:
             # print('mic_pkg',np.array(dat[:5]).shape)
     
     def handle_mic_pkg(self,dat):
+        if not self.engine.flag_checked_fileformat.is_set():
+            self.engine.flag_dualmic.clear()
+            if len(dat[1]) == 64:
+                self.engine.flag_4kHz.set()
+            else:
+                self.engine.flag_4kHz.clear()
+                print('multimic: not 4kHz, pkg size=', len(dat[1]))
+        if self.bleaddr is not None:
+            self.engine.flag_checked_fileformat.set()
         # q.put_nowait(dat)
 
         self.mic_pkg_cnt+=1
