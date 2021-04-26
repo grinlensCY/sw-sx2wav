@@ -275,6 +275,7 @@ def findFileset(config, kw='audio-main',srcdir='', loadall=True):
 
 
 if __name__ == "__main__":
+    print('version: 20210426a')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
