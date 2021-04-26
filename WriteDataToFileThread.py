@@ -84,23 +84,42 @@ class RecThread(threading.Thread):
                 
                 fileList = [file0, file1, file2, file3, file4]
                 t0 = None
-
+                seglen = 64 if self.sampleRate==4000 else 32
+                data_dim = 2 if self.isdualmic else 4
+                seg_cnt = 20
+                buffer_mic = np.zeros((data_dim,seglen*seg_cnt),dtype=np.float64)
+                buffer_ts = np.zeros(seg_cnt,dtype=np.float64)
+                cnt = 0
                 while not self._stop_event.is_set():
                     if not self.q.empty():
                         tmp = self.q.get_nowait()
-                        data = np.array(tmp[1:])/self.fullscale
+                        micdata = np.array(tmp[1:])/self.fullscale
+                        # print('record ',micdata.shape)
+                        buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = micdata
                         if t0 is None:
                             t0 = tmp[0]
-                        ts = (tmp[0]-t0) * 4e-6
-                        # ts = tmp[0] * 4e-6
-                        for i,q in enumerate(data):
-                            fileList[i].write(q)  # block=True, timeout=0.05
-                        fileList[-1].write(ts)
+                        buffer_ts[cnt] = (tmp[0]-t0) * 4e-6
+                        cnt += 1
+                        if cnt == seg_cnt:
+                            for i,q in enumerate(buffer_mic):
+                                fileList[i].write(q)
+                            fileList[-1].write(buffer_ts)
+                            cnt = 0
+                        # if t0 is None:
+                        #     t0 = tmp[0]
+                        # ts = (tmp[0]-t0) * 4e-6
+                        # for i,q in enumerate(micdata):
+                        #     fileList[i].write(q)  # block=True, timeout=0.05
+                        # fileList[-1].write(ts)
                         emptyCnt = 0
                     else:
                         emptyCnt += 1
                         if emptyCnt > 200:
                             print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
+                            if cnt and cnt < seg_cnt:
+                                for i,q in enumerate(buffer_mic[:,:cnt*seglen]):
+                                    fileList[i].write(q)
+                                fileList[-1].write(buffer_ts[:cnt])
                             self.stop()
                         time.sleep(self.waitTime)
                         # break
