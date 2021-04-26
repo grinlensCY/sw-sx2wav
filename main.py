@@ -30,10 +30,12 @@ class Engine:
         self.flag_checked_fileformat = threading.Event()
         self.flag_4kHz = threading.Event()
         self.flag_dualmic = threading.Event()
+        self.flag_ble_addr = threading.Event()
         self.strPkgSpd = ''
         self.filecnt=filecnt
         self.bleaddr = None
         self.srcdir = ''
+        self.thd_ChkRecThd = None
 
     def start(self):
         print('engine start')
@@ -52,6 +54,13 @@ class Engine:
     def stop(self):        
         if self.thd_rec_flag.is_set():
             self.setRec()
+        
+        print('--stop thd_ChkRecThd')
+        self.flag_stop_ChkRecThd.set()
+        if self.thd_ChkRecThd is not None and self.thd_ChkRecThd.is_alive():
+            time.sleep(3)
+            print('main self.thd_ChkRecThd.is_alive',self.thd_ChkRecThd.is_alive())
+            self.thd_ChkRecThd = None
 
         print('--stop data_retriever')
         if(self.data_retriever is not None):
@@ -60,6 +69,7 @@ class Engine:
         
         self.reset()
         self.stopped_flag.set()
+
         print('engine stop')
     
     def chkRecThd(self, flag):
@@ -81,7 +91,9 @@ class Engine:
             print(isRun,'self.recThd_mag.stopped()', self.recThd_mag.stopped())
             isRun |= not self.recThd_quaternion.stopped()
             print(isRun,'self.recThd_quaternion.stopped()', self.recThd_quaternion.stopped())
-            if not isRun: break
+            if not isRun:
+                flag.set()
+                break
         self.stop()
 
     def updateConfig(self,config):
@@ -89,7 +101,9 @@ class Engine:
 
     def chk_files_format(self,f_name='',srcdir='',cnt=0):
         srcdir = os.path.dirname(f_name)
-        print('\nf_name: ', f_name)
+        ts = float(os.path.basename(f_name)[:-3])/1000
+        print(f'\nrecording time:{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}')
+        print('f_name: ', f_name)
         # fnstr = f_name.split("/")[-2:] if len(f_name.split("/"))>1 else f_name.split("\\")[-2:]
         # self.input = '_'.join(fnstr)
         if srcdir and f_name.endswith('sx'):
@@ -106,13 +120,30 @@ class Engine:
             cnt = 0
             while not self.flag_checked_fileformat.wait(0.5):
                 cnt+=1
-                print('wait for result of checking file format',cnt)
-        print(f'format checked:{self.flag_checked_fileformat.is_set()}  '
-              f'4kHz:{self.flag_4kHz.is_set()}  dualmic:{self.flag_dualmic.is_set()}  '
-              f'BLE addr:{pkg_handler.bleaddr}')
-        self.datainfo['mic']['sr'] = 4000 if self.flag_4kHz.is_set() else 2000
-        self.bleaddr = pkg_handler.bleaddr
-        self.data_retriever.stop()
+                print('wait for receiving file format',cnt)
+                if cnt>10:
+                    input(f'quit {os.path.basename(f_name)}, having waited for format check too long time')
+                    print(f'quit {os.path.basename(f_name)}, having waited for format check too long time'
+                          ,file=open('log.txt','a',newline=''))
+                    self.stop()
+                    break
+            cnt = 0
+            while not self.flag_ble_addr.wait(0.5):
+                cnt += 1
+                print('wait for receiving ble addre',cnt)
+                if cnt > 10:
+                    input(f'ble addr of {os.path.basename(f_name)} is unknown!')
+                    print(f'ble addr of {os.path.basename(f_name)} is unknown!'
+                          ,file=open('log.txt','a',newline=''))
+                    break
+        if self.flag_checked_fileformat.is_set():
+            print(f'format checked:{self.flag_checked_fileformat.is_set()}  '
+                f'4kHz:{self.flag_4kHz.is_set()}  dualmic:{self.flag_dualmic.is_set()}  '
+                f'BLE addr:{pkg_handler.bleaddr}')
+            self.datainfo['mic']['sr'] = 4000 if self.flag_4kHz.is_set() else 2000
+            self.bleaddr = pkg_handler.bleaddr if self.flag_ble_addr.is_set() else "unknownBLE"
+            self.data_retriever.stop()
+            engine.set_files_source(reset=False,f_name=fn)
         # self.stop()
 
     def set_files_source(self,reset=True,f_name='',srcdir=''):
@@ -141,7 +172,11 @@ class Engine:
                       f'{time.strftime("%Y-%m-%d", time.localtime(ts))}/'
                       f'{self.bleaddr}/'
                       f'{wavkw}')
-            existfns = [fn for fn in os.listdir(os.path.dirname(wavdir)) if wavkw in fn]
+            print(f'setRec: wavdir={wavdir}')
+            if os.path.exists(os.path.dirname(wavdir)):
+                existfns = [fn for fn in os.listdir(os.path.dirname(wavdir)) if wavkw in fn]
+            else:
+                existfns = ''
             if len(existfns):
                 print(f'{wavdir} has existed!')
                 self.stop()
@@ -241,13 +276,12 @@ def findFileset(config, kw='audio-main',srcdir='', loadall=True):
 
 if __name__ == "__main__":
     config = updateConfig()
-    datainfo = {'mic':{'fullscale':32768.0, 'sr':4000, 'disp_time':config['mic_visible_sec']},
-                'ecg':{'fullscale':2000.0, 'sr':512, 'disp_time':config['ecg_visible_sec']},
-                'acc':{'fullscale':4.0, 'sr':112.5/2, 'disp_time':config['curv_visible_sec']},
-                'gyro':{'fullscale':4.0, 'sr':112.5/2, 'disp_time':config['curv_visible_sec']},
-                'mag':{'fullscale':4900.0, 'sr':75, 'disp_time':config['curv_visible_sec']},
-                'quaternion':{'fullscale':1.0, 'sr':112.5/2, 'disp_time':config['curv_visible_sec']},
-                'trend': {'fullscale':[[90,180],[60,150]], 'sr':1/3, 'disp_time':config['trend_chart_min']*60}}
+    datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
+                'ecg':{'fullscale':2000.0, 'sr':512},
+                'acc':{'fullscale':4.0, 'sr':112.5/2},
+                'gyro':{'fullscale':4.0, 'sr':112.5/2},
+                'mag':{'fullscale':4900.0, 'sr':75},
+                'quaternion':{'fullscale':1.0, 'sr':112.5/2}}
     kw = ''
     sdir = config['dirToloadFile']
     fns = findFileset(config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'])
@@ -257,6 +291,8 @@ if __name__ == "__main__":
     for i,fn in enumerate(fns):
         stop_flag.clear()
         engine.chk_files_format(f_name=fn,cnt=i+1)
-        engine.set_files_source(reset=False,f_name=fn)
-        while not stop_flag.wait(5):
+        # engine.set_files_source(reset=False,f_name=fn)
+        while not stop_flag.wait(2.5):
             print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
+    time.sleep(3)
+    print('threading.active=',threading.active_count(),threading.enumerate())

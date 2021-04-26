@@ -28,6 +28,7 @@ class Driver:
 
         try:
             fp=open(file_path,'rb')
+            print('drv: file opened')
         except:
             time.sleep(0.5)
             return
@@ -43,6 +44,7 @@ class Driver:
             in_len=len(dat)
             if(in_len>0):
                 rxq.put_nowait(dat)
+            # print('in_len=',in_len)
             # time.sleep(0.018)
 
     def start(self):
@@ -57,6 +59,7 @@ class Driver:
 
         self.thd=threading.Thread(target = self.__io_thd_fun__, args =(self.thd_run_flag,self.file_path,self.rx_queue,))
         self.thd.start()
+        print('drv: start self.thd_run_flag:',self.thd_run_flag.is_set())
 
     def stop(self):
         if(self.thd_run_flag is not None):
@@ -70,6 +73,8 @@ class Driver:
 
         self.thd_run_flag=None
         self.thd=None
+
+        print('drv: stop')
 
 if __name__ == "__main__":
     drv = Driver('./android_test_file/D2_6A_EF_C4_5E_0D/1614135882794.sx')
