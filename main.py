@@ -1,10 +1,12 @@
 import os,threading,time,json
+import zipfile
 import file_driver as FD
 from package_handler import PackageHandler
 from WriteDataToFileThread import RecThread
 import protocol as PRO
 import tkinter as tk
 from tkinter import filedialog
+from zipfile import ZipFile
 
 class Engine:
     def __init__(self,datainfo=None, config=None, stopped_flag=None, filecnt=0):
@@ -257,25 +259,37 @@ def findFileset(config, kw='audio-main',srcdir='', loadall=True):
     root.withdraw()
 
     srcdir = config['dirToloadFile'] if not srcdir else srcdir
-    tfn = filedialog.askopenfilename(initialdir=srcdir,filetypes=[("SXwav",f"*{kw}*.sx")])
+    tfn = filedialog.askopenfilename(initialdir=sdir,filetypes=[("SX File",(f"*{kw}*.sx",f"*{kw}*.zip"))])
     if not tfn:
         return ''
     srcdir = os.path.dirname(tfn)
-    # kw2 = 'audio-main01' if 'ts' in kw else ''
     if loadall:
+        fns = [f'{srcdir}\\{fn}' for fn in os.listdir(srcdir)
+                if fn.endswith('.sx') or fn.endswith('.zip')]
+        for fn in fns:
+            if fn.endswith('zip'):
+                with ZipFile(fn) as myzip:
+                    for zipfn in myzip.namelist():
+                        if zipfn.endswith('sx') and not os.path.exists(f'{srcdir}\{zipfn.replace("zip","sx")}'):
+                            print('going to upzip',zipfn)
+                            myzip.extract(zipfn,path=srcdir)
         fns = [f'{srcdir}\\{fn}' for fn in os.listdir(srcdir)
                 if fn.endswith('.sx')]
     else:
-        fns = [f'{srcdir}\\{fn}' for fn in os.listdir(srcdir)
-                if os.path.basename(tfn)[:19] == fn[:19]]
-                    # and (not kw2 or kw2 in fn or kw in fn)]
+        if tfn.endswith('zip'):
+            with ZipFile(tfn) as myzip:
+                for zipfn in myzip.namelist():
+                    if zipfn.endswith('sx') and not os.path.exists(f'{srcdir}\{zipfn.replace("zip","sx")}'):
+                        print('going to upzip',zipfn)
+                        myzip.extract(zipfn,path=srcdir)
+        fns = [tfn.replace("zip","sx")]
     fns.sort()
     [print(os.path.basename(fn)) for fn in fns]
     return fns
 
 
 if __name__ == "__main__":
-    print('version: 20210426a')
+    print('version: 20210427a')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},

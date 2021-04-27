@@ -432,7 +432,7 @@ class Protocol:
     def __decode_thd_fun(self,flag,drv,txq,rxq):
         emptyCnt = 0
         while(flag.is_set()):
-            print('in prot: t0   emptyCnt=', emptyCnt)
+            print('protocol: t0   emptyCnt=', emptyCnt)
             get_esp=False
             drv.start()
 
@@ -447,6 +447,7 @@ class Protocol:
                     get_esp=self.__decode_bytes(get_esp,msg,rxq)
                     
                 if(not txq.empty()):
+                    emptyCnt = 0
                     is_busy=True
                     msg=txq.get_nowait()
                     drv.write(msg)
@@ -454,7 +455,7 @@ class Protocol:
                 if(not is_busy):
                     # print('protocol not is_busy, emptyCnt=',emptyCnt)
                     emptyCnt += 1
-                    if emptyCnt > 30:
+                    if emptyCnt > 50:
                         print('protocol empty cnt=',emptyCnt)
                         self.endingTX_callback()
                     time.sleep(0.01)
