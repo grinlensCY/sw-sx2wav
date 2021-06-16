@@ -104,6 +104,7 @@ class Engine:
     def chk_files_format(self,f_name='',srcdir='',cnt=0):
         srcdir = os.path.dirname(f_name)
         ts = float(os.path.basename(f_name)[:-3])/1000
+        self.flag_ble_addr.clear()
         print(f'\nrecording time:{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}')
         print('f_name: ', f_name)
         # fnstr = f_name.split("/")[-2:] if len(f_name.split("/"))>1 else f_name.split("\\")[-2:]
@@ -142,6 +143,9 @@ class Engine:
             print(f'format checked:{self.flag_checked_fileformat.is_set()}  '
                 f'4kHz:{self.flag_4kHz.is_set()}  dualmic:{self.flag_dualmic.is_set()}  '
                 f'BLE addr:{pkg_handler.bleaddr}')
+            if config['run_onlyBLE'] not in pkg_handler.bleaddr:
+                self.stop()
+                return
             self.datainfo['mic']['sr'] = 4000 if self.flag_4kHz.is_set() else 2000
             self.bleaddr = pkg_handler.bleaddr if self.flag_ble_addr.is_set() else "unknownBLE"
             self.data_retriever.stop()
@@ -171,8 +175,8 @@ class Engine:
             dir_export = self.config['dir_Export'] if self.config['dir_Export'] else self.srcdir
             wavkw = f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}'
             wavdir = (f"{dir_export}/wav/"
-                      f'{time.strftime("%Y-%m-%d", time.localtime(ts))}/'
                       f'{self.bleaddr}/'
+                      f'{time.strftime("%Y-%m-%d", time.localtime(ts))}/'
                       f'{wavkw}')
             print(f'setRec: wavdir={wavdir}')
             if os.path.exists(os.path.dirname(wavdir)):
@@ -284,12 +288,16 @@ def findFileset(config, kw='audio-main',srcdir='', loadall=True):
                         myzip.extract(zipfn,path=srcdir)
         fns = [tfn.replace("zip","sx")]
     fns.sort()
-    [print(os.path.basename(fn)) for fn in fns]
+    print()
+    for fn in fns:
+        ts = float(os.path.basename(fn)[:-3])/1000
+        print(f'{os.path.basename(fn)}  recording time:{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}')
+    print()
     return fns
 
 
 if __name__ == "__main__":
-    print('version: 20210427a')
+    print('version: 20210616a')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
@@ -300,14 +308,15 @@ if __name__ == "__main__":
     kw = ''
     sdir = config['dirToloadFile']
     fns = findFileset(config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'])
-    stop_flag = threading.Event()
-    engine = Engine(datainfo, config,stopped_flag=stop_flag,filecnt=len(fns))
-    t0 = time.time()
-    for i,fn in enumerate(fns):
-        stop_flag.clear()
-        engine.chk_files_format(f_name=fn,cnt=i+1)
-        # engine.set_files_source(reset=False,f_name=fn)
-        while not stop_flag.wait(2.5):
-            print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
-    time.sleep(3)
+    if not config['chkTSonly']:
+        stop_flag = threading.Event()
+        engine = Engine(datainfo, config,stopped_flag=stop_flag,filecnt=len(fns))
+        t0 = time.time()
+        for i,fn in enumerate(fns):
+            stop_flag.clear()
+            engine.chk_files_format(f_name=fn,cnt=i+1)
+            # engine.set_files_source(reset=False,f_name=fn)
+            while not stop_flag.wait(2.5):
+                print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
+        time.sleep(3)
     print('threading.active=',threading.active_count(),threading.enumerate())
