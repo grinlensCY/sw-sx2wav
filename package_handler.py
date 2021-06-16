@@ -78,6 +78,9 @@ class PackageHandler:
             print('BLE addr:',addr.upper(),addr.replace(':','').upper())
             self.bleaddr = addr.replace(':','').upper()
             self.engine.flag_ble_addr.set()
+        if self.engine.thd_rec_flag.is_set():
+            self.engine.recThd_sysinfo.addData([dat[0],dat[3],dat[4]])
+            # print('get from decorder',dat[0])
 
     def handle_dual_mic_pkg(self,dat):
         if not self.engine.flag_checked_fileformat.is_set():

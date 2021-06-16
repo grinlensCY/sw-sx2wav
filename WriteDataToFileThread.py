@@ -5,9 +5,10 @@ import time
 import os
 import queue
 import numpy as np
+import csv
 
 class RecThread(threading.Thread):    
-    def __init__(self, sampleRate, channels, waitTime, fn_prefix, job, fullscale, isdualmic):
+    def __init__(self, sampleRate, channels, waitTime, fn_prefix, job, fullscale, isdualmic=False):
         #QtCore.QThread.__init__(self)
         super(RecThread, self).__init__()
         self.sampleRate = sampleRate
@@ -32,6 +33,8 @@ class RecThread(threading.Thread):
             self.filename_new.append(f'{self.filename_prefix}-audio-main02.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-main03.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-ts.wav')
+        elif job == 'sysinfo':
+            self.filename_new.append(f'{self.filename_prefix}-{job}.csv')
         elif job != 'ecg':
             for i in range(1):
                 self.filename_new.append(f'{self.filename_prefix}-{job}-{i+1:02d}.wav')
@@ -128,7 +131,7 @@ class RecThread(threading.Thread):
                 os.remove(self.filename_new[2])
                 print(f'recording> remove({self.filename_new[3]})')
                 os.remove(self.filename_new[3])
-        elif self.job != 'ecg':
+        elif self.job != 'ecg' and self.job != 'sysinfo':
             with sf.SoundFile(self.filename_new[0], mode='x',
                                 samplerate=self.sampleRate, channels=self.channels,
                                 subtype=self.subtype_NonAudio) as file0:
@@ -204,6 +207,28 @@ class RecThread(threading.Thread):
                                             /self.fullscale]])
                                 .T)
                             del data[i][0]
+        elif self.job == 'sysinfo':
+            t0 = None
+            with open(self.filename_new[0], 'a', newline='') as csvfile:
+                writer = csv.writer(csvfile, delimiter='\t')
+                while not self._stop_event.is_set():
+                    hasData = False
+                    try:
+                        tmp = self.q.get(timeout=0.02)
+                        if t0 is None:
+                            t0 = tmp[0]
+                        tmp[0] -= t0
+                        tmp[0] *= 4e-6
+                        # print('sysinfo rec',tmp)
+                        writer.writerow(tmp)
+                        hasData |= True
+                    except:
+                        # print(f'{self.job}: timeout while getting data')
+                        pass
+                    if not hasData: emptyCnt += 1
+                    if emptyCnt > 200:
+                        print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
+                        self.stop()
         print(f'Stop recording {self.job}')
         # for i,f in enumerate(fileList):
         #     print(f'is {self.job} file{i} closed? {f.closed}')

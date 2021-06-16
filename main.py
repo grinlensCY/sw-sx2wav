@@ -26,6 +26,7 @@ class Engine:
         self.recThd_gyro = None
         self.recThd_mag = None
         self.recThd_quaternion = None
+        self.recThd_sysinfo = None
         # self.recT0 = None
         self.input = ''
         self.flag_stop_ChkRecThd = threading.Event()
@@ -93,6 +94,8 @@ class Engine:
             print(isRun,'self.recThd_mag.stopped()', self.recThd_mag.stopped())
             isRun |= not self.recThd_quaternion.stopped()
             print(isRun,'self.recThd_quaternion.stopped()', self.recThd_quaternion.stopped())
+            isRun |= not self.recThd_sysinfo.stopped()
+            print(isRun,'self.recThd_sysinfo.stopped()', self.recThd_sysinfo.stopped())
             if not isRun:
                 flag.set()
                 break
@@ -216,6 +219,10 @@ class Engine:
                                             self.datainfo['quaternion']['fullscale'],
                                         self.flag_dualmic.is_set())
             self.recThd_quaternion.start()
+            self.recThd_sysinfo = RecThread(1,
+                                            3, 0.01, wavdir, 'sysinfo',
+                                            1)
+            self.recThd_sysinfo.start()
             self.thd_rec_flag.set()
             return True
         else:
@@ -244,6 +251,9 @@ class Engine:
             self.recThd_quaternion.join(0.5)
             # print('self.recThd_quaternion ',self.recThd_quaternion.is_alive())
             self.recThd_quaternion = None
+            self.recThd_sysinfo.stop()
+            self.recThd_sysinfo.join(0.5)
+            self.recThd_sysinfo = None
             # self.recT0 = None
     
     def endingTX_callback(self):
@@ -297,7 +307,7 @@ def findFileset(config, kw='audio-main',srcdir='', loadall=True):
 
 
 if __name__ == "__main__":
-    print('version: 20210616a')
+    print('version: 20210616b')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
