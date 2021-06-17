@@ -214,7 +214,7 @@ class RecThread(threading.Thread):
                 while not self._stop_event.is_set():
                     hasData = False
                     try:
-                        tmp = self.q.get(timeout=0.02)
+                        tmp = self.q.get(timeout=0.03)
                         if t0 is None:
                             t0 = tmp[0]
                         tmp[0] -= t0
