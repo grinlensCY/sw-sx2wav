@@ -146,13 +146,19 @@ class Engine:
             print(f'format checked:{self.flag_checked_fileformat.is_set()}  '
                 f'4kHz:{self.flag_4kHz.is_set()}  dualmic:{self.flag_dualmic.is_set()}  '
                 f'BLE addr:{pkg_handler.bleaddr}')
-            if config['run_onlyBLE'] not in pkg_handler.bleaddr:
+            if config['onlySelectedBle'] not in pkg_handler.bleaddr:
                 self.stop()
-                return
+            if config['chkFormatonly']:
+                print('chkFormatonly',config['chkFormatonly'])
+                self.stop()
+                return pkg_handler.bleaddr
             self.datainfo['mic']['sr'] = 4000 if self.flag_4kHz.is_set() else 2000
             self.bleaddr = pkg_handler.bleaddr if self.flag_ble_addr.is_set() else "unknownBLE"
             self.data_retriever.stop()
             engine.set_files_source(reset=False,f_name=fn)
+            return self.bleaddr
+        else:
+            return ''
         # self.stop()
 
     def set_files_source(self,reset=True,f_name='',srcdir=''):
@@ -175,12 +181,21 @@ class Engine:
 
     def setRec(self,ts=0):
         if not self.thd_rec_flag.is_set():
-            dir_export = self.config['dir_Export'] if self.config['dir_Export'] else self.srcdir
+            # dir_export = self.config['dir_Export'] if self.config['dir_Export'] else self.srcdir
             wavkw = f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}'
-            wavdir = (f"{dir_export}/wav/"
-                      f'{self.bleaddr}/'
-                      f'{time.strftime("%Y-%m-%d", time.localtime(ts))}/'
-                      f'{wavkw}')
+            str_date = time.strftime("%Y-%m-%d", time.localtime(ts))
+            wavdir = ''
+            if self.config['dir_Export']:
+                if self.config['dir_Export'] == self.config['dir_savSX']:
+                    for folder in os.listdir(self.config['dir_Export']):
+                        if folder[-4:] == f"{self.bleaddr[-4:]}":
+                            wavdir =  f"{config['dir_savSX']}\\{folder}\\{str_date}\\{wavkw}"
+                            break
+            if not wavdir:  # if can't find any folder matching the ble address
+                wavdir = (f"{self.srcdir}/"
+                            f'{self.bleaddr}/'
+                            f'{str_date}/'
+                            f'{wavkw}')
             print(f'setRec: wavdir={wavdir}')
             if os.path.exists(os.path.dirname(wavdir)):
                 existfns = [fn for fn in os.listdir(os.path.dirname(wavdir)) if wavkw in fn]
@@ -307,7 +322,7 @@ def findFileset(config, kw='audio-main',srcdir='', loadall=True):
 
 
 if __name__ == "__main__":
-    print('version: 20210616b')
+    print('version: 20210619a')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
@@ -324,9 +339,21 @@ if __name__ == "__main__":
         t0 = time.time()
         for i,fn in enumerate(fns):
             stop_flag.clear()
-            engine.chk_files_format(f_name=fn,cnt=i+1)
+            bleaddr = engine.chk_files_format(f_name=fn,cnt=i+1)
             # engine.set_files_source(reset=False,f_name=fn)
             while not stop_flag.wait(2.5):
                 print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
+            if config['moveSX'] and bleaddr:
+                for folder in os.listdir(config['dir_savSX']):
+                    if folder[-4:] == f"{bleaddr[-4:]}":
+                        dstdir = f"{config['dir_savSX']}\\{folder}\\raw"
+                        print('move to',dstdir)
+                        dstfn = f"{dstdir}\\{os.path.basename(fn)}"
+                        if not os.path.exists(dstfn):
+                            os.rename(fn,dstfn)
+                        else:
+                            print(dstfn,'exists!')
+                        break
         time.sleep(3)
+
     print('threading.active=',threading.active_count(),threading.enumerate())

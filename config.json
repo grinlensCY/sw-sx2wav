@@ -3,9 +3,12 @@
     "//dirToloadFile": "\\\\192.168.50.250\\寶寶音資料庫\\新生兒1M~2M_baby_patch_v1\\raw_data\\2021-04-22",
     "dirToloadFile": "G:\\My Drive\\Code\\sx2wav\\test_files",
     "//dirToloadFile": "G:\\My Drive\\Experiment\\compilation\\誤判\\20210607_手機比對",
-    "dir_Export": "",
+    "dir_Export": "G:\\My Drive\\Experiment\\compilation\\在家受測者",
+    "dir_savSX": "G:\\My Drive\\Experiment\\compilation\\在家受測者",
+    "moveSX": 0,
     "kwtoloadFile": "",
-    "load_all_sx": 10,
-    "run_onlyBLE": "",
-    "chkTSonly": 10
+    "load_all_sx": 0,
+    "onlySelectedBle": "",
+    "chkTSonly": 0,
+    "chkFormatonly": 10
 }
