@@ -2,13 +2,17 @@
     "//dirToloadFile": "G:\\.shortcut-targets-by-id\\1Q7Wn72L_mqTIqoUDDdLG5rgbAS4DQ2Zn\\寶寶音資料庫\\By Rocket Baby Ver3\\37W 7Day\\PC Flutter 收音比對\\C5_61_7C_AC_79_21 Small 三獨立矽膠套 Flutter App收錄",
     "//dirToloadFile": "\\\\192.168.50.250\\寶寶音資料庫\\新生兒1M~2M_baby_patch_v1\\raw_data\\2021-04-22",
     "dirToloadFile": "G:\\My Drive\\Code\\sx2wav\\test_files",
-    "//dirToloadFile": "G:\\My Drive\\Experiment\\compilation\\誤判\\20210607_手機比對",
+    "dirList_load_S3zip":["\\\\192.168.50.250\\Amazon S3 (fetalmonitorc0a1663ff0db4172b5aa1b231e7b9fc3134550-de\\private\\UUUIJK~F",
+                        "\\\\192.168.50.250\\Amazon S3 (fetalmonitorc0a1663ff0db4172b5aa1b231e7b9fc3134550-de\\private\\UFAE7Q~8"],
+    "dir_upzipS3": "C:\\Users\\chenyikuo\\downloads_S3",
+    "ts_loadS3": [20210618,20210621],
     "dir_Export": "G:\\My Drive\\Experiment\\compilation\\在家受測者",
+    "//dir_Export": "",
     "dir_savSX": "G:\\My Drive\\Experiment\\compilation\\在家受測者",
     "moveSX": 0,
     "kwtoloadFile": "",
     "load_all_sx": 0,
     "onlySelectedBle": "",
     "chkTSonly": 0,
-    "chkFormatonly": 10
+    "chkFormatonly": 0
 }

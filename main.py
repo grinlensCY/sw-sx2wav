@@ -191,7 +191,7 @@ class Engine:
                         if folder[-4:] == f"{self.bleaddr[-4:]}":
                             wavdir =  f"{config['dir_savSX']}\\{folder}\\{str_date}\\{wavkw}"
                             break
-            if not wavdir:  # if can't find any folder matching the ble address
+            if not wavdir:  # if can't find any folder matching the ble address or no assigned dir_Export
                 wavdir = (f"{self.srcdir}/"
                             f'{self.bleaddr}/'
                             f'{str_date}/'
@@ -320,9 +320,33 @@ def findFileset(config, kw='audio-main',srcdir='', loadall=True):
     print()
     return fns
 
+def unzipS3(srcList,dst,tsRange):
+    ti = time.mktime(time.strptime(f'{tsRange[0]}', "%Y%m%d"))*1000
+    tf = time.mktime(time.strptime(f'{tsRange[1]}', "%Y%m%d"))*1000
+    sx_list = []
+    for srcdir in srcList:
+        print('check',srcdir)
+        fns = [f'{srcdir}\\{fn}' for fn in os.listdir(srcdir)
+                if fn.endswith('.zip')
+                    and ti <= float(fn[:-3]) <= tf]
+        for fn in fns:
+            with ZipFile(fn) as myzip:
+                for zipfn in myzip.namelist():
+                    ts = float(zipfn[:-3])/1000
+                    recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+                    if zipfn.endswith('sx') and not os.path.exists(f'{dst}\\{zipfn}'):
+                        print(f'going to upzip {zipfn} to {dst} '
+                              f'recording time:{recTime}')
+                        myzip.extract(zipfn,path=dst)
+                        sx_list.append(f'{dst}\\{zipfn}')
+                    else:
+                        print(zipfn,'exists?',os.path.exists(f'{dst}\\{zipfn}'),'recording time:',recTime)
+                        sx_list.append(f'{dst}\\{zipfn}')
+    return sx_list
+
 
 if __name__ == "__main__":
-    print('version: 20210619a')
+    print('version: 20210620a')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
@@ -331,8 +355,11 @@ if __name__ == "__main__":
                 'mag':{'fullscale':4900.0, 'sr':75},
                 'quaternion':{'fullscale':1.0, 'sr':112.5/2}}
     kw = ''
-    sdir = config['dirToloadFile']
-    fns = findFileset(config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'])
+    if config["dirList_load_S3zip"]:
+        fns = unzipS3(config["dirList_load_S3zip"],config["dir_upzipS3"],config['ts_loadS3'])
+    else:
+        sdir = config['dirToloadFile']
+        fns = findFileset(config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'])
     if not config['chkTSonly']:
         stop_flag = threading.Event()
         engine = Engine(datainfo, config,stopped_flag=stop_flag,filecnt=len(fns))
