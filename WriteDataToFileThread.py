@@ -132,6 +132,8 @@ class RecThread(threading.Thread):
                 print(f'recording> remove({self.filename_new[3]})')
                 os.remove(self.filename_new[3])
         elif self.job != 'ecg' and self.job != 'sysinfo':
+            duration_pkg_ts = 20/self.sampleRate/4e-6
+            UL_duration_pkg = duration_pkg_ts*1.4
             with sf.SoundFile(self.filename_new[0], mode='x',
                                 samplerate=self.sampleRate, channels=self.channels,
                                 subtype=self.subtype_NonAudio) as file0:
@@ -163,11 +165,18 @@ class RecThread(threading.Thread):
                         self.stop()
                     for i in range(1):
                         if len(data[i])==2:
-                            # print(f'ch{i} ts={data[i][0][0]},{data[i][1][0]} len={len(data[i][0][1])},{len(data[i][1][1])}')
+                            # print(f'{self.job} ts={data[i][0][0]},{data[i][1][0]} len={len(data[i][0][1])},{len(data[i][1][1])}')
+                            # print(f'{self.job} len={len(data[i][0][1])},{len(data[i][1][1])}')
                             if t0[i] is None:
                                 t0[i] = data[i][0][0]
-                            ts = np.linspace(data[i][0][0]-t0[i], data[i][1][0]-t0[i],
-                                             len(data[i][0][1]), endpoint=False) * 4e-6
+                            if 0 < data[i][1][0]-data[i][0][0] < UL_duration_pkg:
+                                ts = np.linspace(data[i][0][0]-t0[i], data[i][1][0]-t0[i],
+                                                len(data[i][0][1]), endpoint=False) * 4e-6
+                            else:
+                                ts = np.linspace(data[i][0][0]-t0[i], data[i][0][0]+duration_pkg_ts-t0[i],
+                                                len(data[i][0][1]), endpoint=False) * 4e-6
+                                if data[i][1][0]-data[i][0][0] < 0:
+                                    t0[i] += data[i][0][0]+duration_pkg_ts
                             # print(f'{self.job}rec  {np.block([[ts], [np.array(list(data[i][0][1])).T]]).T.shape}')
                             fileList[i].write(
                                 np.block([[ts],
