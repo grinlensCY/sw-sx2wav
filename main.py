@@ -1,5 +1,5 @@
 import os,threading,time,json
-import zipfile
+import zipfile, shutil
 import file_driver as FD
 from package_handler import PackageHandler
 from WriteDataToFileThread import RecThread
@@ -346,13 +346,13 @@ def unzipS3(srcList,dst,tsRange):
 
 
 if __name__ == "__main__":
-    print('version: 20210620a')
+    print('version: 20210621a')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
                 'acc':{'fullscale':4.0, 'sr':112.5/2},
                 'gyro':{'fullscale':4.0, 'sr':112.5/2},
-                'mag':{'fullscale':4900.0, 'sr':75},
+                'mag':{'fullscale':4900.0, 'sr':112.5/2},
                 'quaternion':{'fullscale':1.0, 'sr':112.5/2}}
     kw = ''
     if config["dirList_load_S3zip"]:
@@ -377,7 +377,9 @@ if __name__ == "__main__":
                         print('move to',dstdir)
                         dstfn = f"{dstdir}\\{os.path.basename(fn)}"
                         if not os.path.exists(dstfn):
-                            os.rename(fn,dstfn)
+                            if not os.path.exists(dstdir):
+                                os.makedirs(dstdir)
+                            shutil.move(fn,dstfn)
                         else:
                             print(dstfn,'exists!')
                         break
