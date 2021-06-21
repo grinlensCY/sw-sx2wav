@@ -210,12 +210,12 @@ class Engine:
                     self.stop()
                     return False
             self.recThd_audio = RecThread(self.datainfo['mic']['sr'],
-                                        1, 0.01, wavdir, 'mic',
+                                        1, 0.04, wavdir, 'mic',
                                         self.datainfo['mic']['fullscale'],
                                         self.flag_dualmic.is_set())
             self.recThd_audio.start()
             self.recThd_acc = RecThread(int(self.datainfo['acc']['sr']),
-                                        4, 0.01, wavdir,'acc',
+                                        4, 0.04, wavdir,'acc',
                                         self.datainfo['acc']['fullscale'],
                                         self.flag_dualmic.is_set())
             self.recThd_acc.start()
@@ -224,22 +224,22 @@ class Engine:
             #                             self.datainfo['ecg']['fullscale'])
             # self.recThd_ecg.start()
             self.recThd_gyro = RecThread(int(self.datainfo['gyro']['sr']),
-                                        4, 0.01, wavdir, 'gyro',
+                                        4, 0.04, wavdir, 'gyro',
                                         self.datainfo['gyro']['fullscale'],
                                         self.flag_dualmic.is_set())
             self.recThd_gyro.start()
             self.recThd_mag = RecThread(int(self.datainfo['mag']['sr']),
-                                        4, 0.01, wavdir, 'mag',
+                                        4, 0.04, wavdir, 'mag',
                                         self.datainfo['mag']['fullscale'],
                                         self.flag_dualmic.is_set())
             self.recThd_mag.start()
             self.recThd_quaternion = RecThread(int(self.datainfo['quaternion']['sr']),
-                                            5, 0.01, wavdir, 'quaternion',
+                                            5, 0.04, wavdir, 'quaternion',
                                             self.datainfo['quaternion']['fullscale'],
                                         self.flag_dualmic.is_set())
             self.recThd_quaternion.start()
             self.recThd_sysinfo = RecThread(1,
-                                            3, 0.01, wavdir, 'sysinfo',
+                                            3, 0.09, wavdir, 'sysinfo',
                                             1)
             self.recThd_sysinfo.start()
             self.thd_rec_flag.set()

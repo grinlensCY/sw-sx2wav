@@ -158,7 +158,7 @@ class RecThread(threading.Thread):
                         # else:
                         #     time.sleep(self.waitTime)
                         try:
-                            data[i].append(self.qMulti[i].get(timeout=0.02))
+                            data[i].append(self.qMulti[i].get(timeout=self.waitTime))
                             hasData |= True
                         except:
                             # print(f'{self.job}: timeout while getting data of ch{i}')
@@ -189,37 +189,37 @@ class RecThread(threading.Thread):
                                 .T)
                             del data[i][0]
                             # print(f'ch{i}  ts={ts[0]:.6f}~{ts[-1]:.6f}sec  t0={t0[i]}')
-        elif self.job == 'ecg':
-            with sf.SoundFile(self.filename_new[0], mode='x',
-                                samplerate=self.sampleRate, channels=self.channels,
-                                subtype=self.subtype_NonAudio) as file0:
-                fileList = [file0]
-                data = [[]]
-                t0 = [None]
-                while not self._stop_event.is_set():
-                    for i in range(1):
-                        if not self.qMulti[i].empty():
-                            data[i].append(self.qMulti[i].get_nowait())
-                            emptyCnt = 0
-                        else:
-                            emptyCnt += 1
-                            if emptyCnt > 200:
-                                print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
-                                self.stop()
-                            time.sleep(self.waitTime)
-                    for i in range(1):
-                        if len(data[i])==2:
-                            # print(f'ch{i} ts={data[i][0][0]},{data[i][1][0]} len={len(data[i][0][1])},{len(data[i][1][1])}')
-                            if t0[i] is None:
-                                t0[i] = data[i][0][0]
-                            ts = np.linspace(data[i][0][0]-t0[i], data[i][1][0]-t0[i],
-                                             len(data[i][0][1]), endpoint=False) * 4e-6
-                            fileList[i].write(
-                                np.block([[ts],
-                                          [np.array(list(data[i][0][1])).T
-                                            /self.fullscale]])
-                                .T)
-                            del data[i][0]
+        # elif self.job == 'ecg':
+        #     with sf.SoundFile(self.filename_new[0], mode='x',
+        #                         samplerate=self.sampleRate, channels=self.channels,
+        #                         subtype=self.subtype_NonAudio) as file0:
+        #         fileList = [file0]
+        #         data = [[]]
+        #         t0 = [None]
+        #         while not self._stop_event.is_set():
+        #             for i in range(1):
+        #                 if not self.qMulti[i].empty():
+        #                     data[i].append(self.qMulti[i].get_nowait())
+        #                     emptyCnt = 0
+        #                 else:
+        #                     emptyCnt += 1
+        #                     if emptyCnt > 200:
+        #                         print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
+        #                         self.stop()
+        #                     time.sleep(self.waitTime)
+        #             for i in range(1):
+        #                 if len(data[i])==2:
+        #                     # print(f'ch{i} ts={data[i][0][0]},{data[i][1][0]} len={len(data[i][0][1])},{len(data[i][1][1])}')
+        #                     if t0[i] is None:
+        #                         t0[i] = data[i][0][0]
+        #                     ts = np.linspace(data[i][0][0]-t0[i], data[i][1][0]-t0[i],
+        #                                      len(data[i][0][1]), endpoint=False) * 4e-6
+        #                     fileList[i].write(
+        #                         np.block([[ts],
+        #                                   [np.array(list(data[i][0][1])).T
+        #                                     /self.fullscale]])
+        #                         .T)
+        #                     del data[i][0]
         elif self.job == 'sysinfo':
             t0 = None
             with open(self.filename_new[0], 'a', newline='') as csvfile:
@@ -227,7 +227,7 @@ class RecThread(threading.Thread):
                 while not self._stop_event.is_set():
                     hasData = False
                     try:
-                        tmp = self.q.get(timeout=0.03)
+                        tmp = self.q.get(timeout=self.waitTime)
                         if t0 is None:
                             t0 = tmp[0]
                         tmp[0] -= t0
