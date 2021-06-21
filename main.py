@@ -378,14 +378,15 @@ if __name__ == "__main__":
                 for folder in os.listdir(config['dir_savSX']):
                     if folder[-4:] == f"{bleaddr[-4:]}":
                         dstdir = f"{config['dir_savSX']}\\{folder}\\raw"
-                        print('move to',dstdir)
+                        print('move sx to',dstdir)
                         dstfn = f"{dstdir}\\{os.path.basename(fn)}"
                         if not os.path.exists(dstfn):
                             if not os.path.exists(dstdir):
                                 os.makedirs(dstdir)
                             shutil.move(fn,dstfn)
                         else:
-                            print(dstfn,'exists!')
+                            print(dstfn,'exists! remove src!')
+                            os.remove(fn)
                         break
         time.sleep(3)
 

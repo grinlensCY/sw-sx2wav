@@ -40,7 +40,11 @@ class RecThread(threading.Thread):
                 self.filename_new.append(f'{self.filename_prefix}-{job}-{i+1:02d}.wav')
         elif job == 'ecg':
             self.filename_new.append(f'{self.filename_prefix}-{job}.wav')
-        print(self.filename_new)
+        for fn in self.filename_new:
+            print('going to record',fn)
+            if os.path.exists(fn):
+                os.remove(fn)
+                print('replace existing',os.path.basename(fn))
         if not os.path.exists(os.path.dirname(self.filename_prefix)):
             os.makedirs(os.path.dirname(self.filename_prefix))
 
