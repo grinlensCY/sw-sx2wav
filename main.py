@@ -203,8 +203,12 @@ class Engine:
                 existfns = ''
             if len(existfns):
                 print(f'{wavdir} has existed!')
-                self.stop()
-                return False
+                if self.config['overwrite']:
+                    print('going to overwrite it!')
+                else:
+                    print('going to skip it!')
+                    self.stop()
+                    return False
             self.recThd_audio = RecThread(self.datainfo['mic']['sr'],
                                         1, 0.01, wavdir, 'mic',
                                         self.datainfo['mic']['fullscale'],
