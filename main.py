@@ -326,7 +326,7 @@ def findFileset(config, kw='audio-main',srcdir='', loadall=True):
 
 def unzipS3(srcList,dst,tsRange):
     ti = time.mktime(time.strptime(f'{tsRange[0]}', "%Y%m%d"))*1000
-    tf = time.mktime(time.strptime(f'{tsRange[1]}', "%Y%m%d"))*1000
+    tf = time.mktime(time.strptime(f'{tsRange[1]+1}', "%Y%m%d"))*1000
     sx_list = []
     for srcdir in srcList:
         print('check',srcdir)
@@ -339,10 +339,13 @@ def unzipS3(srcList,dst,tsRange):
                     ts = float(zipfn[:-3])/1000
                     recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
                     if zipfn.endswith('sx') and not os.path.exists(f'{dst}\\{zipfn}'):
-                        print(f'going to upzip {zipfn} to {dst} '
-                              f'recording time:{recTime}')
-                        myzip.extract(zipfn,path=dst)
-                        sx_list.append(f'{dst}\\{zipfn}')
+                        if config['chkTSonly']:
+                            print(f'{zipfn}: recording time:{recTime}')
+                        else:
+                            print(f'going to upzip {zipfn} to {dst} '
+                                    f'recording time:{recTime}')
+                            myzip.extract(zipfn,path=dst)
+                            sx_list.append(f'{dst}\\{zipfn}')
                     else:
                         print(zipfn,'exists?',os.path.exists(f'{dst}\\{zipfn}'),'recording time:',recTime)
                         sx_list.append(f'{dst}\\{zipfn}')
@@ -350,7 +353,7 @@ def unzipS3(srcList,dst,tsRange):
 
 
 if __name__ == "__main__":
-    print('version: 20210621a')
+    print('version: 20210624a')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
@@ -374,7 +377,7 @@ if __name__ == "__main__":
             # engine.set_files_source(reset=False,f_name=fn)
             while not stop_flag.wait(2.5):
                 print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
-            if config['moveSX'] and bleaddr:
+            if (config['moveSX'] or config['dirList_load_S3zip']) and bleaddr:
                 for folder in os.listdir(config['dir_savSX']):
                     if folder[-4:] == f"{bleaddr[-4:]}":
                         dstdir = f"{config['dir_savSX']}\\{folder}\\raw"
