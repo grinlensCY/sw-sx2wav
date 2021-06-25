@@ -1,5 +1,5 @@
 import os,threading,time,json
-import zipfile, shutil
+import shutil
 import file_driver as FD
 from package_handler import PackageHandler
 from WriteDataToFileThread import RecThread
@@ -146,6 +146,8 @@ class Engine:
             print(f'format checked:{self.flag_checked_fileformat.is_set()}  '
                 f'4kHz:{self.flag_4kHz.is_set()}  dualmic:{self.flag_dualmic.is_set()}  '
                 f'BLE addr:{pkg_handler.bleaddr}')
+            if pkg_handler.bleaddr is None:
+               self.stop() 
             if config['onlySelectedBle'] not in pkg_handler.bleaddr:
                 self.stop()
             if config['chkFormatonly']:
@@ -328,6 +330,13 @@ def unzipS3(srcList,dst,tsRange):
     ti = time.mktime(time.strptime(f'{tsRange[0]}', "%Y%m%d"))*1000
     tf = time.mktime(time.strptime(f'{tsRange[1]+1}', "%Y%m%d"))*1000
     sx_list = []
+    sx_list_short = []
+    fn_log = 'downloadS3log.json'
+    if os.path.exists(fn_log):
+        with open(fn_log, 'r', newline='') as jf:
+            sx_dict = json.loads(jf.read())
+    else:
+        sx_dict = {'filename':[]}
     for srcdir in srcList:
         print('check',srcdir)
         fns = [f'{srcdir}\\{fn}' for fn in os.listdir(srcdir)
@@ -338,22 +347,33 @@ def unzipS3(srcList,dst,tsRange):
                 for zipfn in myzip.namelist():
                     ts = float(zipfn[:-3])/1000
                     recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
-                    if zipfn.endswith('sx') and not os.path.exists(f'{dst}\\{zipfn}'):
-                        if config['chkTSonly']:
-                            print(f'{zipfn}: recording time:{recTime}')
-                        else:
-                            print(f'going to upzip {zipfn} to {dst} '
-                                    f'recording time:{recTime}')
+                    filesize = myzip.getinfo(zipfn).file_size
+                    msg = (f'{zipfn}>> recording time:{recTime} size:{filesize>>10}KB')
+                    if zipfn in sx_dict['filename']:
+                        print(f'{msg} has been in unzipped list!')
+                        if not config['overwrite']:
+                            continue
+                    if myzip.getinfo(zipfn).file_size>>10 < 200:
+                        print(f'{msg}: filesize is too small!')
+                        continue
+                    print(msg)
+                    sx_list_short.append(zipfn)
+                    if not config['chkTSonly']:
+                        if zipfn.endswith('sx') and not os.path.exists(f'{dst}\\{zipfn}'):
+                            print(f'going to upzip to {dst} ')
                             myzip.extract(zipfn,path=dst)
                             sx_list.append(f'{dst}\\{zipfn}')
-                    else:
-                        print(zipfn,'exists?',os.path.exists(f'{dst}\\{zipfn}'),'recording time:',recTime)
-                        sx_list.append(f'{dst}\\{zipfn}')
+                        else:
+                            print(zipfn,'exists?',os.path.exists(f'{dst}\\{zipfn}'),'recording time:',recTime)
+                            sx_list.append(f'{dst}\\{zipfn}')
+    sx_dict['filename'].extend(sx_list_short)
+    with open(fn_log, 'w') as jout:
+        json.dump(sx_dict, jout, indent=4, ensure_ascii=False)
     return sx_list
 
 
 if __name__ == "__main__":
-    print('version: 20210624a')
+    print('version: 20210625a')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
