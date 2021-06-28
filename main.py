@@ -144,25 +144,26 @@ class Engine:
                     break
         if self.flag_checked_fileformat.is_set():
             print(f'format checked:{self.flag_checked_fileformat.is_set()}  '
-                f'4kHz:{self.flag_4kHz.is_set()}  dualmic:{self.flag_dualmic.is_set()}  '
-                f'BLE addr:{pkg_handler.bleaddr}')
+                    f'4kHz:{self.flag_4kHz.is_set()}  dualmic:{self.flag_dualmic.is_set()}  '
+                    f'BLE addr:{pkg_handler.bleaddr}')
             if pkg_handler.bleaddr is None:
                self.stop() 
             if self.config['onlySelectedBle'] not in pkg_handler.bleaddr:
+                print('onlySelectedBle not in pkg_handler.bleaddr')
                 self.stop()
             if self.config['onlyChkFormat']:
                 print('onlyChkFormat',self.config['onlyChkFormat'])
                 self.stop()
-                return pkg_handler.bleaddr
+                return pkg_handler.bleaddr,'',''
             self.datainfo['mic']['sr'] = 4000 if self.flag_4kHz.is_set() else 2000
             self.bleaddr = pkg_handler.bleaddr if self.flag_ble_addr.is_set() else "unknownBLE"
             self.data_retriever.stop()
             # == handle log and sx file
             self.srcdir = os.path.dirname(f_name)
-            dstdir,fnkw_ts = self.getDstdir(f_name)
+            dstdir,fnkw_ts,userdir = self.getDstdir(f_name)
             # = log
             log_srcfn = f_name.replace("sx","log")
-            log_dstfn = f'{dstdir}/{os.path.basename(log_srcfn)}'
+            log_dstfn = f'{dstdir}/{fnkw_ts}.log'
             if os.path.exists(log_srcfn) and not os.path.exists(log_dstfn):
                 print('move log to',log_dstfn)
                 shutil.move(log_srcfn,log_dstfn)
@@ -174,22 +175,23 @@ class Engine:
                     shutil.move(log_srcfn,log_dstfn)
                 else:
                     os.remove(log_srcfn)
-            # = sx
-            if (self.config['moveSX'] or self.config['dirList_load_S3zip']):
-                sx_dstfn = f"{dstdir}/{os.path.basename(f_name)}"
-                if not os.path.exists(sx_dstfn):
-                    print('move sx to',sx_dstfn)
-                    shutil.move(f_name,sx_dstfn)
-                else:
-                    print(sx_dstfn,'exists! remove src!')
-                    os.remove(f_name)
+            # # = sx
+            # if (self.config['moveSX'] or self.config['dirList_load_S3zip']):
+            #     sx_dstfn = f"{dstdir}/{os.path.basename(f_name)}"
+            #     if not os.path.exists(sx_dstfn):
+            #         print('move sx to',sx_dstfn)
+            #         shutil.move(f_name,sx_dstfn)
+            #     else:
+            #         print(sx_dstfn,'exists! remove src!')
+            #         os.remove(f_name)
             if self.config['onlyMovelog']:
+                print('onlyMovelog ==> Stop!')
                 self.stop()
-                return ''
+                return '','',''
             engine.set_files_source(reset=False,f_name=f_name, fnkw_ts=fnkw_ts, dstdir=dstdir)
-            return self.bleaddr
+            return self.bleaddr, dstdir, userdir
         else:
-            return ''
+            return '','',''
     
     def getDstdir(self,f_name):
         ts = float(os.path.basename(f_name)[:-3])/1000
@@ -201,15 +203,20 @@ class Engine:
                 for folder in os.listdir(self.config['dir_Export']):
                     if folder[-4:] == f"{self.bleaddr[-4:]}":
                         dstdir =  f"{config['dir_savSX']}/{folder}/{str_date}"
+                        userdir = f"{config['dir_savSX']}/{folder}"
                         break
+            else:
+                dstdir = os.path.dirname(f_name)
+                userdir = ''
         if not dstdir:  # if can't find any folder matching the ble address or no assigned dir_Export
             dstdir = (f"{self.srcdir}/"
                         f'{self.bleaddr}/'
                         f'{str_date}/')
-        print(f'setRec: dstdir={dstdir}')
+            userdir = ''
+        print(f'setRec: dstdir={dstdir}  userdir={userdir}')
         if not os.path.exists(dstdir):
             os.makedirs(dstdir)
-        return dstdir,fnkw_ts
+        return dstdir,fnkw_ts,userdir
 
     def set_files_source(self,reset=True,f_name='',fnkw_ts='',dstdir=''):
         if reset: self.stop()
@@ -227,7 +234,9 @@ class Engine:
             self.data_retriever.set_ecg_data_handler(pkg_handler)
             self.data_retriever.set_endingTX_callback(self.endingTX_callback)
         go = self.setRec(dstdir,fnkw_ts)
-        if go: self.start()
+        if go:
+            print('going to start Engine again for recording!')
+            self.start()
 
     def setRec(self,dstdir='',fnkw_ts=''):
         if not self.thd_rec_flag.is_set():
@@ -433,9 +442,30 @@ if __name__ == "__main__":
         t0 = time.time()
         for i,fn in enumerate(fns):
             stop_flag.clear()
-            engine.chk_files_format(f_name=fn,cnt=i+1)
+            bleaddr,dstdir,userdir = engine.chk_files_format(f_name=fn,cnt=i+1)
             while not stop_flag.wait(2.5):
                 print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
+            if (config['moveSX'] or config['dirList_load_S3zip']) and bleaddr:
+                sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
+                if not os.path.exists(sx_dstfn):
+                    print('move sx to',sx_dstfn)
+                    shutil.move(fn,sx_dstfn)
+                elif fn != sx_dstfn:
+                    print(sx_dstfn,'exists! remove src!')
+                    os.remove(fn)
+                # for folder in os.listdir(config['dir_savSX']):
+                #     if folder[-4:] == f"{bleaddr[-4:]}":
+                #         dstdir = f"{config['dir_savSX']}\\{folder}\\raw"
+                #         print('move sx to',dstdir)
+                #         dstfn = f"{dstdir}\\{os.path.basename(fn)}"
+                #         if not os.path.exists(dstfn):
+                #             if not os.path.exists(dstdir):
+                #                 os.makedirs(dstdir)
+                #             shutil.move(fn,dstfn)
+                #         else:
+                #             print(dstfn,'exists! remove src!')
+                #             os.remove(fn)
+                #         break
         time.sleep(3)
 
     print('threading.active=',threading.active_count(),threading.enumerate())
