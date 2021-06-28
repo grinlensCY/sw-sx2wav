@@ -7,14 +7,15 @@
     "dirList_load_S3zip":["\\\\192.168.50.250\\Amazon S3 (fetalmonitorc0a1663ff0db4172b5aa1b231e7b9fc3134550-de\\private\\UUUIJK~F",
                         "\\\\192.168.50.250\\Amazon S3 (fetalmonitorc0a1663ff0db4172b5aa1b231e7b9fc3134550-de\\private\\UFAE7Q~8"],
     "dir_upzipS3": "C:\\Users\\chenyikuo\\downloads_S3",
-    "ts_loadS3": [20210624,20210625],
+    "ts_loadS3": [20210625,20210627],
     "dir_Export": "G:\\My Drive\\Experiment\\compilation\\在家受測者",
     "//dir_Export": "",
     "dir_savSX": "G:\\My Drive\\Experiment\\compilation\\在家受測者",
-    "overwrite": 0,
+    "overwrite": 10,
     "moveSX": 10,
     "load_all_sx": 10,
     "onlySelectedBle": "",
-    "chkTSonly": 0,
-    "chkFormatonly": 0
+    "onlyChkTS": 0,
+    "onlyChkFormat": 0,
+    "onlyMovelog": 0
 }
