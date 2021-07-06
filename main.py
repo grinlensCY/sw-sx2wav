@@ -445,7 +445,9 @@ if __name__ == "__main__":
             bleaddr,dstdir,userdir = engine.chk_files_format(f_name=fn,cnt=i+1)
             while not stop_flag.wait(2.5):
                 print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
-            if (config['moveSX'] or config['dirList_load_S3zip']) and bleaddr:
+            if config['delSX']:
+                os.remove(fn)
+            elif (config['moveSX'] or config['dirList_load_S3zip']) and bleaddr:
                 sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
                 if not os.path.exists(sx_dstfn):
                     print('move sx to',sx_dstfn)
