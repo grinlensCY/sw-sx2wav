@@ -371,7 +371,10 @@ def findFileset(config, kw='audio-main',srcdir='', loadall=True):
 
 def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS):
     ti = time.mktime(time.strptime(f'{tsRange[0]}', "%Y%m%d"))*1000
-    tf = time.mktime(time.strptime(f'{tsRange[1]+1}', "%Y%m%d"))*1000
+    try:
+        tf = time.mktime(time.strptime(f'{tsRange[1]+1}', "%Y%m%d"))*1000
+    except ValueError:
+        tf = (tsRange[1]+1-tsRange[0])*60*60*24*1000+ti
     sx_list = []
     sx_list_short = []
     fn_log = 'downloadS3log.json'
@@ -407,7 +410,7 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS):
                         print(msg)
                     if not onlyChkTS:
                         if zipfn.endswith('sx') and (not os.path.exists(f'{dst}\\{zipfn}') or overwrite):
-                            print(f'going to upzip {zipfn} to {dst} ')
+                            print(f'\tgoing to upzip to {dst} ')
                             # myzip.extract(zipfn,path=dst)
                             myzip.extractall(path=dst)
                             sx_list.append(f'{dst}\\{zipfn}')
