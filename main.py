@@ -211,7 +211,7 @@ class Engine:
         if not dstdir:  # if can't find any folder matching the ble address or no assigned dir_Export
             dstdir = (f"{self.srcdir}/"
                         f'{self.bleaddr}/'
-                        f'{str_date}/')
+                        f'{str_date}')
             userdir = ''
         print(f'setRec: dstdir={dstdir}  userdir={userdir}')
         if not os.path.exists(dstdir):
@@ -332,7 +332,7 @@ def updateConfig(engine=None):
     print('update config')
     return config
 
-def findFileset(config, kw='audio-main',srcdir='', loadall=True):
+def findFileset(config, kw='audio-main',srcdir='', loadall=True, onlyChkTS=False):
     root = tk.Tk()
     root.withdraw()
 
@@ -342,24 +342,27 @@ def findFileset(config, kw='audio-main',srcdir='', loadall=True):
         return ''
     srcdir = os.path.dirname(tfn)
     if loadall:
-        fns = [f'{srcdir}\\{fn}' for fn in os.listdir(srcdir)
+        fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                 if fn.endswith('.sx') or fn.endswith('.zip')]
-        for fn in fns:
-            if fn.endswith('zip'):
-                with ZipFile(fn) as myzip:
-                    for zipfn in myzip.namelist():
-                        if zipfn.endswith('sx') and not os.path.exists(f'{srcdir}\{zipfn.replace("zip","sx")}'):
-                            print('going to upzip',zipfn)
-                            myzip.extract(zipfn,path=srcdir)
-        fns = [f'{srcdir}\\{fn}' for fn in os.listdir(srcdir)
-                if fn.endswith('.sx')]
+        if not onlyChkTS:
+            for fn in fns:
+                if fn.endswith('zip'):
+                    with ZipFile(fn) as myzip:
+                        for zipfn in myzip.namelist():
+                            if zipfn.endswith('sx') and not os.path.exists(f'{srcdir}\{zipfn.replace("zip","sx")}'):
+                                print('going to upzip',zipfn)
+                                # myzip.extract(zipfn,path=srcdir)
+                                myzip.extractall(path=srcdir)
+            fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
+                    if fn.endswith('.sx')]
     else:
         if tfn.endswith('zip'):
             with ZipFile(tfn) as myzip:
                 for zipfn in myzip.namelist():
                     if zipfn.endswith('sx') and not os.path.exists(f'{srcdir}\{zipfn.replace("zip","sx")}'):
                         print('going to upzip',zipfn)
-                        myzip.extract(zipfn,path=srcdir)
+                        # myzip.extract(zipfn,path=srcdir)
+                        myzip.extractall(path=srcdir)
         fns = [tfn.replace("zip","sx")]
     fns.sort()
     print()
@@ -385,7 +388,7 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS):
         sx_dict = {'filename':[]}
     for srcdir in srcList:
         print('check',srcdir)
-        fns = [f'{srcdir}\\{fn}' for fn in os.listdir(srcdir)
+        fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                 if fn.endswith('.zip')
                     and ti <= float(fn[:-3]) <= tf]
         for fn in fns:
@@ -409,14 +412,14 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS):
                         sx_list_short.append(zipfn)
                         print(msg)
                     if not onlyChkTS:
-                        if zipfn.endswith('sx') and (not os.path.exists(f'{dst}\\{zipfn}') or overwrite):
+                        if zipfn.endswith('sx') and (not os.path.exists(f'{dst}/{zipfn}') or overwrite):
                             print(f'\tgoing to upzip to {dst} ')
                             # myzip.extract(zipfn,path=dst)
                             myzip.extractall(path=dst)
-                            sx_list.append(f'{dst}\\{zipfn}')
+                            sx_list.append(f'{dst}/{zipfn}')
                         else:
-                            print(zipfn,'exists?',os.path.exists(f'{dst}\\{zipfn}'),'recording time:',recTime)
-                            sx_list.append(f'{dst}\\{zipfn}')
+                            print(zipfn,'exists?',os.path.exists(f'{dst}/{zipfn}'),'recording time:',recTime)
+                            sx_list.append(f'{dst}/{zipfn}')
     sx_dict['filename'].extend(sx_list_short)
     with open(fn_log, 'w') as jout:
         json.dump(sx_dict, jout, indent=4, ensure_ascii=False)
@@ -424,7 +427,7 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS):
 
 
 if __name__ == "__main__":
-    print('version: 20210628a')
+    print('version: 20210708a')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
@@ -438,7 +441,8 @@ if __name__ == "__main__":
                         config['overwrite'],config['onlyChkTS'])
     else:
         sdir = config['dirToloadFile']
-        fns = findFileset(config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'])
+        fns = findFileset(config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
+                            onlyChkTS=config['onlyChkTS'])
     if not config['onlyChkTS']:
         stop_flag = threading.Event()
         engine = Engine(datainfo, config,stopped_flag=stop_flag,filecnt=len(fns))
