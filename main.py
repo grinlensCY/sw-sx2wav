@@ -390,6 +390,7 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS):
         print('check',srcdir)
         fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                 if fn.endswith('.zip')
+                    and len(fn) == 17
                     and ti <= float(fn[:-3]) <= tf]
         for fn in fns:
             with ZipFile(fn) as myzip:
@@ -421,13 +422,14 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS):
                             print(zipfn,'exists?',os.path.exists(f'{dst}/{zipfn}'),'recording time:',recTime)
                             sx_list.append(f'{dst}/{zipfn}')
     sx_dict['filename'].extend(sx_list_short)
-    with open(fn_log, 'w') as jout:
-        json.dump(sx_dict, jout, indent=4, ensure_ascii=False)
+    if not onlyChkTS:
+        with open(fn_log, 'w') as jout:
+            json.dump(sx_dict, jout, indent=4, ensure_ascii=False)
     return sx_list
 
 
 if __name__ == "__main__":
-    print('version: 20210708a')
+    print('version: 20210715a')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
@@ -454,7 +456,7 @@ if __name__ == "__main__":
                 print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
             if config['delSX']:
                 os.remove(fn)
-            elif (config['moveSX'] or config['dirList_load_S3zip']) and bleaddr:
+            elif (config['moveSX'] and config['dirList_load_S3zip']) and bleaddr:
                 sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
                 if not os.path.exists(sx_dstfn):
                     print('move sx to',sx_dstfn)
