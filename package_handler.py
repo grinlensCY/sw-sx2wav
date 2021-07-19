@@ -62,11 +62,11 @@ class PackageHandler:
             self.pre_ts=curr_ts
     
     def handle_sys_info_pkg(self,dat):
-        ''' (timestamp, firmware ver, hardware ver, battery level 0~100, temperature in degree, ble addr) '''
-        # print('get sys info')
-        # print(dat[0:5])
-        # print(dat[5].hex())#ble addr
-        # self.sys_v=dat[3]
+        ''' 
+        timestamp,              firmware ver,   hardware ver,   battery level(%),
+        temperature(degreeC),  ble addr,       charging    ,   Bat vol(mV),
+        imu_temperature(degC)
+        '''
         self.sys_t=dat[4]
         self.is_usb_pwr=dat[6]
         self.engine.sysinfo = dat
@@ -80,7 +80,6 @@ class PackageHandler:
             self.engine.flag_ble_addr.set()
         if self.engine.thd_rec_flag.is_set():
             self.engine.recThd_sysinfo.addData([dat[0],dat[3],dat[4]])
-            # print('get from decorder',dat[0])
 
     def handle_dual_mic_pkg(self,dat):
         if not self.engine.flag_checked_fileformat.is_set():
