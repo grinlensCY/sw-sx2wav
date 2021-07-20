@@ -18,5 +18,6 @@
     "onlyMovelog": 0,
     "overwrite": 0,
     "delSX": 10,
+    "onlylog":10,
     "moveSX": 0
 }

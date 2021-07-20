@@ -108,7 +108,7 @@ class PackageHandler:
         self.mic_pkg_cnt+=1
         self.prepare_statistic_output()
         # == rec
-        if self.engine.thd_rec_flag.is_set():
+        if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog']:
             # print('\ndual dual')
             self.engine.recThd_audio.addData(dat)
             # print('mic_pkg',np.array(dat[:5]).shape)
@@ -128,12 +128,12 @@ class PackageHandler:
         self.mic_pkg_cnt+=1
         self.prepare_statistic_output()
         # == rec
-        if self.engine.thd_rec_flag.is_set():
+        if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog']:
             self.engine.recThd_audio.addData(dat)
             # print('mic_pkg',np.array(dat[:5]).shape)
 
     def handle_ecg_raw_pkg(self,dat):
-        if self.engine.thd_rec_flag.is_set():
+        if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog']:
             self.engine.recThd_ecg.addData([dat[0],dat[1]], ch=0)
 
         self.ecg_raw_pkg_cnt+=1
@@ -148,26 +148,26 @@ class PackageHandler:
     def handle_imu_acc_pkg(self,dat):
         self.acc_pkg_cnt+=1
         self.prepare_statistic_output()
-        if self.engine.thd_rec_flag.is_set():
+        if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog']:
             self.engine.recThd_acc.addData([dat[0],dat[2]], ch=dat[1])
 
     def handle_imu_gyro_pkg(self,dat):
         self.gyro_pkg_cnt+=1
         self.prepare_statistic_output()
-        if self.engine.thd_rec_flag.is_set():
+        if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog']:
             # print('add ts data in gryo rec',dat[0])
             self.engine.recThd_gyro.addData([dat[0],dat[2]], ch=dat[1])            
 
     def handle_imu_mag_pkg(self,dat):
         self.mag_pkg_cnt+=1
         self.prepare_statistic_output()
-        if self.engine.thd_rec_flag.is_set():
+        if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog']:
             self.engine.recThd_mag.addData([dat[0],dat[2]], ch=dat[1])
 
     def handle_imu_quaternion_pkg(self,dat):
         self.quat_pkg_cnt+=1
         self.prepare_statistic_output()
-        if self.engine.thd_rec_flag.is_set():
+        if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog']:
             self.engine.recThd_quaternion.addData([dat[0],dat[2]], ch=dat[1])
 
     def calc_sr(self, name='', idx=2, dat=None):

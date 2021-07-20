@@ -82,18 +82,19 @@ class Engine:
             if self.data_retriever.thd_run_flag is not None:  print(self.strPkgSpd)
             # print(f'chkRecThd: elapsed time={time.time()-t0:.2f}sec')
             isRun = False
-            isRun |= not self.recThd_audio.stopped()
-            print('\nisRun',isRun,'self.recThd_audio.stopped()', self.recThd_audio.stopped())
-            isRun |= not self.recThd_acc.stopped()
-            print(isRun,'self.recThd_acc.stopped()', self.recThd_acc.stopped())
-            # isRun |= not self.recThd_ecg.stopped()
-            # print(isRun,'self.recThd_ecg.stopped()', self.recThd_ecg.stopped())
-            isRun |= not self.recThd_gyro.stopped()
-            print(isRun,'self.recThd_gyro.stopped()', self.recThd_gyro.stopped())
-            isRun |= not self.recThd_mag.stopped()
-            print(isRun,'self.recThd_mag.stopped()', self.recThd_mag.stopped())
-            isRun |= not self.recThd_quaternion.stopped()
-            print(isRun,'self.recThd_quaternion.stopped()', self.recThd_quaternion.stopped())
+            if not self.config['onlylog']:
+                isRun |= not self.recThd_audio.stopped()
+                print('\nisRun',isRun,'self.recThd_audio.stopped()', self.recThd_audio.stopped())
+                isRun |= not self.recThd_acc.stopped()
+                print(isRun,'self.recThd_acc.stopped()', self.recThd_acc.stopped())
+                # isRun |= not self.recThd_ecg.stopped()
+                # print(isRun,'self.recThd_ecg.stopped()', self.recThd_ecg.stopped())
+                isRun |= not self.recThd_gyro.stopped()
+                print(isRun,'self.recThd_gyro.stopped()', self.recThd_gyro.stopped())
+                isRun |= not self.recThd_mag.stopped()
+                print(isRun,'self.recThd_mag.stopped()', self.recThd_mag.stopped())
+                isRun |= not self.recThd_quaternion.stopped()
+                print(isRun,'self.recThd_quaternion.stopped()', self.recThd_quaternion.stopped())
             isRun |= not self.recThd_sysinfo.stopped()
             print(isRun,'self.recThd_sysinfo.stopped()', self.recThd_sysinfo.stopped())
             if not isRun:
@@ -254,35 +255,36 @@ class Engine:
                     print('going to skip it!')
                     self.stop()
                     return False
-            self.recThd_audio = RecThread(self.datainfo['mic']['sr'],
-                                        1, 0.04, dstfn_prefix, 'mic',
-                                        self.datainfo['mic']['fullscale'],
-                                        self.flag_dualmic.is_set())
-            self.recThd_audio.start()
-            self.recThd_acc = RecThread(int(self.datainfo['acc']['sr']),
-                                        4, 0.04, dstfn_prefix,'acc',
-                                        self.datainfo['acc']['fullscale'],
-                                        self.flag_dualmic.is_set())
-            self.recThd_acc.start()
-            # self.recThd_ecg = RecThread(self.datainfo['ecg']['sr'],
-            #                             2, 0.01, dstfn_prefix, 'ecg',
-            #                             self.datainfo['ecg']['fullscale'])
-            # self.recThd_ecg.start()
-            self.recThd_gyro = RecThread(int(self.datainfo['gyro']['sr']),
-                                        4, 0.04, dstfn_prefix, 'gyro',
-                                        self.datainfo['gyro']['fullscale'],
-                                        self.flag_dualmic.is_set())
-            self.recThd_gyro.start()
-            self.recThd_mag = RecThread(int(self.datainfo['mag']['sr']),
-                                        4, 0.04, dstfn_prefix, 'mag',
-                                        self.datainfo['mag']['fullscale'],
-                                        self.flag_dualmic.is_set())
-            self.recThd_mag.start()
-            self.recThd_quaternion = RecThread(int(self.datainfo['quaternion']['sr']),
-                                            5, 0.04, dstfn_prefix, 'quaternion',
-                                            self.datainfo['quaternion']['fullscale'],
-                                        self.flag_dualmic.is_set())
-            self.recThd_quaternion.start()
+            if not self.config['onlylog']:
+                self.recThd_audio = RecThread(self.datainfo['mic']['sr'],
+                                            1, 0.04, dstfn_prefix, 'mic',
+                                            self.datainfo['mic']['fullscale'],
+                                            self.flag_dualmic.is_set())
+                self.recThd_audio.start()
+                self.recThd_acc = RecThread(int(self.datainfo['acc']['sr']),
+                                            4, 0.04, dstfn_prefix,'acc',
+                                            self.datainfo['acc']['fullscale'],
+                                            self.flag_dualmic.is_set())
+                self.recThd_acc.start()
+                # self.recThd_ecg = RecThread(self.datainfo['ecg']['sr'],
+                #                             2, 0.01, dstfn_prefix, 'ecg',
+                #                             self.datainfo['ecg']['fullscale'])
+                # self.recThd_ecg.start()
+                self.recThd_gyro = RecThread(int(self.datainfo['gyro']['sr']),
+                                            4, 0.04, dstfn_prefix, 'gyro',
+                                            self.datainfo['gyro']['fullscale'],
+                                            self.flag_dualmic.is_set())
+                self.recThd_gyro.start()
+                self.recThd_mag = RecThread(int(self.datainfo['mag']['sr']),
+                                            4, 0.04, dstfn_prefix, 'mag',
+                                            self.datainfo['mag']['fullscale'],
+                                            self.flag_dualmic.is_set())
+                self.recThd_mag.start()
+                self.recThd_quaternion = RecThread(int(self.datainfo['quaternion']['sr']),
+                                                5, 0.04, dstfn_prefix, 'quaternion',
+                                                self.datainfo['quaternion']['fullscale'],
+                                            self.flag_dualmic.is_set())
+                self.recThd_quaternion.start()
             self.recThd_sysinfo = RecThread(1,
                                             3, 0.09, dstfn_prefix, 'sysinfo',
                                             1)
@@ -291,30 +293,31 @@ class Engine:
             return True
         else:
             self.thd_rec_flag.clear()
-            self.recThd_audio.stop()
-            self.recThd_audio.join(0.5)
-            # print('self.recThd_audio ',self.recThd_audio.is_alive())
-            self.recThd_audio = None
-            self.recThd_acc.stop()
-            self.recThd_acc.join(0.5)
-            # print('self.recThd_acc ',self.recThd_acc.is_alive())
-            self.recThd_acc = None
-            # self.recThd_ecg.stop()
-            # self.recThd_ecg.join(0.5)
-            # # print('self.recThd_ecg ',self.recThd_ecg.is_alive())
-            # self.recThd_ecg = None
-            self.recThd_gyro.stop()
-            self.recThd_gyro.join(0.5)
-            # print('self.recThd_gyro ',self.recThd_gyro.is_alive())
-            self.recThd_gyro = None
-            self.recThd_mag.stop()
-            self.recThd_mag.join(0.5)
-            # print('self.recThd_mag ',self.recThd_mag.is_alive())
-            self.recThd_mag = None
-            self.recThd_quaternion.stop()
-            self.recThd_quaternion.join(0.5)
-            # print('self.recThd_quaternion ',self.recThd_quaternion.is_alive())
-            self.recThd_quaternion = None
+            if not self.config['onlylog']:
+                self.recThd_audio.stop()
+                self.recThd_audio.join(0.5)
+                # print('self.recThd_audio ',self.recThd_audio.is_alive())
+                self.recThd_audio = None
+                self.recThd_acc.stop()
+                self.recThd_acc.join(0.5)
+                # print('self.recThd_acc ',self.recThd_acc.is_alive())
+                self.recThd_acc = None
+                # self.recThd_ecg.stop()
+                # self.recThd_ecg.join(0.5)
+                # # print('self.recThd_ecg ',self.recThd_ecg.is_alive())
+                # self.recThd_ecg = None
+                self.recThd_gyro.stop()
+                self.recThd_gyro.join(0.5)
+                # print('self.recThd_gyro ',self.recThd_gyro.is_alive())
+                self.recThd_gyro = None
+                self.recThd_mag.stop()
+                self.recThd_mag.join(0.5)
+                # print('self.recThd_mag ',self.recThd_mag.is_alive())
+                self.recThd_mag = None
+                self.recThd_quaternion.stop()
+                self.recThd_quaternion.join(0.5)
+                # print('self.recThd_quaternion ',self.recThd_quaternion.is_alive())
+                self.recThd_quaternion = None
             self.recThd_sysinfo.stop()
             self.recThd_sysinfo.join(0.5)
             self.recThd_sysinfo = None
