@@ -96,6 +96,8 @@ class RecThread(threading.Thread):
                 seg_cnt = 20
                 buffer_mic = np.zeros((data_dim,seglen*seg_cnt),dtype=np.float64)
                 buffer_ts = np.zeros(seg_cnt,dtype=np.float64)
+                toffset = 0
+                tlast5 = np.array([],dtype='int64')
                 cnt = 0
                 while not self._stop_event.is_set():
                     if not self.q.empty():
@@ -105,7 +107,14 @@ class RecThread(threading.Thread):
                         buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = micdata
                         if t0 is None:
                             t0 = tmp[0]
-                        buffer_ts[cnt] = (tmp[0]-t0) * 4e-6
+                        elif tmp[0] < t0:
+                            t0 = tmp[0]
+                            toffset = tlast5[-1]+np.mean(np.diff(tlast5))
+                        tstmp = tmp[0] + toffset-t0
+                        tlast5 = np.r_[tlast5, tstmp]
+                        if tlast5.size > 5:
+                            tlast5 = tlast5[-5:]
+                        buffer_ts[cnt] = (tstmp) * 4e-6
                         cnt += 1
                         if cnt == seg_cnt:
                             for i,q in enumerate(buffer_mic):
@@ -222,15 +231,24 @@ class RecThread(threading.Thread):
         #                     del data[i][0]
         elif self.job == 'sysinfo':
             t0 = None
+            toffset = 0
+            tlast5 = np.array([],dtype='int64')
             with open(self.filename_new[0], 'a', newline='') as csvfile:
                 writer = csv.writer(csvfile, delimiter='\t')
+                writer.writerow(['time','bat(%)','temperature(degC)','bat(mV)'])
                 while not self._stop_event.is_set():
                     hasData = False
                     try:
                         tmp = self.q.get(timeout=self.waitTime)
                         if t0 is None:
                             t0 = tmp[0]
-                        tmp[0] -= t0
+                        elif tmp[0] < t0:
+                            t0 = tmp[0]
+                            toffset = tlast5[-1]+np.mean(np.diff(tlast5))
+                        tmp[0] += toffset-t0
+                        tlast5 = np.r_[tlast5, tmp[0]]
+                        if tlast5.size > 5:
+                            tlast5 = tlast5[-5:]
                         tmp[0] *= 4e-6
                         # print('sysinfo rec',tmp)
                         writer.writerow(tmp)
