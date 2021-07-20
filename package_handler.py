@@ -29,6 +29,7 @@ class PackageHandler:
         # self.sys_v=0
         self.sys_t=0
         self.is_usb_pwr=False
+        self.is_imuTemp =None
 
         self.engine = engine
         self.bleaddr = None
@@ -46,7 +47,7 @@ class PackageHandler:
             msg+="ecg: {0:2.2f},{1:2.2f},{2:2.2f}; ".format(self.ecg_sq_pkg_cnt/diff_ts,self.ecg_hr_pkg_cnt/diff_ts,self.ecg_raw_pkg_cnt/diff_ts)
             msg+="mic: {0:2.1f}pkg/sec".format(self.mic_pkg_cnt/diff_ts)
             msg+="\ntemperature: {0:2.1f}, ".format(self.sys_t)
-            msg+="is powered by usb: "+str(self.is_usb_pwr)
+            msg+="powered by usb/qi: "+str(self.is_usb_pwr)
             # if not round(curr_ts-self.t0,0)%60:
             #     print(msg, file=open(f'./pkgspd.txt', 'a'))
             self.engine.strPkgSpd = msg
@@ -63,23 +64,34 @@ class PackageHandler:
     
     def handle_sys_info_pkg(self,dat):
         ''' 
-        timestamp,              firmware ver,   hardware ver,   battery level(%),
-        temperature(degreeC),  ble addr,       charging    ,   Bat vol(mV),
-        imu_temperature(degC)
+        [0]timestamp,               [1]firmware ver,    [2]hardware ver,    [3]battery level(%),
+        [4]temperature(degreeC),    [5]ble addr,        [6]charging    ,    [7]Bat vol(mV),
+        [8]imu_temperature(degC)
         '''
-        self.sys_t=dat[4]
         self.is_usb_pwr=dat[6]
-        self.engine.sysinfo = dat
+        self.engine.sysinfo = []
+        for d in dat:
+            self.engine.sysinfo.append(d)
+        if self.is_imuTemp is None and len(dat) >= 9:
+            self.is_imuTemp = True
+        elif self.is_imuTemp is None and len(dat) < 9:
+            self.is_imuTemp = False
+        self.sys_t = dat[8] if self.is_imuTemp else dat[4]
+        self.engine.sysinfo[4] = self.sys_t
         if not self.engine.flag_ble_addr.is_set():
             tmp = dat[5].hex()
             addr = ''
             for c in range(-2,-len(tmp)-1,-2):
                 addr += f'{tmp[c]}{tmp[c+1]}:' if c!=-len(tmp)else tmp[c]+tmp[c+1]
             print('BLE addr:',addr.upper(),addr.replace(':','').upper())
+            print(f'FW ver:{dat[1]}\tHW ver:{dat[2]}')
+            if dat[2] >= 32:
+                self.engine.datainfo['acc']['sr'] = 104
+                self.engine.datainfo['gyro']['sr'] = 104
             self.bleaddr = addr.replace(':','').upper()
             self.engine.flag_ble_addr.set()
         if self.engine.thd_rec_flag.is_set():
-            self.engine.recThd_sysinfo.addData([dat[0],dat[3],dat[4]])
+            self.engine.recThd_sysinfo.addData([dat[0],dat[3],self.engine.sysinfo[4],dat[7]])
 
     def handle_dual_mic_pkg(self,dat):
         if not self.engine.flag_checked_fileformat.is_set():
