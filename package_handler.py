@@ -29,7 +29,6 @@ class PackageHandler:
         # self.sys_v=0
         self.sys_t=0
         self.is_usb_pwr=False
-        self.is_imuTemp =None
 
         self.engine = engine
         self.bleaddr = None
@@ -72,11 +71,7 @@ class PackageHandler:
         self.engine.sysinfo = []
         for d in dat:
             self.engine.sysinfo.append(d)
-        if self.is_imuTemp is None and len(dat) >= 9:
-            self.is_imuTemp = True
-        elif self.is_imuTemp is None and len(dat) < 9:
-            self.is_imuTemp = False
-        self.sys_t = dat[8] if self.is_imuTemp else dat[4]
+        self.sys_t = dat[8] if dat[8] is not None else dat[4]
         self.engine.sysinfo[4] = self.sys_t
         if not self.engine.flag_ble_addr.is_set():
             tmp = dat[5].hex()
