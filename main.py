@@ -432,7 +432,7 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS):
 
 
 if __name__ == "__main__":
-    print('version: 20210715a')
+    print('version: 20210721a')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
@@ -444,6 +444,10 @@ if __name__ == "__main__":
     if config["dirList_load_S3zip"]:
         fns = unzipS3(config["dirList_load_S3zip"],config["dir_upzipS3"],config['ts_loadS3'],
                         config['overwrite'],config['onlyChkTS'])
+        if not len(fns):
+            dir_upzipS3 = config["dir_upzipS3"].replace("\\","/")
+            fns = [f'{dir_upzipS3}/{fn}' for fn in os.listdir(config["dir_upzipS3"])
+                    if fn.endswith(".sx")]
     else:
         sdir = config['dirToloadFile']
         fns = findFileset(config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],

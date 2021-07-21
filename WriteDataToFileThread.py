@@ -144,6 +144,37 @@ class RecThread(threading.Thread):
                 os.remove(self.filename_new[2])
                 print(f'recording> remove({self.filename_new[3]})')
                 os.remove(self.filename_new[3])
+        elif self.job == 'sysinfo':
+            t0 = None
+            toffset = 0
+            tlast5 = np.array([],dtype='int64')
+            with open(self.filename_new[0], 'a', newline='') as csvfile:
+                writer = csv.writer(csvfile, delimiter='\t')
+                writer.writerow(['time','bat(%)','temperature(degC)','bat(mV)'])
+                while not self._stop_event.is_set():
+                    hasData = False
+                    try:
+                        tmp = self.q.get(timeout=self.waitTime)
+                        if t0 is None:
+                            t0 = tmp[0]
+                        elif tmp[0] < t0:
+                            t0 = tmp[0]
+                            toffset = tlast5[-1]+np.mean(np.diff(tlast5))
+                        tmp[0] += toffset-t0
+                        tlast5 = np.r_[tlast5, tmp[0]]
+                        if tlast5.size > 5:
+                            tlast5 = tlast5[-5:]
+                        tmp[0] *= 4e-6
+                        # print('sysinfo rec',tmp)
+                        writer.writerow(tmp)
+                        hasData |= True
+                    except:
+                        # print(f'{self.job}: timeout while getting data')
+                        pass
+                    if not hasData: emptyCnt += 1
+                    if emptyCnt > 200:
+                        print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
+                        self.stop()
         elif self.job != 'ecg' and self.job != 'sysinfo':
             duration_pkg_ts = 20/self.sampleRate/4e-6
             UL_duration_pkg = duration_pkg_ts*1.4
@@ -229,37 +260,7 @@ class RecThread(threading.Thread):
         #                                     /self.fullscale]])
         #                         .T)
         #                     del data[i][0]
-        elif self.job == 'sysinfo':
-            t0 = None
-            toffset = 0
-            tlast5 = np.array([],dtype='int64')
-            with open(self.filename_new[0], 'a', newline='') as csvfile:
-                writer = csv.writer(csvfile, delimiter='\t')
-                writer.writerow(['time','bat(%)','temperature(degC)','bat(mV)'])
-                while not self._stop_event.is_set():
-                    hasData = False
-                    try:
-                        tmp = self.q.get(timeout=self.waitTime)
-                        if t0 is None:
-                            t0 = tmp[0]
-                        elif tmp[0] < t0:
-                            t0 = tmp[0]
-                            toffset = tlast5[-1]+np.mean(np.diff(tlast5))
-                        tmp[0] += toffset-t0
-                        tlast5 = np.r_[tlast5, tmp[0]]
-                        if tlast5.size > 5:
-                            tlast5 = tlast5[-5:]
-                        tmp[0] *= 4e-6
-                        # print('sysinfo rec',tmp)
-                        writer.writerow(tmp)
-                        hasData |= True
-                    except:
-                        # print(f'{self.job}: timeout while getting data')
-                        pass
-                    if not hasData: emptyCnt += 1
-                    if emptyCnt > 200:
-                        print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
-                        self.stop()
+        
         print(f'Stop recording {self.job}')
         # for i,f in enumerate(fileList):
         #     print(f'is {self.job} file{i} closed? {f.closed}')
