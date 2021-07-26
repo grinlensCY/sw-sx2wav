@@ -139,11 +139,11 @@ class RecThread(threading.Thread):
                             self.stop()
                         time.sleep(self.waitTime)
                         # break
-            if self.isdualmic:
-                print(f'recording> remove({self.filename_new[2]})')
-                os.remove(self.filename_new[2])
-                print(f'recording> remove({self.filename_new[3]})')
-                os.remove(self.filename_new[3])
+            # if self.isdualmic:
+            #     print(f'recording> remove({self.filename_new[2]})')
+            #     os.remove(self.filename_new[2])
+            #     print(f'recording> remove({self.filename_new[3]})')
+            #     os.remove(self.filename_new[3])
         elif self.job == 'sysinfo':
             t0 = None
             toffset = 0
