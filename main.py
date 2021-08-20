@@ -31,6 +31,8 @@ class Engine:
         self.input = ''
         self.flag_stop_ChkRecThd = threading.Event()
         self.flag_checked_fileformat = threading.Event()
+        self.flag_imu_sr_checked = threading.Event()
+        self.flag_mic_sr_checked = threading.Event()
         self.flag_4kHz = threading.Event()
         self.flag_dualmic = threading.Event()
         self.flag_ble_addr = threading.Event()
@@ -146,7 +148,9 @@ class Engine:
         if self.flag_checked_fileformat.is_set():
             print(f'format checked:{self.flag_checked_fileformat.is_set()}  '
                     f'4kHz:{self.flag_4kHz.is_set()}  dualmic:{self.flag_dualmic.is_set()}  '
-                    f'BLE addr:{pkg_handler.bleaddr}')
+                    f'BLE addr:{pkg_handler.bleaddr}'
+                    f'acc sr:{self.datainfo["acc"]["sr"]}'
+                    f'gyro sr:{self.datainfo["gyro"]["sr"]}')
             if pkg_handler.bleaddr is None:
                self.stop() 
             if self.config['onlySelectedBle'] not in pkg_handler.bleaddr:

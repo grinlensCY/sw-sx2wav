@@ -25,7 +25,7 @@ class PackageHandler:
         self.pre_ts=0
         self.pre_ts_pkg = 0
 
-        self.recCnt = 0
+        self.acc_sr_list = []
         # self.sys_v=0
         self.sys_t=0
         self.is_usb_pwr=False
@@ -72,7 +72,7 @@ class PackageHandler:
         for d in dat:
             self.engine.sysinfo.append(d)
         self.sys_t = dat[8] if dat[8] is not None else dat[4]
-        self.engine.sysinfo[4] = self.sys_t
+        # self.engine.sysinfo[4] = self.sys_t
         if not self.engine.flag_ble_addr.is_set():
             tmp = dat[5].hex()
             addr = ''
@@ -80,23 +80,30 @@ class PackageHandler:
                 addr += f'{tmp[c]}{tmp[c+1]}:' if c!=-len(tmp)else tmp[c]+tmp[c+1]
             print('BLE addr:',addr.upper(),addr.replace(':','').upper())
             print(f'FW ver:{dat[1]}\tHW ver:{dat[2]}')
-            if dat[2] >= 32:
-                self.engine.datainfo['acc']['sr'] = 104
-                self.engine.datainfo['gyro']['sr'] = 104
+            # if dat[2] >= 32:
+            #     self.engine.datainfo['acc']['sr'] = 104
+            #     self.engine.datainfo['gyro']['sr'] = 104
             self.bleaddr = addr.replace(':','').upper()
             self.engine.flag_ble_addr.set()
         if self.engine.thd_rec_flag.is_set():
-            self.engine.recThd_sysinfo.addData([dat[0],dat[3],self.engine.sysinfo[4],dat[7]])
+            # self.engine.recThd_sysinfo.addData([dat[0],dat[3],self.engine.sysinfo[4],dat[7]])
+            tmp = self.engine.sysinfo.copy()
+            tmp[5] = tmp[5].hex()
+            self.engine.recThd_sysinfo.addData(tmp)
 
     def handle_dual_mic_pkg(self,dat):
-        if not self.engine.flag_checked_fileformat.is_set():
+        if not self.engine.flag_mic_sr_checked.is_set():
             self.engine.flag_dualmic.set()
             if len(dat[1]) == 64:
                 self.engine.flag_4kHz.set()
+                self.engine.datainfo['mic']['sr'] = 4000
                 print('dualmic: 4kHz, pkg size=',len(dat[1]),'bleaddr=',self.bleaddr)
             else:
                 self.engine.flag_4kHz.clear()
+                self.engine.datainfo['mic']['sr'] = 2000
                 print('dualmic: not 4kHz, pkg size=', len(dat[1]),'bleaddr=',self.bleaddr)
+            self.engine.flag_mic_sr_checked.set()
+        if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
             self.engine.flag_checked_fileformat.set()
         # q.put_nowait(dat)
 
@@ -109,14 +116,18 @@ class PackageHandler:
             # print('mic_pkg',np.array(dat[:5]).shape)
     
     def handle_mic_pkg(self,dat):
-        if not self.engine.flag_checked_fileformat.is_set():
+        if not self.engine.flag_mic_sr_checked.is_set():
             self.engine.flag_dualmic.clear()
             if len(dat[1]) == 64:
                 self.engine.flag_4kHz.set()
+                self.engine.datainfo['mic']['sr'] = 4000
                 print('multimic: 4kHz, pkg size=', len(dat[1]),'bleaddr=',self.bleaddr)
             else:
                 self.engine.flag_4kHz.clear()
+                self.engine.datainfo['mic']['sr'] = 2000
                 print('multimic: not 4kHz, pkg size=', len(dat[1]),'bleaddr=',self.bleaddr)
+            self.engine.flag_mic_sr_checked.set()
+        if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
             self.engine.flag_checked_fileformat.set()
         # q.put_nowait(dat)
 
@@ -145,6 +156,21 @@ class PackageHandler:
         self.prepare_statistic_output()
         if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog']:
             self.engine.recThd_acc.addData([dat[0],dat[2]], ch=dat[1])
+        
+        # print('self.engine.flag_imu_sr_checked.is_set()',self.engine.flag_imu_sr_checked.is_set(),len(self.acc_sr_list))
+        
+        if not self.engine.flag_imu_sr_checked.is_set() and len(self.acc_sr_list) < 6:
+            sr = self.calc_sr('acc', 2, dat)
+            if sr is not None:
+                self.acc_sr_list.append(sr)
+            if len(self.acc_sr_list) == 5:
+                updated_sr = np.round(np.median(self.acc_sr_list)+0.0001,2)
+                for key in ['acc','gyro','mag','quaternion']:
+                    self.engine.datainfo[key]['sr'] = updated_sr
+                self.engine.flag_imu_sr_checked.set()
+                print('\nPackageHandler: imu sr was confirmed!',self.engine.datainfo[key]['sr'],'Hz')
+        if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
+            self.engine.flag_checked_fileformat.set()
 
     def handle_imu_gyro_pkg(self,dat):
         self.gyro_pkg_cnt+=1
@@ -168,12 +194,16 @@ class PackageHandler:
     def calc_sr(self, name='', idx=2, dat=None):
         if self.pre_ts_pkg == 0:
             self.pre_ts_pkg = dat[0]
-            self.quat_pkg_cnt = len(dat[idx])
+            self.pkg_len = len(dat[idx])
+            sr = None
         else:
-            sr = self.quat_pkg_cnt / ((dat[0]-self.pre_ts_pkg)*4e-6)
-            print(f'{name} sr={sr:.3f}Hz  data_len={self.quat_pkg_cnt}')
+            sr = self.pkg_len / ((dat[0]-self.pre_ts_pkg)*4e-6)
+            print(f'PackageHandler: {name} sr={sr:.2f}Hz  data_len={self.pkg_len}')
             self.pre_ts_pkg = dat[0]
-            self.quat_pkg_cnt = len(dat[idx])
+            self.pkg_len = len(dat[idx])
+            if self.pkg_len != 20 and self.pkg_len != 32 and self.pkg_len != 64:
+                sr = None
+        return sr
 
 #===================================================================================
 
