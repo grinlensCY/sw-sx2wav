@@ -1,3 +1,11 @@
+# 20210821
+
+1. 以資料的package size與fw給的time stamp來更新imu sr
+2. 自動模式下，以NAS上的資料夾名稱當作目標資料夾
+3. sysinfo的存檔為完整的sysinfo
+![image](https://user-images.githubusercontent.com/75962075/130272726-2878e34c-4956-44e6-b1ab-ca647bdfa1a5.png)
+
+
 # sw-sx2wav Config說明:
 
 ## "dirToloadFile": 手動模式下，選擇檔案的起始目錄(會有另外的選擇檔案對話框出現)
