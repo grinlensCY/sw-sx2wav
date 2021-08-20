@@ -107,7 +107,7 @@ class Engine:
     def updateConfig(self,config):
         self.config = config
 
-    def chk_files_format(self,f_name='',srcdir='',cnt=0):
+    def chk_files_format(self,f_name='',srcdir='',cnt=0, userdir_kw=''):
         srcdir = os.path.dirname(f_name)
         ts = float(os.path.basename(f_name)[:-3])/1000
         self.flag_ble_addr.clear()
@@ -165,7 +165,7 @@ class Engine:
             self.data_retriever.stop()
             # == handle log and sx file
             self.srcdir = os.path.dirname(f_name)
-            dstdir,fnkw_ts,userdir = self.getDstdir(f_name)
+            dstdir,fnkw_ts,userdir = self.getDstdir(f_name,userdir_kw)
             # = log
             log_srcfn = f_name.replace("sx","log")
             log_dstfn = f'{dstdir}/{fnkw_ts}.log'
@@ -198,7 +198,7 @@ class Engine:
         else:
             return '','',''
     
-    def getDstdir(self,f_name):
+    def getDstdir(self,f_name,userdir_kw):
         ts = float(os.path.basename(f_name)[:-3])/1000
         fnkw_ts = f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}'
         str_date = time.strftime("%Y-%m-%d", time.localtime(ts))
@@ -206,9 +206,9 @@ class Engine:
         if self.config['dir_Export']:
             if self.config['dir_Export'] == self.config['dir_savSX']:
                 for folder in os.listdir(self.config['dir_Export']):
-                    if folder[-4:] == f"{self.bleaddr[-4:]}":
-                        dstdir =  f"{config['dir_savSX']}/{folder}/{str_date}"
-                        userdir = f"{config['dir_savSX']}/{folder}"
+                    if folder[-4:] == f"{self.bleaddr[-4:]}" or folder == userdir_kw:
+                        dstdir =  f"{self.config['dir_savSX']}/{folder}/{str_date}"
+                        userdir = f"{self.config['dir_savSX']}/{folder}"
                         break
             else:
                 dstdir = os.path.dirname(f_name)
@@ -370,7 +370,7 @@ def findFileset(config, kw='audio-main',srcdir='', loadall=True, onlyChkTS=False
                         print('going to upzip',zipfn)
                         # myzip.extract(zipfn,path=srcdir)
                         myzip.extractall(path=srcdir)
-        fns = [tfn.replace("zip","sx")]
+        fns = [tfn.replace(".zip",".sx")]
     fns.sort()
     print()
     for fn in fns:
@@ -387,6 +387,7 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS):
         tf = (tsRange[1]+1-tsRange[0])*60*60*24*1000+ti
     sx_list = []
     sx_list_short = []
+    userdir_list = []
     fn_log = 'downloadS3log.json'
     if os.path.exists(fn_log):
         with open(fn_log, 'r', newline='') as jf:
@@ -394,7 +395,8 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS):
     else:
         sx_dict = {'filename':[]}
     for srcdir in srcList:
-        print('check',srcdir)
+        userdir = srcdir.split('\\')[-1]
+        print('check',srcdir,'\nuser dir:',userdir)
         fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                 if fn.endswith('.zip')
                     and len(fn) == 17
@@ -424,19 +426,20 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS):
                             print(f'\tgoing to upzip to {dst} ')
                             # myzip.extract(zipfn,path=dst)
                             myzip.extractall(path=dst)
-                            sx_list.append(f'{dst}/{zipfn}')
+                            # sx_list.append(f'{dst}/{zipfn}')
                         else:
                             print(zipfn,'exists?',os.path.exists(f'{dst}/{zipfn}'),'recording time:',recTime)
-                            sx_list.append(f'{dst}/{zipfn}')
+                        sx_list.append(f'{dst}/{zipfn}')
+                        userdir_list.append(userdir)
     sx_dict['filename'].extend(sx_list_short)
     if not onlyChkTS:
         with open(fn_log, 'w') as jout:
             json.dump(sx_dict, jout, indent=4, ensure_ascii=False)
-    return sx_list
+    return sx_list,userdir_list
 
 
 if __name__ == "__main__":
-    print('version: 20210721a')
+    print('version: 20210821a')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
@@ -446,12 +449,13 @@ if __name__ == "__main__":
                 'quaternion':{'fullscale':1.0, 'sr':112.5/2}}
     kw = ''
     if config["dirList_load_S3zip"]:
-        fns = unzipS3(config["dirList_load_S3zip"],config["dir_upzipS3"],config['ts_loadS3'],
+        fns,userdirs = unzipS3(config["dirList_load_S3zip"],config["dir_upzipS3"],config['ts_loadS3'],
                         config['overwrite'],config['onlyChkTS'])
         if not len(fns):
             dir_upzipS3 = config["dir_upzipS3"].replace("\\","/")
             fns = [f'{dir_upzipS3}/{fn}' for fn in os.listdir(config["dir_upzipS3"])
                     if fn.endswith(".sx")]
+            userdirs = [dir_upzipS3]
     else:
         sdir = config['dirToloadFile']
         fns = findFileset(config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
@@ -462,7 +466,7 @@ if __name__ == "__main__":
         t0 = time.time()
         for i,fn in enumerate(fns):
             stop_flag.clear()
-            bleaddr,dstdir,userdir = engine.chk_files_format(f_name=fn,cnt=i+1)
+            bleaddr,dstdir,userdir = engine.chk_files_format(f_name=fn,cnt=i+1,userdir_kw=userdirs[i])
             while not stop_flag.wait(2.5):
                 print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
             if config['delSX']:
