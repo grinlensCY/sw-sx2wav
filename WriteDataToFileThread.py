@@ -1,5 +1,5 @@
 import threading
-import datetime
+import csv
 import soundfile as sf
 import time
 import os
@@ -73,6 +73,7 @@ class RecThread(threading.Thread):
         print(f'job:{self.job}: Start All Channels recording')
         emptyCnt = 0
         if self.job == 'mic':
+            sr_PatchTS = int(1/0.016)
             with sf.SoundFile(self.filename_new[0], mode='x',
                                 samplerate=self.sampleRate, channels=self.channels,
                                 subtype=self.subtype_audio) as file0,\
@@ -86,7 +87,7 @@ class RecThread(threading.Thread):
                                 samplerate=self.sampleRate, channels=self.channels,
                                 subtype=self.subtype_audio) as file3,\
                 sf.SoundFile(self.filename_new[4], mode='x',
-                                samplerate=self.sampleRate, channels=self.channels,
+                                samplerate=sr_PatchTS, channels=self.channels,
                                 subtype=self.subtype_NonAudio) as file4:
                 
                 fileList = [file0, file1, file2, file3, file4]
@@ -150,7 +151,8 @@ class RecThread(threading.Thread):
             tlast5 = np.array([],dtype='int64')
             with open(self.filename_new[0], 'a', newline='') as csvfile:
                 writer = csv.writer(csvfile, delimiter='\t')
-                writer.writerow(['time','bat(%)','temperature(degC)','bat(mV)'])
+                # writer.writerow(['time','bat(%)','temperature(degC)','bat(mV)'])
+                writer.writerow(['time','fwVer','hwVer','bat(%)','temperature(degC)','ble','charging','bat(mV)','imuTemp(degC)'])
                 while not self._stop_event.is_set():
                     hasData = False
                     try:
