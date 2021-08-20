@@ -126,6 +126,8 @@ class Engine:
             self.data_retriever.set_endingTX_callback(self.endingTX_callback)
             self.data_retriever.start()
             self.flag_checked_fileformat.clear()
+            self.flag_imu_sr_checked.clear()
+            self.flag_mic_sr_checked.clear()
             cnt = 0
             while not self.flag_checked_fileformat.wait(0.5):
                 cnt+=1
