@@ -9,7 +9,7 @@ from tkinter import filedialog
 from zipfile import ZipFile
 
 class Engine:
-    def __init__(self,datainfo=None, config=None, stopped_flag=None, filecnt=0):
+    def __init__(self,datainfo=None, config=None, stopped_flag=None):
         self.datainfo = datainfo
 
         self.config = config
@@ -37,7 +37,6 @@ class Engine:
         self.flag_dualmic = threading.Event()
         self.flag_ble_addr = threading.Event()
         self.strPkgSpd = ''
-        self.filecnt=filecnt
         self.bleaddr = None
         self.srcdir = ''
         self.thd_ChkRecThd = None
@@ -107,16 +106,37 @@ class Engine:
     def updateConfig(self,config):
         self.config = config
 
-    def chk_files_format(self,f_name='',srcdir='',cnt=0, userdir_kw=''):
-        srcdir = os.path.dirname(f_name)
-        ts = float(os.path.basename(f_name)[:-3])/1000
+    def getDstdir(self,sx_fn,userdir_kw):
+        ts = float(os.path.basename(sx_fn)[:-3])/1000
+        wavfnkw_ts = f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}'
+        str_date = time.strftime("%Y-%m-%d", time.localtime(ts))
+        dstdir = ''
+        if self.config['dir_Export'] == self.config['dir_savSX']:
+            for folder in os.listdir(self.config['dir_Export']):
+                if folder[-4:] == f"{self.bleaddr[-4:]}" or folder == userdir_kw:
+                    dstdir =  f"{self.config['dir_savSX']}/{folder}/{str_date}"
+                    userdir = f"{self.config['dir_savSX']}/{folder}"
+                    break
+        if not dstdir:  # if can't find any folder matching the ble address or no assigned dir_Export
+            dstdir = (f"{self.srcdir}/"
+                        f'{self.bleaddr}/'
+                        f'{str_date}')
+            userdir = f"{self.srcdir}/{self.bleaddr}/"
+        print(f'setRec: dstdir={dstdir}  userdir={userdir}')
+        if not os.path.exists(dstdir):
+            os.makedirs(dstdir)
+        return dstdir,wavfnkw_ts,userdir
+
+    def chk_files_format(self,sx_fn='',cnt=0, userdir_kw='', thisSXdict={}):
+        self.srcdir = os.path.dirname(sx_fn)
+        ts = float(os.path.basename(sx_fn)[:-3])/1000
         self.flag_ble_addr.clear()
         print(f'\nrecording time:{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}')
-        print('f_name: ', f_name)
-        # fnstr = f_name.split("/")[-2:] if len(f_name.split("/"))>1 else f_name.split("\\")[-2:]
+        print('sx_fn: ', sx_fn)
+        # fnstr = sx_fn.split("/")[-2:] if len(sx_fn.split("/"))>1 else sx_fn.split("\\")[-2:]
         # self.input = '_'.join(fnstr)
-        if srcdir and f_name.endswith('sx'):
-            drv = FD.Driver(f_name)
+        if self.srcdir and sx_fn.endswith('sx'):
+            drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
             self.data_retriever = PRO.Protocol(drv,'sxFile')
             self.data_retriever.set_sys_info_handler(pkg_handler)
@@ -133,8 +153,8 @@ class Engine:
                 cnt+=1
                 print('wait for receiving file format',cnt)
                 if cnt>10:
-                    input(f'quit {os.path.basename(f_name)}, having waited for format check too long time')
-                    print(f'quit {os.path.basename(f_name)}, having waited for format check too long time'
+                    input(f'quit {os.path.basename(sx_fn)}, having waited for format check too long time')
+                    print(f'quit {os.path.basename(sx_fn)}, having waited for format check too long time'
                           ,file=open('log.txt','a',newline=''))
                     self.stop()
                     break
@@ -143,8 +163,8 @@ class Engine:
                 cnt += 1
                 print('wait for receiving ble addre',cnt)
                 if cnt > 10:
-                    input(f'ble addr of {os.path.basename(f_name)} is unknown!')
-                    print(f'ble addr of {os.path.basename(f_name)} is unknown!'
+                    input(f'ble addr of {os.path.basename(sx_fn)} is unknown!')
+                    print(f'ble addr of {os.path.basename(sx_fn)} is unknown!'
                           ,file=open('log.txt','a',newline=''))
                     break
         if self.flag_checked_fileformat.is_set():
@@ -161,16 +181,23 @@ class Engine:
             if self.config['onlyChkFormat']:
                 print('onlyChkFormat',self.config['onlyChkFormat'])
                 self.stop()
-                return pkg_handler.bleaddr,'',''
-            self.datainfo['mic']['sr'] = 4000 if self.flag_4kHz.is_set() else 2000
+                return pkg_handler.bleaddr,'','',''
+            # self.datainfo['mic']['sr'] = 4000 if self.flag_4kHz.is_set() else 2000
             self.bleaddr = pkg_handler.bleaddr if self.flag_ble_addr.is_set() else "unknownBLE"
+            self.datainfo['ble'] = self.bleaddr
+            self.datainfo['dualmic'] = self.flag_dualmic.is_set()
+            if thisSXdict:
+                thisSXdict['imu_sr'] = self.datainfo["acc"]["sr"]
+                thisSXdict['mic_sr'] = self.datainfo["mic"]["sr"]
+                thisSXdict['dualmic'] = self.flag_dualmic.is_set()
+                thisSXdict['ble'] = self.bleaddr
             self.data_retriever.stop()
             # == handle log and sx file
-            self.srcdir = os.path.dirname(f_name)
-            dstdir,fnkw_ts,userdir = self.getDstdir(f_name,userdir_kw)
+            # self.srcdir = os.path.dirname(sx_fn)
+            dstdir,wavfnkw_ts,userdir = self.getDstdir(sx_fn,userdir_kw)
             # = log
-            log_srcfn = f_name.replace("sx","log")
-            log_dstfn = f'{dstdir}/{fnkw_ts}.log'
+            log_srcfn = sx_fn.replace("sx","log")
+            log_dstfn = f'{dstdir}/{wavfnkw_ts}.log'
             if os.path.exists(log_srcfn) and not os.path.exists(log_dstfn):
                 print('move log to',log_dstfn)
                 shutil.move(log_srcfn,log_dstfn)
@@ -182,57 +209,23 @@ class Engine:
                     shutil.move(log_srcfn,log_dstfn)
                 else:
                     os.remove(log_srcfn)
-            # # = sx
-            # if (self.config['moveSX'] or self.config['dirList_load_S3zip']):
-            #     sx_dstfn = f"{dstdir}/{os.path.basename(f_name)}"
-            #     if not os.path.exists(sx_dstfn):
-            #         print('move sx to',sx_dstfn)
-            #         shutil.move(f_name,sx_dstfn)
-            #     else:
-            #         print(sx_dstfn,'exists! remove src!')
-            #         os.remove(f_name)
             if self.config['onlyMovelog']:
                 print('onlyMovelog ==> Stop!')
                 self.stop()
-                return '','',''
-            engine.set_files_source(reset=False,f_name=f_name, fnkw_ts=fnkw_ts, dstdir=dstdir)
-            return self.bleaddr, dstdir, userdir
+                return '','','',''
+            self.set_files_source(reset=False,sx_fn=sx_fn, wavfnkw_ts=wavfnkw_ts, dstdir=dstdir)
+            return self.bleaddr, dstdir, userdir, self.flag_dualmic.is_set()
         else:
-            return '','',''
-    
-    def getDstdir(self,f_name,userdir_kw):
-        ts = float(os.path.basename(f_name)[:-3])/1000
-        fnkw_ts = f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}'
-        str_date = time.strftime("%Y-%m-%d", time.localtime(ts))
-        dstdir = ''
-        if self.config['dir_Export']:
-            if self.config['dir_Export'] == self.config['dir_savSX']:
-                for folder in os.listdir(self.config['dir_Export']):
-                    if folder[-4:] == f"{self.bleaddr[-4:]}" or folder == userdir_kw:
-                        dstdir =  f"{self.config['dir_savSX']}/{folder}/{str_date}"
-                        userdir = f"{self.config['dir_savSX']}/{folder}"
-                        break
-            else:
-                dstdir = os.path.dirname(f_name)
-                userdir = ''
-        if not dstdir:  # if can't find any folder matching the ble address or no assigned dir_Export
-            dstdir = (f"{self.srcdir}/"
-                        f'{self.bleaddr}/'
-                        f'{str_date}')
-            userdir = ''
-        print(f'setRec: dstdir={dstdir}  userdir={userdir}')
-        if not os.path.exists(dstdir):
-            os.makedirs(dstdir)
-        return dstdir,fnkw_ts,userdir
+            return '','','',''
 
-    def set_files_source(self,reset=True,f_name='',fnkw_ts='',dstdir=''):
+    def set_files_source(self,reset=True,sx_fn='',wavfnkw_ts='',dstdir=''):
         if reset: self.stop()
-        # self.srcdir = os.path.dirname(f_name)
-        print('f_name: ', f_name)
-        fnstr = f_name.split("/")[-2:] if len(f_name.split("/"))>1 else f_name.split("\\")[-2:]
+        # self.srcdir = os.path.dirname(sx_fn)
+        print('sx_fn: ', sx_fn)
+        fnstr = sx_fn.split("/")[-2:] if len(sx_fn.split("/"))>1 else sx_fn.split("\\")[-2:]
         self.input = '_'.join(fnstr)
-        if self.srcdir and f_name.endswith('sx'):
-            drv = FD.Driver(f_name)
+        if self.srcdir and sx_fn.endswith('sx'):
+            drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
             self.data_retriever = PRO.Protocol(drv,'sxFile')
             self.data_retriever.set_sys_info_handler(pkg_handler)
@@ -240,16 +233,16 @@ class Engine:
             self.data_retriever.set_imu_data_handler(pkg_handler)
             self.data_retriever.set_ecg_data_handler(pkg_handler)
             self.data_retriever.set_endingTX_callback(self.endingTX_callback)
-        go = self.setRec(dstdir,fnkw_ts)
+        go = self.setRec(dstdir,wavfnkw_ts)
         if go:
             print('going to start Engine again for recording!')
             self.start()
 
-    def setRec(self,dstdir='',fnkw_ts=''):
+    def setRec(self,dstdir='',wavfnkw_ts=''):
         if not self.thd_rec_flag.is_set():
-            dstfn_prefix = f'{dstdir}/{fnkw_ts}'
+            dstfn_prefix = f'{dstdir}/{wavfnkw_ts}'
             if os.path.exists(os.path.dirname(dstdir)):
-                existfns = [fn for fn in os.listdir(os.path.dirname(dstdir)) if fnkw_ts in fn]
+                existfns = [fn for fn in os.listdir(os.path.dirname(dstdir)) if wavfnkw_ts in fn]
             else:
                 existfns = ''
                 os.makedirs(os.path.dirname(dstdir))
@@ -333,6 +326,7 @@ class Engine:
         print('stop data_retriever')
         self.data_retriever.stop()
 
+
 def updateConfig(engine=None):
     with open(f"{os.path.join(os.path.dirname(__file__),'config.json')}", 'r', encoding='utf-8-sig') as reader:
         config = json.loads(reader.read())
@@ -341,7 +335,7 @@ def updateConfig(engine=None):
     print('update config')
     return config
 
-def findFileset(config, kw='audio-main',srcdir='', loadall=True, onlyChkTS=False):
+def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyChkTS=False):
     root = tk.Tk()
     root.withdraw()
 
@@ -373,32 +367,32 @@ def findFileset(config, kw='audio-main',srcdir='', loadall=True, onlyChkTS=False
                         # myzip.extract(zipfn,path=srcdir)
                         myzip.extractall(path=srcdir)
         fns = [tfn.replace(".zip",".sx")]
+        datainfo['user_srcdir'] = srcdir.split('\\')[-1]
+        datainfo['sxfn'] = tfn
     fns.sort()
     print()
     for fn in fns:
         ts = float(os.path.basename(fn)[:-3])/1000
-        print(f'{os.path.basename(fn)}  recording time:{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}')
+        recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+        print(f'{os.path.basename(fn)}  recording time:{recTime}')
+    if len(fns) == 1:
+        datainfo['recTime'] = recTime
+        datainfo['sxfn'] = fns[0]
+        datainfo['user_srcdir'] = srcdir.split('\\')[-1]
     print()
     return fns
 
-def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS):
+def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS,sx_dict):
     ti = time.mktime(time.strptime(f'{tsRange[0]}', "%Y%m%d"))*1000
     try:
         tf = time.mktime(time.strptime(f'{tsRange[1]+1}', "%Y%m%d"))*1000
     except ValueError:
         tf = (tsRange[1]+1-tsRange[0])*60*60*24*1000+ti
     sx_list = []
-    sx_list_short = []
-    userdir_list = []
-    fn_log = 'downloadS3log.json'
-    if os.path.exists(fn_log):
-        with open(fn_log, 'r', newline='') as jf:
-            sx_dict = json.loads(jf.read())
-    else:
-        sx_dict = {'filename':[]}
+    usrsrcdir_list = []
     for srcdir in srcList:
-        userdir = srcdir.split('\\')[-1]
-        print('check',srcdir,'\nuser dir:',userdir)
+        user_srcdir = srcdir.split('\\')[-1]
+        print('check',srcdir,'\nuser dir:',user_srcdir)
         fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                 if fn.endswith('.zip')
                     and len(fn) == 17
@@ -415,62 +409,105 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS):
                     if myzip.getinfo(zipfn).file_size>>10 < 200:
                         print(f'{msg}: filesize is too small!')
                         continue
-                    if zipfn in sx_dict['filename']:
-                        msg +=  ' has been in unzipped list!'
+                    if zipfn in sx_dict:
+                        msg += ' has been in unzipped list!'
                         if not overwrite:
                             print(f'{msg} ==> skip')
                             continue
                     else:
-                        sx_list_short.append(zipfn)
+                        sx_dict[zipfn] = {'user_srcdir':user_srcdir,
+                                            'recTime':recTime,
+                                            'ble':'',
+                                            'mic_sr':0,
+                                            'imu_sr':0,
+                                            'dualmic':False}
                         print(msg)
                     if not onlyChkTS:
                         if zipfn.endswith('sx') and (not os.path.exists(f'{dst}/{zipfn}') or overwrite):
                             print(f'\tgoing to upzip to {dst} ')
                             # myzip.extract(zipfn,path=dst)
                             myzip.extractall(path=dst)
-                            # sx_list.append(f'{dst}/{zipfn}')
                         else:
                             print(zipfn,'exists?',os.path.exists(f'{dst}/{zipfn}'),'recording time:',recTime)
                         sx_list.append(f'{dst}/{zipfn}')
-                        userdir_list.append(userdir)
-    sx_dict['filename'].extend(sx_list_short)
-    if not onlyChkTS:
-        with open(fn_log, 'w') as jout:
-            json.dump(sx_dict, jout, indent=4, ensure_ascii=False)
-    return sx_list,userdir_list
-
+                        usrsrcdir_list.append(user_srcdir)
+    if len(sx_list) == 1:
+        datainfo['recTime'] = recTime
+        datainfo['sxfn'] = sx_list[0]
+        datainfo['user_srcdir'] = user_srcdir
+    return sx_list,usrsrcdir_list
 
 if __name__ == "__main__":
-    print('version: 20210821a')
+    print('version: 20210821b')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
                 'acc':{'fullscale':4.0, 'sr':112.5/2},
                 'gyro':{'fullscale':4.0, 'sr':112.5/2},
                 'mag':{'fullscale':4900.0, 'sr':112.5/2},
-                'quaternion':{'fullscale':1.0, 'sr':112.5/2}}
+                'quaternion':{'fullscale':1.0, 'sr':112.5/2},
+                'ble':'',
+                'dualmic':False,
+                'user_srcdir':'',
+                'recTime':'',
+                'sxfn':''}
     kw = ''
-    if config["dirList_load_S3zip"]:
-        fns,userdirs = unzipS3(config["dirList_load_S3zip"],config["dir_upzipS3"],config['ts_loadS3'],
-                        config['overwrite'],config['onlyChkTS'])
+    sxdict = {}
+    usersrcdirs = []
+    fns = []
+    if config["dirList_load_S3zip"]:    # auto run mode, process files in s3
+        fn_log = os.path.dirname(__file__)+'/s3filelog.json'
+        if os.path.exists(fn_log):
+            with open(fn_log, 'r', newline='') as jf:
+                sxdict = json.loads(jf.read())
+        fns,usersrcdirs = unzipS3(
+                            config["dirList_load_S3zip"],config["dir_upzipS3"],config['ts_loadS3'],
+                            config['overwrite'],config['onlyChkTS'],sx_dict=sxdict)
+        # == if no zip fns found in unzipS3, process sx fns in dir_upzipS3 if they are also in sxdict
         if not len(fns):
             dir_upzipS3 = config["dir_upzipS3"].replace("\\","/")
-            fns = [f'{dir_upzipS3}/{fn}' for fn in os.listdir(config["dir_upzipS3"])
-                    if fn.endswith(".sx")]
-            userdirs = [dir_upzipS3]
+            for fn in os.listdir(dir_upzipS3):
+                if fn.endswith(".sx") and fn in sxdict:
+                    fns.append(f'{dir_upzipS3}/{fn}')
+                    usersrcdirs.append(sxdict[fn]['user_srcdir'])
     else:
         sdir = config['dirToloadFile']
-        fns = findFileset(config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
+        fns = findFileset(datainfo, config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
                             onlyChkTS=config['onlyChkTS'])
     if not config['onlyChkTS']:
         stop_flag = threading.Event()
-        engine = Engine(datainfo, config,stopped_flag=stop_flag,filecnt=len(fns))
+        engine = Engine(datainfo,config,stopped_flag=stop_flag)
         t0 = time.time()
         for i,fn in enumerate(fns):
             stop_flag.clear()
-            bleaddr,dstdir,userdir = engine.chk_files_format(f_name=fn,cnt=i+1,userdir_kw=userdirs[i])
+            userdirkw = usersrcdirs[i] if len(usersrcdirs) else ''
+            thisdict = sxdict[os.path.basename(fn)] if len(sxdict) else {}
+            # self.bleaddr, dstdir, userdir, self.flag_dualmic.is_set()
+            bleaddr,dstdir,userdir,isdualmic = engine.chk_files_format(sx_fn=fn,cnt=i+1,userdir_kw=userdirkw,
+                                                        thisSXdict=thisdict)
             while not stop_flag.wait(2.5):
                 print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
+            ts = float(os.path.basename(fn)[:-3])/1000
+            recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+            datainfo['recTime'] = recTime
+            datainfo['sxfn'] = os.path.basename(fn)
+            if userdirkw:
+                datainfo['user_srcdir'] = userdirkw
+
+            wavdictfn = f'{userdir}/{os.path.basename(userdir)}_fileinfo.json'
+            if os.path.exists(wavdictfn):
+                with open(wavdictfn, 'r', newline='') as jf:
+                    wavdict = json.loads(jf.read())
+            else:
+                wavdict = {}
+            wavdict[recTime] = {'ble': bleaddr,
+                                'micsr': datainfo["mic"]["sr"],
+                                'imusr': datainfo["acc"]["sr"],
+                                'dualmic':isdualmic,
+                                'sxfn': datainfo['sxfn']}
+            with open(wavdictfn, 'w', newline='') as wavjson:
+                json.dump(wavdict, wavjson, indent=4, ensure_ascii=False)
+
             if config['delSX']:
                 os.remove(fn)
             elif (config['moveSX'] and config['dirList_load_S3zip']) and bleaddr:
@@ -494,6 +531,11 @@ if __name__ == "__main__":
                 #             print(dstfn,'exists! remove src!')
                 #             os.remove(fn)
                 #         break
+        if (len(sxdict)
+                and (not config["onlyChkTS"] or not config["onlyChkFormat"]
+                        or not config["onlylog"] or not config["onlyMovelog"])):
+            with open(fn_log, 'w') as jout:
+                json.dump(sxdict, jout, indent=4, ensure_ascii=False)
         time.sleep(3)
 
     print('threading.active=',threading.active_count(),threading.enumerate())
