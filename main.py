@@ -531,11 +531,11 @@ if __name__ == "__main__":
                 #             print(dstfn,'exists! remove src!')
                 #             os.remove(fn)
                 #         break
-        if (len(sxdict)
-                and (not config["onlyChkTS"] or not config["onlyChkFormat"]
-                        or not config["onlylog"] or not config["onlyMovelog"])):
-            with open(fn_log, 'w') as jout:
-                json.dump(sxdict, jout, indent=4, ensure_ascii=False)
+            if (len(sxdict)
+                    and (not config["onlyChkTS"] or not config["onlyChkFormat"]
+                            or not config["onlylog"] or not config["onlyMovelog"])):
+                with open(fn_log, 'w') as jout:
+                    json.dump(sxdict, jout, indent=4, ensure_ascii=False)
         time.sleep(3)
 
     print('threading.active=',threading.active_count(),threading.enumerate())
