@@ -456,7 +456,7 @@ if __name__ == "__main__":
     usersrcdirs = []
     fns = []
     if config["dirList_load_S3zip"]:    # auto run mode, process files in s3
-        fn_log = os.path.dirname(__file__)+'/s3filelog.json'
+        fn_log = os.path.join(os.path.dirname(__file__),'s3filelog.json')
         if os.path.exists(fn_log):
             with open(fn_log, 'r', newline='') as jf:
                 sxdict = json.loads(jf.read())
