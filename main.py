@@ -113,16 +113,21 @@ class Engine:
         dstdir = ''
         if self.config['dir_Export'] == self.config['dir_savSX']:
             for folder in os.listdir(self.config['dir_Export']):
-                if folder[-4:] == f"{self.bleaddr[-4:]}" or folder == userdir_kw:
+                # if folder[-4:] == f"{self.bleaddr[-4:]}" or folder == userdir_kw or len(self.config['dirList_load_S3zip']):
+                if folder == userdir_kw:
                     dstdir =  f"{self.config['dir_savSX']}/{folder}/{str_date}"
                     userdir = f"{self.config['dir_savSX']}/{folder}"
                     break
+            if not dstdir and len(self.config['dirList_load_S3zip']):
+                dstdir =  f"{self.config['dir_savSX']}/{userdir_kw}/{str_date}"
+                userdir = f"{self.config['dir_savSX']}/{userdir_kw}"
+
         if not dstdir:  # if can't find any folder matching the ble address or no assigned dir_Export
             dstdir = (f"{self.srcdir}/"
                         f'{self.bleaddr}/'
                         f'{str_date}')
             userdir = f"{self.srcdir}/{self.bleaddr}/"
-        print(f'setRec: dstdir={dstdir}  userdir={userdir}')
+        print(f'setRec: dstdir={dstdir}\nuserdir={userdir}')
         if not os.path.exists(dstdir):
             os.makedirs(dstdir)
         return dstdir,wavfnkw_ts,userdir
@@ -170,8 +175,8 @@ class Engine:
         if self.flag_checked_fileformat.is_set():
             print(f'format checked:{self.flag_checked_fileformat.is_set()}  '
                     f'4kHz:{self.flag_4kHz.is_set()}  dualmic:{self.flag_dualmic.is_set()}  '
-                    f'BLE addr:{pkg_handler.bleaddr}'
-                    f'acc sr:{self.datainfo["acc"]["sr"]}'
+                    f'BLE addr:{pkg_handler.bleaddr} '
+                    f'acc sr:{self.datainfo["acc"]["sr"]} '
                     f'gyro sr:{self.datainfo["gyro"]["sr"]}')
             if pkg_handler.bleaddr is None:
                self.stop() 
@@ -214,6 +219,7 @@ class Engine:
                 self.stop()
                 return '','','',''
             self.set_files_source(reset=False,sx_fn=sx_fn, wavfnkw_ts=wavfnkw_ts, dstdir=dstdir)
+            # self.stop()
             return self.bleaddr, dstdir, userdir, self.flag_dualmic.is_set()
         else:
             return '','','',''
@@ -438,7 +444,7 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS,sx_dict):
     return sx_list,usrsrcdir_list
 
 if __name__ == "__main__":
-    print('version: 20210821b')
+    print('version: 20210821c')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
