@@ -404,6 +404,10 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS,sx_dict):
                     and len(fn) == 17
                     and ti <= float(fn[:-3]) <= tf]
         for fn in fns:
+            print('going to upzip',fn,'size',os.stat(fn).st_size>>10,'KB')
+            if os.stat(fn).st_size>>10 < 200:
+                print('\tto small to process it')
+                continue
             with ZipFile(fn) as myzip:
                 for zipfn in myzip.namelist():
                     if not zipfn.endswith('sx'):

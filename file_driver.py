@@ -35,7 +35,7 @@ class Driver:
 
         while(flag.is_set()):
             try:
-                in_len=400
+                in_len=800
                 dat=fp.read(in_len)
             except:
                 time.sleep(0.5)
