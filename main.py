@@ -179,10 +179,12 @@ class Engine:
                     f'acc sr:{self.datainfo["acc"]["sr"]} '
                     f'gyro sr:{self.datainfo["gyro"]["sr"]}')
             if pkg_handler.bleaddr is None:
-               self.stop() 
+               self.stop()
+               return pkg_handler.bleaddr,'','',''
             if self.config['onlySelectedBle'] not in pkg_handler.bleaddr:
                 print('onlySelectedBle not in pkg_handler.bleaddr')
                 self.stop()
+                return pkg_handler.bleaddr,'','',''
             if self.config['onlyChkFormat']:
                 print('onlyChkFormat',self.config['onlyChkFormat'])
                 self.stop()
@@ -397,7 +399,7 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS,sx_dict):
     sx_list = []
     usrsrcdir_list = []
     for srcdir in srcList:
-        user_srcdir = srcdir.split('\\')[-1]
+        user_srcdir = os.path.basename(srcdir)
         print('check',srcdir,'\nuser dir:',user_srcdir)
         fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                 if fn.endswith('.zip')
@@ -447,8 +449,89 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS,sx_dict):
         datainfo['user_srcdir'] = user_srcdir
     return sx_list,usrsrcdir_list
 
+def mergeSX(sxfns,userlist):
+    global config
+    if len(sxfns) < 2:
+        return sxfns
+    last_stop_ts = 0
+    first_sxfn = None
+    first_user = None
+    cum_sxData = None
+    cum_logdata = None
+    new_sxfns = []
+    new_userlist = []
+    merged_sxfns = []
+    cum_cnt = 0
+    cum_duration = 0
+    for i,fn in enumerate(sxfns):
+        if os.path.exists(fn.replace(".sx",".log")):
+            with open(fn.replace(".sx",".log"), 'r', newline='') as jf:
+                log = json.loads(jf.read())
+        else:
+            new_sxfns.append(fn)
+            new_userlist.append(userlist[i])
+            continue
+        
+        with open(fn, 'rb') as f:
+            buf = f.read()
+
+        if not last_stop_ts:
+            first_sxfn = fn
+            first_user = userlist[i]
+            cum_sxData = buf
+            cum_logdata = log
+            new_sxfns.append(fn)
+            new_userlist.append(userlist[i])
+            cum_cnt = 1
+            cum_duration += (log['stop_ts']-log['start_ts'])
+            print(f'first sx/user: {os.path.basename(first_sxfn)} / {first_user}')
+        else:
+            interval = log['start_ts'] - last_stop_ts
+            if userlist[i] == first_user and interval <= 5000:  # the same user and interval < 5sec
+                merged_sxfns.append(os.path.basename(fn))
+                cum_sxData += buf
+                cum_logdata['stop_ts'] = log['stop_ts']
+                cum_logdata['evt'].extend(log['evt'])
+                cum_logdata['hr'].extend(log['hr'])
+                cum_logdata['fm'].extend(log['fm'])
+                cum_cnt += 1
+                cum_duration += (log['stop_ts']-log['start_ts'])
+                if config['delSX']:
+                    print('mergeSX: remove',fn,'of',userlist[i])
+                    os.remove(fn)
+                    os.remove(fn.replace(".sx",".log"))
+                if fn == sxfns[-1] or not os.path.exists(sxfns[i+1].replace(".sx",".log")):
+                    print((f'merging {merged_sxfns} into {os.path.basename(first_sxfn)}'
+                            f'({first_user}: {cum_cnt} files,{cum_duration/1000/60:.2f}min)'))
+                    with open(first_sxfn, "wb") as f:
+                        f.write(cum_sxData)
+                    with open(first_sxfn.replace(".sx",".log"), 'w', newline='') as jf:
+                        json.dump(cum_logdata, jf, ensure_ascii=False)
+            else:
+                if cum_cnt > 1:
+                    print((f'merging {merged_sxfns} into {os.path.basename(first_sxfn)}'
+                            f'({cum_cnt} files,{cum_duration/1000/60:.2f}min)'))
+                    with open(first_sxfn, "wb") as f:
+                        f.write(cum_sxData)
+                    with open(first_sxfn.replace(".sx",".log"), 'w', newline='') as jf:
+                        json.dump(cum_logdata, jf, ensure_ascii=False)
+                    merged_sxfns = []
+                    cum_duration = 0
+                cum_cnt = 1
+                first_sxfn = fn
+                first_user = userlist[i]
+                new_sxfns.append(fn)
+                new_userlist.append(userlist[i])
+                cum_sxData = buf
+                cum_logdata = log
+                cum_duration += (log['stop_ts']-log['start_ts'])
+                print(f'first sx/user: {os.path.basename(first_sxfn)} / {first_user}')
+        last_stop_ts = log['stop_ts']
+    return new_sxfns,new_userlist
+    
+
 if __name__ == "__main__":
-    print('version: 20210821c')
+    print('version: 20210914a')
     config = updateConfig()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
@@ -485,6 +568,8 @@ if __name__ == "__main__":
         fns = findFileset(datainfo, config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
                             onlyChkTS=config['onlyChkTS'])
     if not config['onlyChkTS']:
+        if config['mergeNearby']:
+            fns,usersrcdirs = mergeSX(fns,usersrcdirs)
         stop_flag = threading.Event()
         engine = Engine(datainfo,config,stopped_flag=stop_flag)
         t0 = time.time()
@@ -497,6 +582,8 @@ if __name__ == "__main__":
                                                         thisSXdict=thisdict)
             while not stop_flag.wait(2.5):
                 print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
+            if bleaddr is None or not dstdir:
+                continue
             ts = float(os.path.basename(fn)[:-3])/1000
             recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
             datainfo['recTime'] = recTime

@@ -94,7 +94,7 @@ class RecThread(threading.Thread):
                 t0 = None
                 seglen = 64 if self.sampleRate==4000 else 32
                 data_dim = 2 if self.isdualmic else 4
-                seg_cnt = 20
+                seg_cnt = 40
                 buffer_mic = np.zeros((data_dim,seglen*seg_cnt),dtype=np.float64)
                 buffer_ts = np.zeros(seg_cnt,dtype=np.float64)
                 toffset = 0
@@ -108,7 +108,7 @@ class RecThread(threading.Thread):
                         buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = micdata
                         if t0 is None:
                             t0 = tmp[0]
-                        elif tmp[0] < t0:
+                        elif tmp[0] < t0 or tmp[0] < tlast5[-1]:
                             t0 = tmp[0]
                             toffset = tlast5[-1]+np.mean(np.diff(tlast5))
                         tstmp = tmp[0] + toffset-t0
@@ -159,7 +159,7 @@ class RecThread(threading.Thread):
                         tmp = self.q.get(timeout=self.waitTime)
                         if t0 is None:
                             t0 = tmp[0]
-                        elif tmp[0] < t0:
+                        elif tmp[0] < t0 or tmp[0] < tlast5[-1]:
                             t0 = tmp[0]
                             toffset = tlast5[-1]+np.mean(np.diff(tlast5))
                         tmp[0] += toffset-t0
