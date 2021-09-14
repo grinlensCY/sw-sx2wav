@@ -1,4 +1,4 @@
-# 20210821
+# 20210914
 
 1. 以資料的package size與fw給的time stamp來更新imu sr(拿acc的結果來當作其他的)
 2. 自動模式下，以NAS上的資料夾名稱當作目標資料夾
@@ -18,7 +18,9 @@
 ## "dir_upzipS3": 自動模式下，解壓縮zip的目的資料夾，也是載入sx的位置
 
 ## "ts_loadS3" 自動模式下，選擇檔案的日期區間
-"ts_loadS3": [20210718,20210730], 
+"ts_loadS3": [20210718,20210730],
+
+## "mergeNearby": 10,  是否merge 時間相鄰(<=5sec)的sx
 
 ## "dir_Export" 轉檔之後的輸出預設目錄
 ## "dir_savSX" 如果dir_Export == dir_savSX，則會去找是否有對應的使用者資料夾，否則就存檔在sx的資料夾/ble_addr/date
