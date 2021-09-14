@@ -3,6 +3,7 @@
 1. 以資料的package size與fw給的time stamp來更新imu sr(拿acc的結果來當作其他的)
 2. 自動模式下，以NAS上的資料夾名稱當作目標資料夾
 3. sysinfo的存檔為完整的sysinfo
+4. 可以合併相連(間隔相差<=5秒)的sx
 ![image](https://user-images.githubusercontent.com/75962075/130272726-2878e34c-4956-44e6-b1ab-ca647bdfa1a5.png)
 
 
