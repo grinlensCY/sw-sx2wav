@@ -567,8 +567,9 @@ if __name__ == "__main__":
         sdir = config['dirToloadFile']
         fns = findFileset(datainfo, config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
                             onlyChkTS=config['onlyChkTS'])
+        usersrcdirs = [os.path.basename(os.path.dirname(fns[0]))]
     if not config['onlyChkTS']:
-        if config['mergeNearby']:
+        if config['mergeNearby'] and len(fns)>1:
             fns,usersrcdirs = mergeSX(fns,usersrcdirs)
         stop_flag = threading.Event()
         engine = Engine(datainfo,config,stopped_flag=stop_flag)
