@@ -173,13 +173,21 @@ class RecThread(threading.Thread):
                     except:
                         # print(f'{self.job}: timeout while getting data')
                         pass
-                    if not hasData: emptyCnt += 1
+                    if not hasData:
+                        emptyCnt += 1
+                    else:
+                        emptyCnt = 0
                     if emptyCnt > 200:
                         print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
                         self.stop()
         elif self.job != 'ecg' and self.job != 'sysinfo':
-            duration_pkg_ts = 20/self.sampleRate/4e-6
-            UL_duration_pkg = duration_pkg_ts*1.4
+            # duration_pkg_ts = 20/self.sampleRate/4e-6
+            # UL_duration_pkg = duration_pkg_ts*1.4
+            t0 = None
+            toffset = 0
+            tpre = 0
+            ts_interval = 20/self.sampleRate
+            ts_interval_fw = ts_interval/4e-6
             with sf.SoundFile(self.filename_new[0], mode='x',
                                 samplerate=self.sampleRate, channels=self.channels,
                                 subtype=self.subtype_NonAudio) as file0:
@@ -190,46 +198,67 @@ class RecThread(threading.Thread):
                 #                 samplerate=self.sampleRate, channels=self.channels,
                 #                 subtype=self.subtype_NonAudio) as file2:
                 fileList = [file0]#, file1, file2]
-                data = [[]]   #[[],[],[]]
-                t0 = [None, None, None]
+                # data = [[]]   #[[],[],[]]
+                t0 = None # [None]#, None, None]
                 while not self._stop_event.is_set():
-                    hasData = False
-                    for i in range(1):
-                        # if not self.qMulti[i].empty():
-                        #     data[i].append(self.qMulti[i].get_nowait())
-                        # else:
-                        #     time.sleep(self.waitTime)
-                        try:
-                            data[i].append(self.qMulti[i].get(timeout=self.waitTime))
-                            hasData |= True
-                        except:
-                            # print(f'{self.job}: timeout while getting data of ch{i}')
-                            pass
-                    if not hasData: emptyCnt += 1
-                    if emptyCnt > 200:
-                        print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
-                        self.stop()
-                    for i in range(1):
-                        if len(data[i])==2:
-                            # print(f'{self.job} ts={data[i][0][0]},{data[i][1][0]} len={len(data[i][0][1])},{len(data[i][1][1])}')
-                            # print(f'{self.job} len={len(data[i][0][1])},{len(data[i][1][1])}')
-                            if t0[i] is None:
-                                t0[i] = data[i][0][0]
-                            if 0 < data[i][1][0]-data[i][0][0] < UL_duration_pkg:
-                                ts = np.linspace(data[i][0][0]-t0[i], data[i][1][0]-t0[i],
-                                                len(data[i][0][1]), endpoint=False) * 4e-6
-                            else:
-                                ts = np.linspace(data[i][0][0]-t0[i], data[i][0][0]+duration_pkg_ts-t0[i],
-                                                len(data[i][0][1]), endpoint=False) * 4e-6
-                                if data[i][1][0]-data[i][0][0] < 0:
-                                    t0[i] += data[i][0][0]+duration_pkg_ts
-                            # print(f'{self.job}rec  {np.block([[ts], [np.array(list(data[i][0][1])).T]]).T.shape}')
-                            fileList[i].write(
-                                np.block([[ts],
-                                          [np.array(list(data[i][0][1])).T
-                                            /self.fullscale]])
-                                .T)
-                            del data[i][0]
+                    if not self.qMulti[0].empty():
+                        emptyCnt = 0
+                        tmp = self.qMulti[0].get(timeout=0.02)
+                        if t0 is None:
+                            t0 = tmp[0]
+                        elif tmp[0] < t0 or tmp[0] < tpre :
+                            t0 = tmp[0]
+                            toffset = tpre + ts_interval_fw
+                        tmp[0] += toffset-t0
+                        tpre = tmp[0]
+                        ts = np.linspace(tmp[0], tmp[0]+ts_interval_fw, 20, endpoint=False) * 4e-6
+                        fileList[0].write(
+                                    np.block([[ts],
+                                            [np.array(list(tmp[1])).T/self.fullscale]]).T)
+                    else:
+                        emptyCnt += 1
+                        if emptyCnt > 200:
+                            print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
+                            self.stop()
+                        time.sleep(self.waitTime)
+
+                    # hasData = False
+                    # for i in range(1):
+                    #     # if not self.qMulti[i].empty():
+                    #     #     data[i].append(self.qMulti[i].get_nowait())
+                    #     # else:
+                    #     #     time.sleep(self.waitTime)
+                    #     try:
+                    #         data[i].append(self.qMulti[i].get(timeout=self.waitTime))
+                    #         hasData |= True
+                    #     except:
+                    #         # print(f'{self.job}: timeout while getting data of ch{i}')
+                    #         pass
+                    # if not hasData: emptyCnt += 1
+                    # if emptyCnt > 200:
+                    #     print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
+                    #     self.stop()
+                    # for i in range(1):
+                    #     if len(data[i])==2:
+                    #         # print(f'{self.job} ts={data[i][0][0]},{data[i][1][0]} len={len(data[i][0][1])},{len(data[i][1][1])}')
+                    #         # print(f'{self.job} len={len(data[i][0][1])},{len(data[i][1][1])}')
+                    #         if t0[i] is None:
+                    #             t0[i] = data[i][0][0]
+                    #         if 0 < data[i][1][0]-data[i][0][0] < UL_duration_pkg:
+                    #             ts = np.linspace(data[i][0][0]-t0[i], data[i][1][0]-t0[i],
+                    #                             len(data[i][0][1]), endpoint=False) * 4e-6
+                    #         else:
+                    #             ts = np.linspace(data[i][0][0]-t0[i], data[i][0][0]+duration_pkg_ts-t0[i],
+                    #                             len(data[i][0][1]), endpoint=False) * 4e-6
+                    #             if data[i][1][0]-data[i][0][0] < 0:
+                    #                 t0[i] += data[i][0][0]+duration_pkg_ts
+                    #         # print(f'{self.job}rec  {np.block([[ts], [np.array(list(data[i][0][1])).T]]).T.shape}')
+                    #         fileList[i].write(
+                    #             np.block([[ts],
+                    #                       [np.array(list(data[i][0][1])).T
+                    #                         /self.fullscale]])
+                    #             .T)
+                    #         del data[i][0]
                             # print(f'ch{i}  ts={ts[0]:.6f}~{ts[-1]:.6f}sec  t0={t0[i]}')
         # elif self.job == 'ecg':
         #     with sf.SoundFile(self.filename_new[0], mode='x',
