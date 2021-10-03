@@ -531,8 +531,14 @@ def mergeSX(sxfns,userlist):
     
 
 if __name__ == "__main__":
-    print('version: 20210914a')
+    import sys
+    print('version: 20210914b')
     config = updateConfig()
+    for key in config.keys():
+        if '//' not in key and 'dir' not in key:
+            print(key,config[key])
+    if input('Are all parameters correct? Enter:contiune others:exit '):
+        sys.exit()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
                 'acc':{'fullscale':4.0, 'sr':112.5/2},
