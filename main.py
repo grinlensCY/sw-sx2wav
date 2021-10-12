@@ -406,7 +406,9 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS,sx_dict):
                     and len(fn) == 17
                     and ti <= float(fn[:-3]) <= tf]
         for fn in fns:
-            print('going to upzip',fn,'size',os.stat(fn).st_size>>10,'KB')
+            ts = float(os.path.basename(fn)[:-3])/1000
+            recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+            print('going to upzip',fn,'\n\tsize',os.stat(fn).st_size>>10,'KB\trec time:',recTime)
             if os.stat(fn).st_size>>10 < 200:
                 print('\tto small to process it')
                 continue
@@ -414,10 +416,10 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS,sx_dict):
                 for zipfn in myzip.namelist():
                     if not zipfn.endswith('sx'):
                         continue
-                    ts = float(zipfn[:-3])/1000
-                    recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+                    # ts = float(zipfn[:-3])/1000
+                    # recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
                     filesize = myzip.getinfo(zipfn).file_size
-                    msg = (f'{zipfn}>> recording time:{recTime} size:{filesize>>10}KB')
+                    msg = (f'{zipfn}>> size:{filesize>>10}KB')
                     if myzip.getinfo(zipfn).file_size>>10 < 200:
                         print(f'{msg}: filesize is too small!')
                         continue
@@ -532,7 +534,7 @@ def mergeSX(sxfns,userlist):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20210914b')
+    print('version: 20210914c')
     config = updateConfig()
     for key in config.keys():
         if '//' not in key and 'dir' not in key:
