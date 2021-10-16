@@ -111,7 +111,12 @@ class Engine:
         wavfnkw_ts = f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}'
         str_date = time.strftime("%Y-%m-%d", time.localtime(ts))
         dstdir = ''
-        if self.config['dir_Export'] == self.config['dir_savSX']:
+        dstdir2 = ''
+        userdir2 = ''
+        if userdir_kw in ['AOIS3T~5','AO7G2X~7']:
+            dstdir =  f"{self.config['dir_Export_fj']}/{self.bleaddr}/{str_date}"
+            userdir = f"{self.config['dir_Export_fj']}/{self.bleaddr}"
+        elif self.config['dir_Export'] == self.config['dir_savSX']:
             for folder in os.listdir(self.config['dir_Export']):
                 # if folder[-4:] == f"{self.bleaddr[-4:]}" or folder == userdir_kw or len(self.config['dirList_load_S3zip']):
                 if folder == userdir_kw:
@@ -130,7 +135,9 @@ class Engine:
         print(f'setRec: dstdir={dstdir}\nuserdir={userdir}')
         if not os.path.exists(dstdir):
             os.makedirs(dstdir)
-        return dstdir,wavfnkw_ts,userdir
+        # if not os.path.exists(dstdir2):
+        #     os.makedirs(dstdir2)
+        return dstdir,wavfnkw_ts,userdir,dstdir2,userdir2
 
     def chk_files_format(self,sx_fn='',cnt=0, userdir_kw='', thisSXdict={}):
         self.srcdir = os.path.dirname(sx_fn)
@@ -201,7 +208,7 @@ class Engine:
             self.data_retriever.stop()
             # == handle log and sx file
             # self.srcdir = os.path.dirname(sx_fn)
-            dstdir,wavfnkw_ts,userdir = self.getDstdir(sx_fn,userdir_kw)
+            dstdir,wavfnkw_ts,userdir,dstdir2,userdir2 = self.getDstdir(sx_fn,userdir_kw)
             # = log
             log_srcfn = sx_fn.replace("sx","log")
             log_dstfn = f'{dstdir}/{wavfnkw_ts}.log'
@@ -222,9 +229,9 @@ class Engine:
                 return '','','',''
             self.set_files_source(reset=False,sx_fn=sx_fn, wavfnkw_ts=wavfnkw_ts, dstdir=dstdir)
             # self.stop()
-            return self.bleaddr, dstdir, userdir, self.flag_dualmic.is_set()
+            return self.bleaddr, dstdir, userdir, self.flag_dualmic.is_set(), dstdir2, userdir2, wavfnkw_ts
         else:
-            return '','','',''
+            return '','','','','','',''
 
     def set_files_source(self,reset=True,sx_fn='',wavfnkw_ts='',dstdir=''):
         if reset: self.stop()
@@ -424,7 +431,7 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS,sx_dict):
                         print(f'{msg}: filesize is too small!')
                         continue
                     if zipfn in sx_dict:
-                        msg += ' has been in unzipped list!'
+                        msg += ' has been in converted list!'
                         if not overwrite:
                             print(f'{msg} ==> skip')
                             continue
@@ -534,11 +541,16 @@ def mergeSX(sxfns,userlist):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20210914c')
+    print('version: 20211017a')
     config = updateConfig()
     for key in config.keys():
         if '//' not in key and 'dir' not in key:
             print(key,config[key])
+        elif key.startswith("dirList_load_S3zip"):
+            for item in config[key]:
+                print(item)
+        elif key == 'dir_Export_fj':
+            print(config[key])
     if input('Are all parameters correct? Enter:contiune others:exit '):
         sys.exit()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
@@ -587,8 +599,8 @@ if __name__ == "__main__":
             userdirkw = usersrcdirs[i] if len(usersrcdirs) else ''
             thisdict = sxdict[os.path.basename(fn)] if len(sxdict) else {}
             # self.bleaddr, dstdir, userdir, self.flag_dualmic.is_set()
-            bleaddr,dstdir,userdir,isdualmic = engine.chk_files_format(sx_fn=fn,cnt=i+1,userdir_kw=userdirkw,
-                                                        thisSXdict=thisdict)
+            bleaddr,dstdir,userdir,isdualmic,dstdir2,userdir2,wavfnkw_ts = engine.chk_files_format(sx_fn=fn,
+                                                            cnt=i+1,userdir_kw=userdirkw,thisSXdict=thisdict)
             while not stop_flag.wait(2.5):
                 print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
             if bleaddr is None or not dstdir:
