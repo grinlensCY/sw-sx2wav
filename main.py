@@ -462,7 +462,7 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS,sx_dict):
         datainfo['user_srcdir'] = user_srcdir
     return sx_list,usrsrcdir_list
 
-def mergeSX(sxfns,userlist):
+def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
     global config
     if len(sxfns) < 2:
         return sxfns
@@ -477,6 +477,7 @@ def mergeSX(sxfns,userlist):
     cum_cnt = 0
     cum_duration = 0
     for i,fn in enumerate(sxfns):
+        basefn = os.path.basename(fn)
         if os.path.exists(fn.replace(".sx",".log")):
             with open(fn.replace(".sx",".log"), 'r', newline='') as jf:
                 log = json.loads(jf.read())
@@ -498,10 +499,12 @@ def mergeSX(sxfns,userlist):
             cum_cnt = 1
             cum_duration += (log['stop_ts']-log['start_ts'])
             print(f'first sx/user: {os.path.basename(first_sxfn)} / {first_user}')
+            last_merged_dict[first_user] = [basefn]
         else:
             interval = log['start_ts'] - last_stop_ts
             if userlist[i] == first_user and interval <= 5000:  # the same user and interval < 5sec
-                merged_sxfns.append(os.path.basename(fn))
+                merged_sxfns.append(basefn)
+                last_merged_dict[first_user].append(basefn)
                 cum_sxData += buf
                 cum_logdata['stop_ts'] = log['stop_ts']
                 cum_logdata['evt'].extend(log['evt'])
@@ -514,22 +517,25 @@ def mergeSX(sxfns,userlist):
                     os.remove(fn)
                     os.remove(fn.replace(".sx",".log"))
                 if fn == sxfns[-1] or not os.path.exists(sxfns[i+1].replace(".sx",".log")):
-                    print((f'merging {merged_sxfns} into {os.path.basename(first_sxfn)}'
+                    print((f'merging {merged_sxfns} into\n\t{os.path.basename(first_sxfn)}'
                             f'({first_user}: {cum_cnt} files,{cum_duration/1000/60:.2f}min)'))
                     with open(first_sxfn, "wb") as f:
                         f.write(cum_sxData)
                     with open(first_sxfn.replace(".sx",".log"), 'w', newline='') as jf:
                         json.dump(cum_logdata, jf, ensure_ascii=False)
+                    sx_dict[basefn]['duration'] = cum_duration/1000
             else:
                 if cum_cnt > 1:
-                    print((f'merging {merged_sxfns} into {os.path.basename(first_sxfn)}'
+                    print((f'merging {merged_sxfns} into\n\t{os.path.basename(first_sxfn)}'
                             f'({cum_cnt} files,{cum_duration/1000/60:.2f}min)'))
+                    sx_dict[basefn]['duration'] = cum_duration/1000
                     with open(first_sxfn, "wb") as f:
                         f.write(cum_sxData)
                     with open(first_sxfn.replace(".sx",".log"), 'w', newline='') as jf:
                         json.dump(cum_logdata, jf, ensure_ascii=False)
                     merged_sxfns = []
                     cum_duration = 0
+                    
                 cum_cnt = 1
                 first_sxfn = fn
                 first_user = userlist[i]
@@ -539,22 +545,21 @@ def mergeSX(sxfns,userlist):
                 cum_logdata = log
                 cum_duration += (log['stop_ts']-log['start_ts'])
                 print(f'first sx/user: {os.path.basename(first_sxfn)} / {first_user}')
+                last_merged_dict[first_user] = [basefn]
         last_stop_ts = log['stop_ts']
     return new_sxfns,new_userlist
     
 
 if __name__ == "__main__":
     import sys
-    print('version: 20211017a')
+    print('version: 20211017b')
     config = updateConfig()
     for key in config.keys():
-        if '//' not in key and 'dir' not in key:
+        if key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
             print(key,config[key])
         elif key.startswith("dirList_load_S3zip"):
             for item in config[key]:
                 print(item)
-        elif key == 'dir_Export_fj':
-            print(config[key])
     if input('Are all parameters correct? Enter:contiune others:exit '):
         sys.exit()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
@@ -571,6 +576,7 @@ if __name__ == "__main__":
     kw = ''
     sxdict = {}
     usersrcdirs = []
+    last_merged_dict = {}
     fns = []
     if config["dirList_load_S3zip"]:    # auto run mode, process files in s3
         fn_log = os.path.join(os.path.dirname(__file__),'s3filelog.json')
@@ -594,7 +600,7 @@ if __name__ == "__main__":
         usersrcdirs = [os.path.basename(os.path.dirname(fns[0]))]
     if not config['onlyChkTS']:
         if config['mergeNearby'] and len(fns)>1:
-            fns,usersrcdirs = mergeSX(fns,usersrcdirs)
+            fns,usersrcdirs = mergeSX(fns,usersrcdirs,last_merged_dict,sxdict)
         stop_flag = threading.Event()
         engine = Engine(datainfo,config,stopped_flag=stop_flag)
         t0 = time.time()
@@ -654,6 +660,7 @@ if __name__ == "__main__":
                 #             os.remove(fn)
                 #         break
             if (len(sxdict)
+                    and os.path.basename(fn) not in last_merged_dict[userdirkw]
                     and (not config["onlyChkTS"] or not config["onlyChkFormat"]
                             or not config["onlylog"] or not config["onlyMovelog"])):
                 with open(fn_log, 'w') as jout:
