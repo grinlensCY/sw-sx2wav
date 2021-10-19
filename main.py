@@ -79,7 +79,7 @@ class Engine:
     def chkRecThd(self, flag):
         print('start to ChkRecThd')
         # t0 = time.time()
-        while not flag.wait(3):
+        while not flag.wait(5):
             if self.data_retriever.thd_run_flag is not None:  print(self.strPkgSpd)
             # print(f'chkRecThd: elapsed time={time.time()-t0:.2f}sec')
             isRun = False
@@ -441,7 +441,8 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS,sx_dict):
                                             'ble':'',
                                             'mic_sr':0,
                                             'imu_sr':0,
-                                            'dualmic':False}
+                                            'dualmic':False,
+                                            'duration':0}
                         print(msg)
                     if not onlyChkTS:
                         if (zipfn.endswith('sx')
