@@ -444,7 +444,10 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS,sx_dict):
                                             'dualmic':False}
                         print(msg)
                     if not onlyChkTS:
-                        if zipfn.endswith('sx') and (not os.path.exists(f'{dst}/{zipfn}') or overwrite):
+                        if (zipfn.endswith('sx')
+                                and (not os.path.exists(f'{dst}/{zipfn}')
+                                        or overwrite
+                                        or not os.path.exists(f'{dst}/{zipfn}'.replace('.sx','log')))):
                             print(f'\tgoing to upzip to {dst} ')
                             # myzip.extract(zipfn,path=dst)
                             myzip.extractall(path=dst)
