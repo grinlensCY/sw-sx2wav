@@ -214,15 +214,15 @@ class Engine:
             log_dstfn = f'{dstdir}/{wavfnkw_ts}.log'
             if os.path.exists(log_srcfn) and not os.path.exists(log_dstfn):
                 print('move log to',log_dstfn)
-                shutil.move(log_srcfn,log_dstfn)
+                # shutil.move(log_srcfn,log_dstfn)
             elif os.path.exists(log_srcfn) and os.path.exists(log_dstfn):
                 print(f'{log_dstfn} exists. Removing {log_srcfn}.') 
-                if self.config['overwrite']:
-                    os.remove(log_dstfn)
-                    print('overwrite', log_dstfn)
-                    shutil.move(log_srcfn,log_dstfn)
-                else:
-                    os.remove(log_srcfn)
+                # if self.config['overwrite']:
+                os.remove(log_dstfn)
+                print('overwrite', log_dstfn)
+            shutil.move(log_srcfn,log_dstfn)
+                # else:
+                #     os.remove(log_srcfn)
             if self.config['onlyMovelog']:
                 print('onlyMovelog ==> Stop!')
                 self.stop()
@@ -263,12 +263,12 @@ class Engine:
                 os.makedirs(os.path.dirname(dstdir))
             if len(existfns):
                 print(f'{dstfn_prefix} has existed!')
-                if self.config['overwrite']:
-                    print('going to overwrite it!')
-                else:
-                    print('going to skip it!')
-                    self.stop()
-                    return False
+                # if self.config['overwrite']:
+                print('going to overwrite it!')
+                # else:
+                #     print('going to skip it!')
+                #     self.stop()
+                #     return False
             if not self.config['onlylog']:
                 self.recThd_audio = RecThread(self.datainfo['mic']['sr'],
                                             1, 0.04, dstfn_prefix, 'mic',
