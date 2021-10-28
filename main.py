@@ -552,7 +552,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20211017b')
+    print('version: 20211017c')
     config = updateConfig()
     for key in config.keys():
         if key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
@@ -597,7 +597,7 @@ if __name__ == "__main__":
         sdir = config['dirToloadFile']
         fns = findFileset(datainfo, config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
                             onlyChkTS=config['onlyChkTS'])
-        usersrcdirs = [os.path.basename(os.path.dirname(fns[0]))]
+        usersrcdirs = [os.path.basename(os.path.dirname(fn)) for fn in fns]
     if not config['onlyChkTS']:
         if config['mergeNearby'] and len(fns)>1:
             fns,usersrcdirs = mergeSX(fns,usersrcdirs,last_merged_dict,sxdict)
