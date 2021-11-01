@@ -22,7 +22,7 @@
     "//dirList_load_S3zip":[
         "//192.168.50.250/Amazon S3 (fetalmonitorc0a1663ff0db4172b5aa1b231e7b9fc3134550-de/private/UZCLN0~8"],
     "dir_upzipS3": "C:/Users/chenyikuo/downloads_S3",
-    "ts_loadS3": [20211013,20221231],
+    "ts_loadS3": [20211028,20221231],
     "load_all_sx": 10,
     "mergeNearby": 10,
     "dir_Export": "G:/My Drive/Experiment/compilation/在家受測者",
