@@ -220,7 +220,8 @@ class Engine:
                 # if self.config['overwrite']:
                 os.remove(log_dstfn)
                 print('overwrite', log_dstfn)
-            shutil.move(log_srcfn,log_dstfn)
+            if os.path.exists(log_srcfn):
+                shutil.move(log_srcfn,log_dstfn)
                 # else:
                 #     os.remove(log_srcfn)
             if self.config['onlyMovelog']:
@@ -350,7 +351,7 @@ def updateConfig(engine=None):
     print('update config')
     return config
 
-def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyChkTS=False):
+def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyChkTS=False, sx_dict={}):
     root = tk.Tk()
     root.withdraw()
 
@@ -386,10 +387,18 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
         datainfo['sxfn'] = tfn
     fns.sort()
     print()
+    user_srcdir = srcdir.split('\\')[-1]
     for fn in fns:
         ts = float(os.path.basename(fn)[:-3])/1000
         recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
         print(f'{os.path.basename(fn)}  recording time:{recTime}')
+        sx_dict[os.path.basename(fn)] = {'user_srcdir':user_srcdir,
+                                            'recTime':recTime,
+                                            'ble':'',
+                                            'mic_sr':0,
+                                            'imu_sr':0,
+                                            'dualmic':False,
+                                            'duration':0}
     if len(fns) == 1:
         datainfo['recTime'] = recTime
         datainfo['sxfn'] = fns[0]
@@ -552,10 +561,10 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20211017c')
+    print('version: 20211101a')
     config = updateConfig()
     for key in config.keys():
-        if key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
+        if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
             print(key,config[key])
         elif key.startswith("dirList_load_S3zip"):
             for item in config[key]:
@@ -596,7 +605,7 @@ if __name__ == "__main__":
     else:
         sdir = config['dirToloadFile']
         fns = findFileset(datainfo, config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
-                            onlyChkTS=config['onlyChkTS'])
+                            onlyChkTS=config['onlyChkTS'],sx_dict=sxdict)
         usersrcdirs = [os.path.basename(os.path.dirname(fn)) for fn in fns]
     if not config['onlyChkTS']:
         if config['mergeNearby'] and len(fns)>1:
@@ -638,6 +647,7 @@ if __name__ == "__main__":
 
             if config['delSX']:
                 os.remove(fn)
+                print('remove sx',os.path.basename(fn))
             elif (config['moveSX'] and config['dirList_load_S3zip']) and bleaddr:
                 sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
                 if not os.path.exists(sx_dstfn):
@@ -659,7 +669,8 @@ if __name__ == "__main__":
                 #             print(dstfn,'exists! remove src!')
                 #             os.remove(fn)
                 #         break
-            if (len(sxdict)
+            if (config["dirList_load_S3zip"]
+                    and len(sxdict)
                     and os.path.basename(fn) not in last_merged_dict[userdirkw]
                     and (not config["onlyChkTS"] or not config["onlyChkFormat"]
                             or not config["onlylog"] or not config["onlyMovelog"])):
