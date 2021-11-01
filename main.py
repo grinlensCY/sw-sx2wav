@@ -113,7 +113,7 @@ class Engine:
         dstdir = ''
         dstdir2 = ''
         userdir2 = ''
-        if userdir_kw in ['AOIS3T~5','AO7G2X~7']:
+        if userdir_kw in self.config['fj_dir_kw']:
             dstdir =  f"{self.config['dir_Export_fj']}/{self.bleaddr}/{str_date}"
             userdir = f"{self.config['dir_Export_fj']}/{self.bleaddr}"
         elif self.config['dir_Export'] == self.config['dir_savSX']:

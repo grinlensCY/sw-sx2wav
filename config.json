@@ -25,6 +25,7 @@
     "load_all_sx": 10,
     "mergeNearby": 10,
     "dir_Export": "G:/My Drive/Experiment/compilation/在家受測者",
+    "fj_dir_kw" : ["AOIS3T~5","AO7G2X~7","A80PBY~0"],
     "dir_Export_fj": "//192.168.50.250/SiriuXense數據庫/寶寶音資料庫/7M_baby_patch_DVT",
     "//dir_Export": "./",
     "dir_savSX": "G:/My Drive/Experiment/compilation/在家受測者",
