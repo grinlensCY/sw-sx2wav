@@ -1,10 +1,12 @@
-# 20211017
+# 20211101
 
 1. 以資料的package size與fw給的time stamp來更新imu sr(拿acc的結果來當作其他的)
 2. 自動模式下，以NAS上的資料夾名稱當作目標資料夾
 3. sysinfo的存檔為完整的sysinfo
 4. 可以合併相連(間隔相差<=5秒)的sx
 5. 針對FJ的收音，給予另外的存檔路徑，config['dir_Export_fj']
+6. 針對FJ帳號的收音，可以在config['fj_dir_kw']設定 NAS上的資料夾名稱
+7. 修正manual mode的錯誤
 ![image](https://user-images.githubusercontent.com/75962075/130272726-2878e34c-4956-44e6-b1ab-ca647bdfa1a5.png)
 
 
@@ -29,6 +31,9 @@
 "dir_Export": "G:\\My Drive\\Experiment\\compilation\\在家受測者",
 
 "dir_Export": "./"
+
+## "fj_dir_kw" 指定NAS上哪些資料夾是屬於FJ帳號
+"fj_dir_kw" : ["AOIS3T~5","AO7G2X~7","A80PBY~0"],
 
 ## 'dir_Export_fj' 針對S3上FJ帳號的收音，給予另外的存檔路徑
 'dir_Export_fj': "//192.168.50.250/SiriuXense數據庫/寶寶音資料庫/7M_baby_patch_DVT",
