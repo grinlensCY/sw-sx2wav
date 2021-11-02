@@ -561,7 +561,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20211101a')
+    print('version: 20211101b')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
@@ -671,7 +671,7 @@ if __name__ == "__main__":
                 #         break
             if (config["dirList_load_S3zip"]
                     and len(sxdict)
-                    and os.path.basename(fn) not in last_merged_dict[userdirkw]
+                    and userdirkw in last_merged_dict and os.path.basename(fn) not in last_merged_dict[userdirkw]
                     and (not config["onlyChkTS"] or not config["onlyChkFormat"]
                             or not config["onlylog"] or not config["onlyMovelog"])):
                 with open(fn_log, 'w') as jout:
