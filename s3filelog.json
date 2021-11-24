@@ -12029,7 +12029,8 @@
         "ble": "D8C13B771341",
         "mic_sr": 2000,
         "imu_sr": 101.84,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1528.599
     },
     "1633187286002.sx": {
         "user_srcdir": "UTC6II~Y",
@@ -12061,7 +12062,8 @@
         "ble": "F04B6595B961",
         "mic_sr": 2000,
         "imu_sr": 100.43,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1284.43
     },
     "1633077575906.sx": {
         "user_srcdir": "U3EV3W~6",
@@ -12090,17 +12092,17 @@
     "1633272775832.sx": {
         "user_srcdir": "UTC6II~Y",
         "recTime": "2021-10-03-22-52-55",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
+        "ble": "D8C13B771341",
+        "mic_sr": 2000,
+        "imu_sr": 101.67,
         "dualmic": false
     },
     "1633273210080.sx": {
         "user_srcdir": "UTC6II~Y",
         "recTime": "2021-10-03-23-00-10",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
+        "ble": "D8C13B771341",
+        "mic_sr": 2000,
+        "imu_sr": 101.6,
         "dualmic": false
     },
     "1633359647105.sx": {
@@ -12109,7 +12111,8 @@
         "ble": "D8C13B771341",
         "mic_sr": 2000,
         "imu_sr": 101.86,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 506.986
     },
     "1633360081994.sx": {
         "user_srcdir": "UTC6II~Y",
@@ -12141,7 +12144,8 @@
         "ble": "F04B6595B961",
         "mic_sr": 2000,
         "imu_sr": 100.43,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 11563.644
     },
     "1633348866079.sx": {
         "user_srcdir": "U3EV3W~6",
@@ -12149,7 +12153,8 @@
         "ble": "",
         "mic_sr": 0,
         "imu_sr": 0,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 506.986
     },
     "1633416804174.sx": {
         "user_srcdir": "AOIS3T~5",
@@ -12221,7 +12226,8 @@
         "ble": "D8C13B771341",
         "mic_sr": 2000,
         "imu_sr": 101.93,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 755.404
     },
     "1633443708450.sx": {
         "user_srcdir": "UTC6II~Y",
@@ -12245,7 +12251,8 @@
         "ble": "D8C13B771341",
         "mic_sr": 2000,
         "imu_sr": 101.95,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1237.306
     },
     "1633529383219.sx": {
         "user_srcdir": "UTC6II~Y",
@@ -12277,7 +12284,8 @@
         "ble": "F04B6595B961",
         "mic_sr": 2000,
         "imu_sr": 100.35,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1347.044
     },
     "1633429849231.sx": {
         "user_srcdir": "U3EV3W~6",
@@ -12285,7 +12293,8 @@
         "ble": "",
         "mic_sr": 0,
         "imu_sr": 0,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 755.404
     },
     "1633430564492.sx": {
         "user_srcdir": "U3EV3W~6",
@@ -12301,7 +12310,8 @@
         "ble": "F04B6595B961",
         "mic_sr": 2000,
         "imu_sr": 100.35,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1218.657
     },
     "1632892601683.sx": {
         "user_srcdir": "AOIS3T~5",
@@ -12325,7 +12335,8 @@
         "ble": "D5EB427A2FFC",
         "mic_sr": 4000,
         "imu_sr": 201.96,
-        "dualmic": true
+        "dualmic": true,
+        "duration": 1300.508
     },
     "1633271681445.sx": {
         "user_srcdir": "AOIS3T~5",
@@ -12346,18 +12357,18 @@
     "1633272834987.sx": {
         "user_srcdir": "AOIS3T~5",
         "recTime": "2021-10-03-22-53-54",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false
+        "ble": "D5EB427A2FFC",
+        "mic_sr": 4000,
+        "imu_sr": 201.8,
+        "dualmic": true
     },
     "1633273216590.sx": {
         "user_srcdir": "AOIS3T~5",
         "recTime": "2021-10-03-23-00-16",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false
+        "ble": "D5EB427A2FFC",
+        "mic_sr": 4000,
+        "imu_sr": 201.83,
+        "dualmic": true
     },
     "1633273598019.sx": {
         "user_srcdir": "AOIS3T~5",
@@ -12541,15 +12552,16 @@
         "ble": "",
         "mic_sr": 0,
         "imu_sr": 0,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 11563.644
     },
     "1633282370580.sx": {
         "user_srcdir": "AOIS3T~5",
         "recTime": "2021-10-04-01-32-50",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false
+        "ble": "D5EB427A2FFC",
+        "mic_sr": 4000,
+        "imu_sr": 201.77,
+        "dualmic": true
     },
     "1633282752376.sx": {
         "user_srcdir": "AOIS3T~5",
@@ -13973,7 +13985,8 @@
         "ble": "F04B6595B961",
         "mic_sr": 2000,
         "imu_sr": 100.3,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1922.452
     },
     "1633705101838.sx": {
         "user_srcdir": "U3EV3W~6",
@@ -14141,7 +14154,8 @@
         "ble": "D8C13B771341",
         "mic_sr": 2000,
         "imu_sr": 101.84,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1217.792
     },
     "1633793750196.sx": {
         "user_srcdir": "UTC6II~Y",
@@ -14173,7 +14187,8 @@
         "ble": "D8C13B771341",
         "mic_sr": 2000,
         "imu_sr": 101.96,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1352.074
     },
     "1633881036414.sx": {
         "user_srcdir": "UTC6II~Y",
@@ -14709,7 +14724,8 @@
         "ble": "D8C13B771341",
         "mic_sr": 2000,
         "imu_sr": 101.86,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1283.144
     },
     "1633965307439.sx": {
         "user_srcdir": "UTC6II~Y",
@@ -15053,7 +15069,8 @@
         "ble": "D8C13B771341",
         "mic_sr": 2000,
         "imu_sr": 101.86,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1274.495
     },
     "1634052479260.sx": {
         "user_srcdir": "UTC6II~Y",
@@ -15077,7 +15094,8 @@
         "ble": "",
         "mic_sr": 0,
         "imu_sr": 0,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1464.425
     },
     "1634053835712.sx": {
         "user_srcdir": "UTC6II~Y",
@@ -15093,7 +15111,8 @@
         "ble": "D8C13B771341",
         "mic_sr": 2000,
         "imu_sr": 101.85,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1377.358
     },
     "1634139848769.sx": {
         "user_srcdir": "UTC6II~Y",
@@ -15117,7 +15136,8 @@
         "ble": "F04B6595B961",
         "mic_sr": 2000,
         "imu_sr": 100.31,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1017.349
     },
     "1634036156335.sx": {
         "user_srcdir": "U3EV3W~6",
@@ -15141,7 +15161,8 @@
         "ble": "F04B6595B961",
         "mic_sr": 2000,
         "imu_sr": 100.43,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 1464.425
     },
     "1634133917535.sx": {
         "user_srcdir": "U3EV3W~6",
@@ -17069,7 +17090,8 @@
         "ble": "F04B6595B961",
         "mic_sr": 2000,
         "imu_sr": 100.45,
-        "dualmic": false
+        "dualmic": false,
+        "duration": 981.492
     },
     "1634311071540.sx": {
         "user_srcdir": "U3EV3W~6",
@@ -17724,7 +17746,7 @@
         "mic_sr": 2000,
         "imu_sr": 100.37,
         "dualmic": false,
-        "duration": 0
+        "duration": 1216.595
     },
     "1634658883941.sx": {
         "user_srcdir": "U3EV3W~6",
@@ -18165,7 +18187,7 @@
         "mic_sr": 2000,
         "imu_sr": 100.56,
         "dualmic": false,
-        "duration": 0
+        "duration": 839.225
     },
     "1634907778924.sx": {
         "user_srcdir": "U3EV3W~6",
@@ -18795,7 +18817,7 @@
         "mic_sr": 2000,
         "imu_sr": 100.41,
         "dualmic": false,
-        "duration": 0
+        "duration": 973.99
     },
     "1635257687044.sx": {
         "user_srcdir": "U3EV3W~6",
@@ -19128,7 +19150,7 @@
         "mic_sr": 2000,
         "imu_sr": 100.42,
         "dualmic": false,
-        "duration": 0
+        "duration": 937.848
     },
     "1635515753913.sx": {
         "user_srcdir": "U3EV3W~6",
@@ -19178,10 +19200,10 @@
     "1635488005385.sx": {
         "user_srcdir": "AOIS3T~5",
         "recTime": "2021-10-29-14-13-25",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "D5EB427A2FFC",
+        "mic_sr": 4000,
+        "imu_sr": 202.27,
+        "dualmic": true,
         "duration": 0
     },
     "1635488388164.sx": {
@@ -19331,19 +19353,19 @@
     "1635465433244.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-29-07-57-13",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.3,
+        "dualmic": true,
         "duration": 7251.028
     },
     "1635517885163.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-29-22-31-25",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.39,
+        "dualmic": true,
         "duration": 0
     },
     "1635518329958.sx": {
@@ -19556,10 +19578,10 @@
     "1635535160329.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-30-03-19-20",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.43,
+        "dualmic": true,
         "duration": 10600.247
     },
     "1635535594155.sx": {
@@ -19682,10 +19704,10 @@
     "1635541697184.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-30-05-08-17",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.47,
+        "dualmic": true,
         "duration": 6055.191
     },
     "1635542131794.sx": {
@@ -19826,10 +19848,10 @@
     "1635548314059.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-30-06-58-34",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.46,
+        "dualmic": true,
         "duration": 6591.179
     },
     "1635548747654.sx": {
@@ -19862,10 +19884,10 @@
     "1635551853547.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-30-07-57-33",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.37,
+        "dualmic": true,
         "duration": 1744.246
     },
     "1635552288105.sx": {
@@ -19925,100 +19947,100 @@
     "1635556360973.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-30-09-12-40",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.25,
+        "dualmic": true,
         "duration": 2712.275
     },
     "1635637009075.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-07-36-49",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.63,
+        "dualmic": true,
         "duration": 0
     },
     "1635637199535.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-07-39-59",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.51,
+        "dualmic": true,
         "duration": 0
     },
     "1635638545146.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-08-02-25",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.49,
+        "dualmic": true,
         "duration": 0
     },
     "1635638852637.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-08-07-32",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.45,
+        "dualmic": true,
         "duration": 0
     },
     "1635639327487.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-08-15-27",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.33,
+        "dualmic": true,
         "duration": 0
     },
     "1635660184405.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-14-03-04",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.6,
+        "dualmic": true,
         "duration": 0
     },
     "1635660292083.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-14-04-52",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.56,
+        "dualmic": true,
         "duration": 0
     },
     "1635660486094.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-14-08-06",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.46,
+        "dualmic": true,
         "duration": 0
     },
     "1635660616121.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-14-10-16",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.46,
+        "dualmic": true,
         "duration": 0
     },
     "1635661046907.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-14-17-26",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.43,
+        "dualmic": true,
         "duration": 0
     },
     "1635661495526.sx": {
@@ -20087,10 +20109,10 @@
     "1635689175797.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-22-06-15",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.31,
+        "dualmic": true,
         "duration": 5509.808
     },
     "1635689610539.sx": {
@@ -20105,46 +20127,46 @@
     "1635690219903.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-22-23-39",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.22,
+        "dualmic": true,
         "duration": 456.367
     },
     "1635690449067.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-22-27-29",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.23,
+        "dualmic": true,
         "duration": 0
     },
     "1635690543590.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-22-29-03",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.22,
+        "dualmic": true,
         "duration": 0
     },
     "1635690603865.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-22-30-03",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.35,
+        "dualmic": true,
         "duration": 0
     },
     "1635693524171.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-10-31-23-18-44",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.35,
+        "dualmic": true,
         "duration": 0
     },
     "1635693958047.sx": {
@@ -20195,10 +20217,10 @@
     "1635696117543.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-11-01-00-01-57",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.37,
+        "dualmic": true,
         "duration": 0
     },
     "1635696549811.sx": {
@@ -20424,25 +20446,25 @@
         "mic_sr": 0,
         "imu_sr": 0,
         "dualmic": false,
-        "duration": 14020.222
+        "duration": 11244.542
     },
     "1635707365165.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-11-01-03-09-25",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.36,
+        "dualmic": true,
         "duration": 0
     },
     "1635709151889.sx": {
         "user_srcdir": "AO7G2X~7",
         "recTime": "2021-11-01-03-39-11",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
-        "duration": 14020.222
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.49,
+        "dualmic": true,
+        "duration": 11244.542
     },
     "1635709586489.sx": {
         "user_srcdir": "AO7G2X~7",
@@ -20501,10 +20523,10 @@
     "1635712005066.sx": {
         "user_srcdir": "A80PBY~0",
         "recTime": "2021-11-01-04-26-45",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.37,
+        "dualmic": true,
         "duration": 2816.305
     },
     "1635712468033.sx": {
@@ -20663,37 +20685,37 @@
     "1635719726498.sx": {
         "user_srcdir": "A80PBY~0",
         "recTime": "2021-11-01-06-35-26",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
-        "duration": 7657.427
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.36,
+        "dualmic": true,
+        "duration": 7751.525
     },
     "1635720171366.sx": {
         "user_srcdir": "A80PBY~0",
         "recTime": "2021-11-01-06-42-51",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.38,
+        "dualmic": true,
         "duration": 0
     },
     "1635725563856.sx": {
         "user_srcdir": "A80PBY~0",
         "recTime": "2021-11-01-08-12-43",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.48,
+        "dualmic": true,
         "duration": 0
     },
     "1635726016899.sx": {
         "user_srcdir": "A80PBY~0",
         "recTime": "2021-11-01-08-20-16",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.38,
+        "dualmic": true,
         "duration": 0
     },
     "1635726482458.sx": {
@@ -20708,19 +20730,19 @@
     "1635726776211.sx": {
         "user_srcdir": "A80PBY~0",
         "recTime": "2021-11-01-08-32-56",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.29,
+        "dualmic": true,
         "duration": 1525.63
     },
     "1635726940471.sx": {
         "user_srcdir": "A80PBY~0",
         "recTime": "2021-11-01-08-35-40",
-        "ble": "",
-        "mic_sr": 0,
-        "imu_sr": 0,
-        "dualmic": false,
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.43,
+        "dualmic": true,
         "duration": 0
     },
     "1635727042871.sx": {
@@ -20758,5 +20780,3029 @@
         "imu_sr": 0,
         "dualmic": false,
         "duration": 1555.665
+    },
+    "1635751934665.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-01-15-32-14",
+        "ble": "D384AAA58126",
+        "mic_sr": 4000,
+        "imu_sr": 200.7,
+        "dualmic": true,
+        "duration": 2816.305
+    },
+    "1635834327469.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-14-25-27",
+        "ble": "D5EB427A2FFC",
+        "mic_sr": 4000,
+        "imu_sr": 202.27,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1635834717121.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-14-31-57",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635835099962.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-14-38-19",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635835484367.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-14-44-44",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635835865716.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-14-51-05",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635836247385.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-14-57-27",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635836629222.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-15-03-49",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635837011356.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-15-10-11",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635837393123.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-15-16-33",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635837775357.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-15-22-55",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635838157183.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-15-29-17",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635838538932.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-15-35-38",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635838921131.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-15-42-01",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635839302686.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-15-48-22",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635839685593.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-15-54-45",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635840066996.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-16-01-06",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635840449975.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-02-16-07-29",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635894493020.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-03-07-08-13",
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.29,
+        "dualmic": true,
+        "duration": 6179.858
+    },
+    "1635895618407.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-03-07-26-58",
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.38,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1635895669023.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-03-07-27-49",
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.34,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1635896102514.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-03-07-35-02",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635896282112.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-03-07-38-02",
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.34,
+        "dualmic": true,
+        "duration": 755.976
+    },
+    "1635896715661.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-03-07-45-15",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635897146991.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-03-07-52-26",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635897579447.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-03-07-59-39",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635898010765.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-03-08-06-50",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635898443411.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-03-08-14-03",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635978349157.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-06-25-49",
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.46,
+        "dualmic": true,
+        "duration": 2592.979
+    },
+    "1635978396448.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-06-26-36",
+        "ble": "E481EF441624",
+        "mic_sr": 4000,
+        "imu_sr": 101.4,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1635978830037.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-06-33-50",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635979262646.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-06-41-02",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635979695206.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-06-48-15",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635980127397.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-06-55-27",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635980560131.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-07-02-40",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635980992152.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-07-09-52",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635981423940.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-07-17-03",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635981856532.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-07-24-16",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1635982289137.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-07-31-29",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636003966985.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-13-32-46",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 4349.207
+    },
+    "1636004047162.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-13-34-07",
+        "ble": "C9487A9D3966",
+        "mic_sr": 4000,
+        "imu_sr": 202.91,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636005811783.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-14-03-31",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 200.08,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636036710005.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-04-22-38-30",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.58,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636066058927.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-06-47-38",
+        "ble": "C9487A9D3966",
+        "mic_sr": 4000,
+        "imu_sr": 202.66,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636066149846.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-06-49-09",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 200.1,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636066527786.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-06-55-27",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636066904577.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-07-01-44",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636067283437.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-07-08-03",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636067659642.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-07-14-19",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636068036161.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-07-20-36",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636068413363.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-07-26-53",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636068789290.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-07-33-09",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636086743136.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-12-32-23",
+        "ble": "C41FBA3EA10E",
+        "mic_sr": 4000,
+        "imu_sr": 100.7,
+        "dualmic": true,
+        "duration": 3065.744
+    },
+    "1636086781558.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-12-33-01",
+        "ble": "D384AAA58126",
+        "mic_sr": 4000,
+        "imu_sr": 200.84,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636124487426.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-23-01-27",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 200.8,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636124866970.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-23-07-46",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636125243751.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-23-14-03",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636125621718.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-23-20-21",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636125999706.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-23-26-39",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636126376379.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-23-32-56",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636126754307.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-23-39-14",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636127131526.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-23-45-31",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636127508250.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-23-51-48",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636127885286.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-05-23-58-05",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636128261554.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-00-04-21",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636128638643.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-00-10-38",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636129015188.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-00-16-55",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636129391910.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-00-23-11",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636129767605.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-00-29-27",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636130142463.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-00-35-42",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636130518377.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-00-41-58",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636130895338.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-00-48-15",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636131272209.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-00-54-32",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636131649117.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-01-00-49",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636132025192.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-01-07-05",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636132401687.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-01-13-21",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636132778466.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-01-19-38",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636133154865.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-01-25-54",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636133530700.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-01-32-10",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636133907364.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-01-38-27",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636134702922.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-01-51-42",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.22,
+        "dualmic": true,
+        "duration": 9681.149
+    },
+    "1636135104845.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-01-58-24",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636135480343.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-02-04-40",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636135857328.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-02-10-57",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636136233125.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-02-17-13",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636136610001.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-02-23-30",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636136985866.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-02-29-45",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636137362932.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-02-36-02",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636137739302.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-02-42-19",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636138116042.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-02-48-36",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636138492366.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-02-54-52",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636138867837.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-03-01-07",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636139244507.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-03-07-24",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636139621114.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-03-13-41",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636139996940.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-03-19-56",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636140373608.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-03-26-13",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636140750298.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-03-32-30",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636141125801.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-03-38-45",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636141501511.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-03-45-01",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636141877512.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-03-51-17",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636142252976.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-03-57-32",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636142628903.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-04-03-48",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636143004595.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-04-10-04",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636143380480.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-04-16-20",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636143757448.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-04-22-37",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636144133770.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-04-28-53",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636144510536.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-04-35-10",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636146913582.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-05-15-13",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.3,
+        "dualmic": true,
+        "duration": 10180.568
+    },
+    "1636147292300.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-05-21-32",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636147668841.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-05-27-48",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636148045478.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-05-34-05",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636148767785.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-05-46-07",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.66,
+        "dualmic": true,
+        "duration": 1508.357
+    },
+    "1636149144944.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-05-52-24",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636149521370.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-05-58-41",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636149898139.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-06-04-58",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636150274966.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-06-11-14",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636150651867.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-06-17-31",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636151028566.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-06-23-48",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636151404921.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-06-30-04",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636151781692.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-06-36-21",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636152158362.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-06-42-38",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636152535491.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-06-48-55",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636152911846.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-06-55-11",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636153288847.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-07-01-28",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636153665208.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-07-07-45",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636154042076.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-07-14-02",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636154418665.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-07-20-18",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636154795104.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-07-26-35",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636155171756.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-07-32-51",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636155548237.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-07-39-08",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636155924633.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-07-45-24",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636156300070.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-07-51-40",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636156678307.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-07-57-58",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636212750524.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-23-32-30",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 200.3,
+        "dualmic": true,
+        "duration": 8218.392
+    },
+    "1636213128009.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-23-38-48",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636213504862.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-23-45-04",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636213882082.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-23-51-22",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636214258531.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-06-23-57-38",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636214635040.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-00-03-55",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636215011495.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-00-10-11",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636215387927.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-00-16-27",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636215764340.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-00-22-44",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636216140708.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-00-29-00",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636216517080.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-00-35-17",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636216893457.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-00-41-33",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636217270180.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-00-47-50",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636217646588.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-00-54-06",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636218022955.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-01-00-22",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636218399535.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-01-06-39",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636218776665.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-01-12-56",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636219153680.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-01-19-13",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636219530714.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-01-25-30",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636219907684.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-01-31-47",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636220284693.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-01-38-04",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636220661544.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-01-44-21",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636221037948.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-01-50-37",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636221414411.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-01-56-54",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636221791163.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-02-03-11",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636222168034.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-02-09-28",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636222545264.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-02-15-45",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636222922001.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-02-22-02",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636223298173.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-02-28-18",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636223675177.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-02-34-35",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636224051272.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-02-40-51",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636224428248.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-02-47-08",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636224805116.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-02-53-25",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636225182673.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-02-59-42",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636225558714.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-03-05-58",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 13183.618
+    },
+    "1636225936071.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-03-12-16",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 200.55,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636239311476.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-06-55-11",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.54,
+        "dualmic": true,
+        "duration": 13183.618
+    },
+    "1636239689008.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-07-01-29",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636240065442.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-07-07-45",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636240441978.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-07-14-01",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636240818347.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-07-20-18",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636241194849.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-07-26-34",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636241570519.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-07-32-50",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636241946635.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-07-39-06",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636242323115.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-07-45-23",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636242700030.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-07-51-40",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636243075291.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-07-57-55",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636243452287.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-08-04-12",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636243829556.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-08-10-29",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636244206088.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-08-16-46",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636244582742.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-08-23-02",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636244986743.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-08-29-46",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636245308778.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-08-35-08",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.19,
+        "dualmic": true,
+        "duration": 5970.496
+    },
+    "1636148422319.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-06-05-40-22",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636337043570.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-08-10-04-03",
+        "ble": "C9487A9D3966",
+        "mic_sr": 4000,
+        "imu_sr": 202.71,
+        "dualmic": true,
+        "duration": 1807.793
+    },
+    "1636337717777.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-08-10-15-17",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636295063872.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-22-24-23",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.98,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636295282785.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-22-28-02",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.64,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636295505264.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-22-31-45",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 201.29,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636295678093.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-22-34-38",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.36,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636295874885.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-22-37-54",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 28.54,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636296306920.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-22-45-06",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.74,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636296698494.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-22-51-38",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636297077063.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-22-57-57",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636297453629.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-23-04-13",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636297832846.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-23-10-32",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636298209467.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-23-16-49",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636298586067.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-23-23-06",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636298966582.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-23-29-26",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636299342176.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-23-35-42",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636299717780.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-23-41-57",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636300094606.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-23-48-14",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636300471119.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-07-23-54-31",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636300847355.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-00-00-47",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636301224804.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-00-07-04",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636301601783.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-00-13-21",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636301978952.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-00-19-38",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636302355773.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-00-25-55",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636302732725.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-00-32-12",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636303108693.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-00-38-28",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636303485692.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-00-44-45",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 8155.731
+    },
+    "1636303861762.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-00-51-01",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.96,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636327718099.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-07-28-38",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.2,
+        "dualmic": true,
+        "duration": 8155.731
+    },
+    "1636328095973.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-07-34-55",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636328472554.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-07-41-12",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636328852703.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-07-47-32",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636329229815.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-07-53-49",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636329606347.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-08-00-06",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636329983587.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-08-06-23",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636330371006.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-08-12-51",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636330771376.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-08-19-31",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636331213452.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-08-26-53",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.85,
+        "dualmic": true,
+        "duration": 3461.994
+    },
+    "1636331469928.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-08-31-09",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.43,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636331850145.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-08-37-30",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636332226668.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-08-08-43-46",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 1224.748
+    },
+    "1636439587342.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-09-14-33-07",
+        "ble": "FB613C01FCED",
+        "mic_sr": 4000,
+        "imu_sr": 203.13,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636458406228.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-09-19-46-46",
+        "ble": "FB613C01FCED",
+        "mic_sr": 4000,
+        "imu_sr": 202.99,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636531406714.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-10-16-03-26",
+        "ble": "FB613C01FCED",
+        "mic_sr": 4000,
+        "imu_sr": 203.16,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636673697980.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-12-07-34-57",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636895666455.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-14-21-14-26",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 200.56,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1637043203558.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-14-13-23",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 200.79,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1637043582819.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-14-19-42",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637043960518.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-14-26-00",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637044337946.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-14-32-17",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637044716051.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-14-38-36",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637045092927.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-14-44-52",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637045470092.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-14-51-10",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637045846192.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-14-57-26",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637046223862.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-15-03-43",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637046600495.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-15-10-00",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637046977449.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-15-16-17",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637047353915.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-15-22-33",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637047730004.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-15-28-50",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637048107244.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-15-35-07",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637048483957.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-15-41-23",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637048859823.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-15-47-39",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637049236412.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-15-53-56",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637049612362.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-16-00-12",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637049988552.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-16-06-28",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637050365311.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-16-16-12-45",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637125642203.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-13-07-22",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 201.01,
+        "dualmic": true,
+        "duration": 7239.47
+    },
+    "1637126020776.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-13-13-40",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637126397916.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-13-19-57",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637126774649.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-13-26-14",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637127152061.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-13-32-32",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637127528653.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-13-38-48",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637127906282.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-13-45-06",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637128284075.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-13-51-24",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637128660946.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-13-57-40",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637129038257.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-14-03-58",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637129415522.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-14-10-15",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637129793093.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-14-16-33",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637130170698.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-14-22-50",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637130547744.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-14-29-07",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637130924644.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-14-35-24",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637131301808.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-14-41-41",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637131678464.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-14-47-58",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637132055535.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-14-54-15",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637132431558.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-15-00-31",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637132808779.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-15-06-48",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637133185743.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-15-13-05",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637133562602.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-15-19-22",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637133939762.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-15-25-39",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637134315553.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-15-31-55",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637134692447.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-15-38-12",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637135068534.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-15-44-28",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637135445549.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-17-15-50-45",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637214070038.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-13-41-10",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 201.14,
+        "dualmic": true,
+        "duration": 10068.721
+    },
+    "1637214448362.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-13-47-28",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637214828400.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-13-53-48",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637215206688.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-14-00-06",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637215583632.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-14-06-23",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637215961945.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-14-12-41",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637216339498.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-14-18-59",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637216747804.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-14-25-47",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637217125609.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-14-32-05",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637217502901.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-14-38-22",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637217879178.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-14-44-39",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637218256825.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-14-50-56",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637218633532.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-14-57-13",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637219010070.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-15-03-30",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637219386620.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-15-09-46",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637219763849.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-15-16-03",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637220140418.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-15-22-20",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637220517753.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-15-28-37",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637220893955.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-15-34-53",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637221270519.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-15-41-10",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637221646692.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-15-47-26",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637222023526.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-15-53-43",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637222400723.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-16-00-00",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1637222776665.sx": {
+        "user_srcdir": "AOIS3T~5",
+        "recTime": "2021-11-18-16-06-16",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636899266499.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-14-22-14-26",
+        "ble": "EBBD3458C1E1",
+        "mic_sr": 4000,
+        "imu_sr": 200.2,
+        "dualmic": true,
+        "duration": 9081.239
+    },
+    "1636922088059.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-15-04-34-48",
+        "ble": "EBBD3458C1E1",
+        "mic_sr": 4000,
+        "imu_sr": 199.16,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636922205800.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-15-04-36-45",
+        "ble": "EBBD3458C1E1",
+        "mic_sr": 4000,
+        "imu_sr": 199.05,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636922585418.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-15-04-43-05",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636922964016.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-15-04-49-24",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636923154318.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-15-04-52-34",
+        "ble": "C9487A9D3966",
+        "mic_sr": 4000,
+        "imu_sr": 202.67,
+        "dualmic": true,
+        "duration": 949.018
+    },
+    "1636923538087.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-15-04-58-58",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636923918496.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-15-05-05-18",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636924298345.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-15-05-11-38",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636924679311.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-15-05-17-59",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636925060023.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-15-05-24-20",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636925440875.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-15-05-30-40",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636925822205.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-15-05-37-02",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636925956989.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-15-05-39-16",
+        "ble": "C9487A9D3966",
+        "mic_sr": 4000,
+        "imu_sr": 202.31,
+        "dualmic": true,
+        "duration": 2762.862
+    },
+    "1637052336965.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-16-16-45-36",
+        "ble": "C5E9A78BADB8",
+        "mic_sr": 4000,
+        "imu_sr": 102.05,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1637337466206.sx": {
+        "user_srcdir": "AO7G2X~7",
+        "recTime": "2021-11-19-23-57-46",
+        "ble": "EBBD3458C1E1",
+        "mic_sr": 4000,
+        "imu_sr": 199.82,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636759989965.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-07-33-09",
+        "ble": "E7544941C9C3",
+        "mic_sr": 4000,
+        "imu_sr": 199.39,
+        "dualmic": true,
+        "duration": 0
+    },
+    "1636760367610.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-07-39-27",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636760743953.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-07-45-43",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636761120805.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-07-52-00",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636761498934.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-07-58-18",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636761875250.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-08-04-35",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636762252098.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-08-10-52",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636762628253.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-08-17-08",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636788779185.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-15-32-59",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 3074.976
+    },
+    "1636789159928.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-15-39-19",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636789538014.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-15-45-38",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636789915678.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-15-51-55",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636790297497.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-15-58-17",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636790674826.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-16-04-34",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636791050883.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-16-10-50",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 0
+    },
+    "1636791427419.sx": {
+        "user_srcdir": "A80PBY~0",
+        "recTime": "2021-11-13-16-17-07",
+        "ble": "",
+        "mic_sr": 0,
+        "imu_sr": 0,
+        "dualmic": false,
+        "duration": 2890.094
     }
 }
