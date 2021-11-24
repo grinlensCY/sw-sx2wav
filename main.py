@@ -561,7 +561,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20211101b')
+    print('version: 20211101c')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
@@ -610,6 +610,9 @@ if __name__ == "__main__":
     if not config['onlyChkTS']:
         if config['mergeNearby'] and len(fns)>1:
             fns,usersrcdirs = mergeSX(fns,usersrcdirs,last_merged_dict,sxdict)
+        [print(fn) for fn in fns]
+        if input('Enter:go  Others:quit '):
+            sys.exit()
         stop_flag = threading.Event()
         engine = Engine(datainfo,config,stopped_flag=stop_flag)
         t0 = time.time()
