@@ -164,7 +164,7 @@ class Engine:
             while not self.flag_checked_fileformat.wait(0.5):
                 cnt+=1
                 print('wait for receiving file format',cnt)
-                if cnt>10:
+                if cnt>20:
                     input(f'quit {os.path.basename(sx_fn)}, having waited for format check too long time')
                     print(f'quit {os.path.basename(sx_fn)}, having waited for format check too long time'
                           ,file=open('log.txt','a',newline=''))
