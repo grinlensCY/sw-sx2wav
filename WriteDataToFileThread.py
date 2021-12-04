@@ -27,6 +27,7 @@ class RecThread(threading.Thread):
         self.fullscale = fullscale
         self.isdualmic = isdualmic
         self.name = f'{job}_rec'
+        self.fn_errlog = f'{self.filename_prefix}-errlog.txt'
         if job == 'mic':
             self.filename_new.append(f'{self.filename_prefix}-audio-main01.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-env01.wav')
@@ -74,6 +75,8 @@ class RecThread(threading.Thread):
         emptyCnt = 0
         if self.job == 'mic':
             sr_PatchTS = int(1/0.016)
+            ts_diff_target = 0.016 / 4e-6
+            max_ts_diff = ts_diff_target*1.4
             with sf.SoundFile(self.filename_new[0], mode='x',
                                 samplerate=self.sampleRate, channels=self.channels,
                                 subtype=self.subtype_audio) as file0,\
@@ -102,20 +105,55 @@ class RecThread(threading.Thread):
                 cnt = 0
                 while not self._stop_event.is_set():
                     if not self.q.empty():
+                        msg = ''
                         tmp = self.q.get_nowait()
                         micdata = np.array(tmp[1:])/self.fullscale
                         # print('record ',micdata.shape)
-                        buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = micdata
-                        if t0 is None:
+                        if t0 is None:  # initial
                             t0 = tmp[0]
-                        elif tmp[0] < t0 or tmp[0] < tlast5[-1]:
+                            data_dim = len(micdata)
+                            pkglen = len(micdata[0])
+                            tlast5 = [0]
+                        tstmp = tmp[0] + toffset-t0
+                        if tmp[0] < t0 or tstmp < tlast5[-1]:    # ts was reset
+                            msg += (f'\n\t{self.job} ts was reset')
+                            msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}')
                             t0 = tmp[0]
-                            toffset = tlast5[-1]+np.mean(np.diff(tlast5))
+                            toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 else tlast5[-1]
+                        elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
+                            ts_diff_target = np.median(np.diff(tlast5))
+                            msg += (f'\n\tmic pkgloss at {tstmp*4e-6:.3f} {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}')
+                            msg += (f'\t{tstmp}({tstmp*4e-6:.3f}) - {tlast5[-1]}({tlast5[-1]*4e-6:.3f}) = {tstmp - tlast5[-1]}> {max_ts_diff}')
+                            add_cnt = 1
+                            while tstmp - tlast5[-1] > max_ts_diff:
+                                tstmp2 = tlast5[-1] + ts_diff_target
+                                tlast5 = np.r_[tlast5, tstmp2]
+                                if tlast5.size > 5:
+                                    tlast5 = tlast5[-5:]
+                                ts = tstmp2 * 4e-6
+                                msg += (f'\tadd {add_cnt} ts:{tstmp2} {ts:.3f}')
+                                add_cnt += 1
+
+                                buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = np.zeros((data_dim,seglen))
+                                # tstmp = tlast5[-1] + ts_diff_target + toffset-t0 
+                                # tlast5 = np.r_[tlast5, tstmp]
+                                # if tlast5.size > 5:
+                                #     tlast5 = tlast5[-5:]
+                                buffer_ts[cnt] = ts
+                                cnt += 1
+                                if cnt == seg_cnt:
+                                    for i,q in enumerate(buffer_mic):
+                                        fileList[i].write(q)
+                                    fileList[-1].write(buffer_ts)
+                                    cnt = 0
+                        if len(msg):
+                            print(msg, file=open(self.fn_errlog,'a',newline=''))
                         tstmp = tmp[0] + toffset-t0
                         tlast5 = np.r_[tlast5, tstmp]
                         if tlast5.size > 5:
                             tlast5 = tlast5[-5:]
                         buffer_ts[cnt] = (tstmp) * 4e-6
+                        buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = micdata
                         cnt += 1
                         if cnt == seg_cnt:
                             for i,q in enumerate(buffer_mic):
@@ -140,33 +178,34 @@ class RecThread(threading.Thread):
                             self.stop()
                         time.sleep(self.waitTime)
                         # break
-            # if self.isdualmic:
-            #     print(f'recording> remove({self.filename_new[2]})')
-            #     os.remove(self.filename_new[2])
-            #     print(f'recording> remove({self.filename_new[3]})')
-            #     os.remove(self.filename_new[3])
         elif self.job == 'sysinfo':
             t0 = None
             toffset = 0
-            tlast5 = np.array([],dtype='int64')
             with open(self.filename_new[0], 'a', newline='') as csvfile:
                 writer = csv.writer(csvfile, delimiter='\t')
                 # writer.writerow(['time','bat(%)','temperature(degC)','bat(mV)'])
                 writer.writerow(['time','fwVer','hwVer','bat(%)','temperature(degC)','ble','charging','bat(mV)','imuTemp(degC)'])
                 while not self._stop_event.is_set():
+                    msg = ''
                     hasData = False
                     try:
                         tmp = self.q.get(timeout=self.waitTime)
                         if t0 is None:
                             t0 = tmp[0]
-                        elif tmp[0] < t0 or tmp[0] < tlast5[-1]:
+                            tlast5 = [0]
+                        tstmp = tmp[0] + toffset-t0
+                        if tmp[0] < t0 or tstmp < tlast5[-1]:   # ts was reset
                             t0 = tmp[0]
-                            toffset = tlast5[-1]+np.mean(np.diff(tlast5))
-                        tmp[0] += toffset-t0
-                        tlast5 = np.r_[tlast5, tmp[0]]
+                            toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 else tlast5[-1]
+                            msg += (f'\n\t{self.job} ts was reset at')
+                            msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}')
+                        if len(msg):
+                            print(msg, file=open(self.fn_errlog,'a',newline=''))
+                        tstmp = tmp[0] + toffset-t0
+                        tlast5 = np.r_[tlast5, tstmp]
                         if tlast5.size > 5:
                             tlast5 = tlast5[-5:]
-                        tmp[0] *= 4e-6
+                        tmp[0] = tstmp * 4e-6
                         # print('sysinfo rec',tmp)
                         writer.writerow(tmp)
                         hasData |= True
@@ -180,14 +219,12 @@ class RecThread(threading.Thread):
                     if emptyCnt > 200:
                         print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
                         self.stop()
-        elif self.job != 'ecg' and self.job != 'sysinfo':
-            # duration_pkg_ts = 20/self.sampleRate/4e-6
-            # UL_duration_pkg = duration_pkg_ts*1.4
-            t0 = None
+        elif self.job != 'ecg':
             toffset = 0
-            tpre = 0
-            ts_interval = 20/self.sampleRate
-            ts_interval_fw = ts_interval/4e-6
+            pkglen = 20
+            ts_interval = pkglen/self.sampleRate
+            ts_diff_target = ts_interval/4e-6
+            max_ts_diff = ts_diff_target*1.4
             with sf.SoundFile(self.filename_new[0], mode='x',
                                 samplerate=self.sampleRate, channels=self.channels,
                                 subtype=self.subtype_NonAudio) as file0:
@@ -202,16 +239,45 @@ class RecThread(threading.Thread):
                 t0 = None # [None]#, None, None]
                 while not self._stop_event.is_set():
                     if not self.qMulti[0].empty():
+                        msg = ''
                         emptyCnt = 0
                         tmp = self.qMulti[0].get(timeout=0.02)
                         if t0 is None:
                             t0 = tmp[0]
-                        elif tmp[0] < t0 or tmp[0] < tpre :
+                            data_dim = len(tmp[1][0])
+                            pkglen = len(tmp[1])
+                            tlast5 = [0]
+                        tstmp = tmp[0] + toffset-t0
+                        if tmp[0] < t0 or tstmp < tlast5[-1] : # ts was reset
                             t0 = tmp[0]
-                            toffset = tpre + ts_interval_fw
-                        tmp[0] += toffset-t0
-                        tpre = tmp[0]
-                        ts = np.linspace(tmp[0], tmp[0]+ts_interval_fw, 20, endpoint=False) * 4e-6
+                            toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 else tlast5[-1]
+                            msg += (f'\n\t{self.job} ts was reset at {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}')
+                            msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}')
+                        elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
+                            ts_diff_target = np.median(np.diff(tlast5))
+                            msg += (f'\n\t{self.job} pkgloss at {tstmp*4e-6:.3f}')
+                            msg += (f'\t{tstmp}({tstmp*4e-6:.3f}) - {tlast5[-1]}({tlast5[-1]*4e-6:.3f}) = '
+                                    f'{tstmp - tlast5[-1]}> {max_ts_diff}')
+                            add_cnt = 1
+                            while tstmp - tlast5[-1] > max_ts_diff:
+                                tstmp2 = tlast5[-1] + ts_diff_target
+                                tlast5 = np.r_[tlast5, tstmp2]
+                                if tlast5.size > 5:
+                                    tlast5 = tlast5[-5:]
+                                ts = np.linspace(tstmp2, tstmp2+ts_diff_target, pkglen, endpoint=False) * 4e-6
+                                # msg += )f'\tadd {add_cnt} ts:{tstmp2} {ts[0]:.3f} {ts[-1]:.3f}')
+                                # msg += )f'\t{self.job} mean={np.mean(tmp[1],axis=0).reshape((3,1))}')
+                                fileList[0].write(
+                                    np.block([[ts],
+                                            [np.array(tmp[1])[0].reshape((3,1))*np.ones((data_dim,pkglen))/self.fullscale]]).T)
+                                add_cnt += 1
+                        if len(msg):
+                            print(msg, file=open(self.fn_errlog,'a',newline=''))
+                        tstmp = tmp[0] + toffset-t0
+                        tlast5 = np.r_[tlast5, tstmp]
+                        if tlast5.size > 5:
+                            tlast5 = tlast5[-5:]
+                        ts = np.linspace(tstmp, tstmp+ts_diff_target, pkglen, endpoint=False) * 4e-6
                         fileList[0].write(
                                     np.block([[ts],
                                             [np.array(list(tmp[1])).T/self.fullscale]]).T)
@@ -222,44 +288,6 @@ class RecThread(threading.Thread):
                             self.stop()
                         time.sleep(self.waitTime)
 
-                    # hasData = False
-                    # for i in range(1):
-                    #     # if not self.qMulti[i].empty():
-                    #     #     data[i].append(self.qMulti[i].get_nowait())
-                    #     # else:
-                    #     #     time.sleep(self.waitTime)
-                    #     try:
-                    #         data[i].append(self.qMulti[i].get(timeout=self.waitTime))
-                    #         hasData |= True
-                    #     except:
-                    #         # print(f'{self.job}: timeout while getting data of ch{i}')
-                    #         pass
-                    # if not hasData: emptyCnt += 1
-                    # if emptyCnt > 200:
-                    #     print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
-                    #     self.stop()
-                    # for i in range(1):
-                    #     if len(data[i])==2:
-                    #         # print(f'{self.job} ts={data[i][0][0]},{data[i][1][0]} len={len(data[i][0][1])},{len(data[i][1][1])}')
-                    #         # print(f'{self.job} len={len(data[i][0][1])},{len(data[i][1][1])}')
-                    #         if t0[i] is None:
-                    #             t0[i] = data[i][0][0]
-                    #         if 0 < data[i][1][0]-data[i][0][0] < UL_duration_pkg:
-                    #             ts = np.linspace(data[i][0][0]-t0[i], data[i][1][0]-t0[i],
-                    #                             len(data[i][0][1]), endpoint=False) * 4e-6
-                    #         else:
-                    #             ts = np.linspace(data[i][0][0]-t0[i], data[i][0][0]+duration_pkg_ts-t0[i],
-                    #                             len(data[i][0][1]), endpoint=False) * 4e-6
-                    #             if data[i][1][0]-data[i][0][0] < 0:
-                    #                 t0[i] += data[i][0][0]+duration_pkg_ts
-                    #         # print(f'{self.job}rec  {np.block([[ts], [np.array(list(data[i][0][1])).T]]).T.shape}')
-                    #         fileList[i].write(
-                    #             np.block([[ts],
-                    #                       [np.array(list(data[i][0][1])).T
-                    #                         /self.fullscale]])
-                    #             .T)
-                    #         del data[i][0]
-                            # print(f'ch{i}  ts={ts[0]:.6f}~{ts[-1]:.6f}sec  t0={t0[i]}')
         # elif self.job == 'ecg':
         #     with sf.SoundFile(self.filename_new[0], mode='x',
         #                         samplerate=self.sampleRate, channels=self.channels,
