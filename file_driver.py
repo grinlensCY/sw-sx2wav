@@ -33,12 +33,16 @@ class Driver:
             time.sleep(0.5)
             return
 
+        empty_cnt = 0
         while(flag.is_set()):
             try:
                 in_len=800
                 dat=fp.read(in_len)
+                empty_cnt = 0
             except:
                 time.sleep(0.5)
+                empty_cnt += 1
+                print('drv: read empty')
                 break
 
             in_len=len(dat)
@@ -48,7 +52,7 @@ class Driver:
             # time.sleep(0.018)
 
     def start(self):
-        self.stop()
+        self.stop('drv_start')
 
         self.thd_run_flag=threading.Event()
         self.thd_run_flag.set()
@@ -61,7 +65,7 @@ class Driver:
         self.thd.start()
         print('drv: start self.thd_run_flag:',self.thd_run_flag.is_set())
 
-    def stop(self):
+    def stop(self,typ=''):
         if(self.thd_run_flag is not None):
             self.thd_run_flag.clear()
             
@@ -74,7 +78,7 @@ class Driver:
         self.thd_run_flag=None
         self.thd=None
 
-        print('drv: stop')
+        print('drv: stop by',typ)
 
 if __name__ == "__main__":
     drv = Driver('./android_test_file/D2_6A_EF_C4_5E_0D/1614135882794.sx')
