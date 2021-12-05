@@ -1,3 +1,10 @@
+# 20211205
+
+1. 延長flag_checked_fileformat的waiting times，確保可以解出
+2. 修正ts was reset的條件
+3. 修正pkgloss的條件
+4. pkgloss時，能把資料數補0(audio) 或 最新封包的第一筆數值(
+
 # 20211101
 
 1. 以資料的package size與fw給的time stamp來更新imu sr(拿acc的結果來當作其他的)
