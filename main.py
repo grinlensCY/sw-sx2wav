@@ -343,13 +343,17 @@ class Engine:
         self.data_retriever.stop()
 
 
-def updateConfig(engine=None):
-    with open(f"{os.path.join(os.path.dirname(__file__),'config.json')}", 'r', encoding='utf-8-sig') as reader:
-        config = json.loads(reader.read())
-    if engine is not None:
-        engine.updateConfig(config)
-    print('update config')
-    return config
+def updateConfig(engine=None, config=None):
+    if config:
+        with open(f"{os.path.join(os.path.dirname(__file__),'config.json')}", 'w', encoding='utf-8-sig') as jout:
+            json.dump(config, jout, indent=4, ensure_ascii=False)
+    else:
+        with open(f"{os.path.join(os.path.dirname(__file__),'config.json')}", 'r', encoding='utf-8-sig') as reader:
+            config = json.loads(reader.read())
+        if engine is not None:
+            engine.updateConfig(config)
+        print('update config')
+        return config
 
 def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyChkTS=False, sx_dict={}):
     root = tk.Tk()
@@ -607,6 +611,9 @@ if __name__ == "__main__":
         fns = findFileset(datainfo, config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
                             onlyChkTS=config['onlyChkTS'],sx_dict=sxdict)
         usersrcdirs = [os.path.basename(os.path.dirname(fn)) for fn in fns]
+        if len(fns):
+            config['dirToloadFile'] = os.path.dirname(fns[0])
+            updateConfig(config=config)
     if not config['onlyChkTS']:
         if config['mergeNearby'] and len(fns)>1:
             fns,usersrcdirs = mergeSX(fns,usersrcdirs,last_merged_dict,sxdict)
