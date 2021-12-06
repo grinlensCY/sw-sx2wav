@@ -250,11 +250,11 @@ class RecThread(threading.Thread):
                         tstmp = tmp[0] + toffset-t0
                         if tmp[0] < t0 or tstmp < tlast5[-1] : # ts was reset
                             t0 = tmp[0]
-                            toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 else tlast5[-1]
+                            toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
                             msg += (f'\n\t{self.job} ts was reset at {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}')
                             msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}')
                         elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
-                            ts_diff_target = np.median(np.diff(tlast5))
+                            ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
                             msg += (f'\n\t{self.job} pkgloss at {tstmp*4e-6:.3f}')
                             msg += (f'\t{tstmp}({tstmp*4e-6:.3f}) - {tlast5[-1]}({tlast5[-1]*4e-6:.3f}) = '
                                     f'{tstmp - tlast5[-1]}> {max_ts_diff}')
