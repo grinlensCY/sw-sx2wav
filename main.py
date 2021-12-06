@@ -257,6 +257,7 @@ class Engine:
     def setRec(self,dstdir='',wavfnkw_ts=''):
         if not self.thd_rec_flag.is_set():
             dstfn_prefix = f'{dstdir}/{wavfnkw_ts}'
+            recT0 = time.mktime(time.strptime(wavfnkw_ts,"%Y-%m-%d-%H-%M-%S"))
             if os.path.exists(os.path.dirname(dstdir)):
                 existfns = [fn for fn in os.listdir(os.path.dirname(dstdir)) if wavfnkw_ts in fn]
             else:
@@ -274,12 +275,12 @@ class Engine:
                 self.recThd_audio = RecThread(self.datainfo['mic']['sr'],
                                             1, 0.04, dstfn_prefix, 'mic',
                                             self.datainfo['mic']['fullscale'],
-                                            self.flag_dualmic.is_set())
+                                            self.flag_dualmic.is_set(),recT0)
                 self.recThd_audio.start()
                 self.recThd_acc = RecThread(int(self.datainfo['acc']['sr']),
                                             4, 0.04, dstfn_prefix,'acc',
                                             self.datainfo['acc']['fullscale'],
-                                            self.flag_dualmic.is_set())
+                                            self.flag_dualmic.is_set(),recT0)
                 self.recThd_acc.start()
                 # self.recThd_ecg = RecThread(self.datainfo['ecg']['sr'],
                 #                             2, 0.01, dstfn_prefix, 'ecg',
@@ -288,21 +289,21 @@ class Engine:
                 self.recThd_gyro = RecThread(int(self.datainfo['gyro']['sr']),
                                             4, 0.04, dstfn_prefix, 'gyro',
                                             self.datainfo['gyro']['fullscale'],
-                                            self.flag_dualmic.is_set())
+                                            self.flag_dualmic.is_set(),recT0)
                 self.recThd_gyro.start()
                 self.recThd_mag = RecThread(int(self.datainfo['mag']['sr']),
                                             4, 0.04, dstfn_prefix, 'mag',
                                             self.datainfo['mag']['fullscale'],
-                                            self.flag_dualmic.is_set())
+                                            self.flag_dualmic.is_set(),recT0)
                 self.recThd_mag.start()
                 self.recThd_quaternion = RecThread(int(self.datainfo['quaternion']['sr']),
                                                 5, 0.04, dstfn_prefix, 'quaternion',
                                                 self.datainfo['quaternion']['fullscale'],
-                                            self.flag_dualmic.is_set())
+                                            self.flag_dualmic.is_set(),recT0)
                 self.recThd_quaternion.start()
             self.recThd_sysinfo = RecThread(1,
                                             3, 0.09, dstfn_prefix, 'sysinfo',
-                                            1)
+                                            1,recT0=recT0)
             self.recThd_sysinfo.start()
             self.thd_rec_flag.set()
             return True
@@ -565,7 +566,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20211205a')
+    print('version: 20211205b')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):

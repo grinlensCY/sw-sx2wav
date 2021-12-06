@@ -8,7 +8,7 @@ import numpy as np
 import csv
 
 class RecThread(threading.Thread):    
-    def __init__(self, sampleRate, channels, waitTime, fn_prefix, job, fullscale, isdualmic=False):
+    def __init__(self, sampleRate, channels, waitTime, fn_prefix, job, fullscale, isdualmic=False, recT0=None):
         #QtCore.QThread.__init__(self)
         super(RecThread, self).__init__()
         self.sampleRate = sampleRate
@@ -18,6 +18,7 @@ class RecThread(threading.Thread):
         self.qMulti = [queue.Queue() for i in range(3)]
         self._stop_event = threading.Event()
         # self.filename_prefix = f'{os.path.dirname(__file__)}/record/{fn_prefix}'
+        self.recT0 = recT0
         self.filename_prefix = fn_prefix
         self.filename_new = []
         self.daemon = True
@@ -28,6 +29,7 @@ class RecThread(threading.Thread):
         self.isdualmic = isdualmic
         self.name = f'{job}_rec'
         self.fn_errlog = f'{self.filename_prefix}-errlog.txt'
+        print('', file=open(self.fn_errlog,'w',newline=''))
         if job == 'mic':
             self.filename_new.append(f'{self.filename_prefix}-audio-main01.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-env01.wav')
@@ -108,6 +110,7 @@ class RecThread(threading.Thread):
                         msg = ''
                         tmp = self.q.get_nowait()
                         micdata = np.array(tmp[1:])/self.fullscale
+                        
                         # print('record ',micdata.shape)
                         if t0 is None:  # initial
                             t0 = tmp[0]
@@ -116,13 +119,15 @@ class RecThread(threading.Thread):
                             tlast5 = [0]
                         tstmp = tmp[0] + toffset-t0
                         if tmp[0] < t0 or tstmp < tlast5[-1]:    # ts was reset
-                            msg += (f'\n\t{self.job} ts was reset')
+                            msg += (f'\n{self.job} ts was reset {tstmp*4e-6:.3f}  '
+                                    f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
                             msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}')
                             t0 = tmp[0]
-                            toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 else tlast5[-1]
+                            toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
+
                         elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
-                            ts_diff_target = np.median(np.diff(tlast5))
-                            msg += (f'\n\tmic pkgloss at {tstmp*4e-6:.3f} {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}')
+                            ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
+                            msg += (f'\nmic pkgloss at {tstmp*4e-6:.3f} {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
                             msg += (f'\t{tstmp}({tstmp*4e-6:.3f}) - {tlast5[-1]}({tlast5[-1]*4e-6:.3f}) = {tstmp - tlast5[-1]}> {max_ts_diff}')
                             add_cnt = 1
                             while tstmp - tlast5[-1] > max_ts_diff:
@@ -133,7 +138,6 @@ class RecThread(threading.Thread):
                                 ts = tstmp2 * 4e-6
                                 msg += (f'\tadd {add_cnt} ts:{tstmp2} {ts:.3f}')
                                 add_cnt += 1
-
                                 buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = np.zeros((data_dim,seglen))
                                 # tstmp = tlast5[-1] + ts_diff_target + toffset-t0 
                                 # tlast5 = np.r_[tlast5, tstmp]
@@ -141,13 +145,19 @@ class RecThread(threading.Thread):
                                 #     tlast5 = tlast5[-5:]
                                 buffer_ts[cnt] = ts
                                 cnt += 1
+                                
                                 if cnt == seg_cnt:
                                     for i,q in enumerate(buffer_mic):
                                         fileList[i].write(q)
                                     fileList[-1].write(buffer_ts)
                                     cnt = 0
                         if len(msg):
-                            print(msg, file=open(self.fn_errlog,'a',newline=''))
+                            try:
+                                print(msg, file=open(self.fn_errlog,'a',newline=''))
+                            except Exception as e:
+                                print(e)
+                                time.sleep(0.01)
+                                print(msg, file=open(self.fn_errlog,'a',newline=''))
                         tstmp = tmp[0] + toffset-t0
                         tlast5 = np.r_[tlast5, tstmp]
                         if tlast5.size > 5:
@@ -196,11 +206,17 @@ class RecThread(threading.Thread):
                         tstmp = tmp[0] + toffset-t0
                         if tmp[0] < t0 or tstmp < tlast5[-1]:   # ts was reset
                             t0 = tmp[0]
-                            toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 else tlast5[-1]
-                            msg += (f'\n\t{self.job} ts was reset at')
+                            toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
+                            msg += (f'\n{self.job} ts was reset at {tstmp*4e-6:.3f}  '
+                                    f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
                             msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}')
                         if len(msg):
-                            print(msg, file=open(self.fn_errlog,'a',newline=''))
+                            try:
+                                print(msg, file=open(self.fn_errlog,'a',newline=''))
+                            except Exception as e:
+                                print(e)
+                                time.sleep(0.01)
+                                print(msg, file=open(self.fn_errlog,'a',newline=''))
                         tstmp = tmp[0] + toffset-t0
                         tlast5 = np.r_[tlast5, tstmp]
                         if tlast5.size > 5:
@@ -251,11 +267,13 @@ class RecThread(threading.Thread):
                         if tmp[0] < t0 or tstmp < tlast5[-1] : # ts was reset
                             t0 = tmp[0]
                             toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
-                            msg += (f'\n\t{self.job} ts was reset at {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())}')
+                            msg += (f'\n{self.job} ts was reset at {tstmp*4e-6:.3f}  '
+                                    f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
                             msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}')
                         elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
                             ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
-                            msg += (f'\n\t{self.job} pkgloss at {tstmp*4e-6:.3f}')
+                            msg += (f'\n{self.job} pkgloss at {tstmp*4e-6:.3f}  '
+                                    f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
                             msg += (f'\t{tstmp}({tstmp*4e-6:.3f}) - {tlast5[-1]}({tlast5[-1]*4e-6:.3f}) = '
                                     f'{tstmp - tlast5[-1]}> {max_ts_diff}')
                             add_cnt = 1
@@ -272,7 +290,12 @@ class RecThread(threading.Thread):
                                             [np.array(tmp[1])[0].reshape((3,1))*np.ones((data_dim,pkglen))/self.fullscale]]).T)
                                 add_cnt += 1
                         if len(msg):
-                            print(msg, file=open(self.fn_errlog,'a',newline=''))
+                            try:
+                                print(msg, file=open(self.fn_errlog,'a',newline=''))
+                            except Exception as e:
+                                print(e)
+                                time.sleep(0.01)
+                                print(msg, file=open(self.fn_errlog,'a',newline=''))
                         tstmp = tmp[0] + toffset-t0
                         tlast5 = np.r_[tlast5, tstmp]
                         if tlast5.size > 5:
