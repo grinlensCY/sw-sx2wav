@@ -458,7 +458,7 @@ class Protocol:
                     if emptyCnt > 50:
                         print('protocol empty cnt=',emptyCnt)
                         self.endingTX_callback()
-                    time.sleep(0.01)
+                    time.sleep(0.02)
 
             drv.stop()            
 
