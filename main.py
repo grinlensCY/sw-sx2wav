@@ -128,10 +128,15 @@ class Engine:
                 userdir = f"{self.config['dir_savSX']}/{userdir_kw}"
 
         if not dstdir:  # if can't find any folder matching the ble address or no assigned dir_Export
-            dstdir = (f"{self.srcdir}/"
-                        f'{self.bleaddr}/'
+            if self.bleaddr in self.srcdir:
+                dstdir = (f"{self.srcdir}/"
                         f'{str_date}')
-            userdir = f"{self.srcdir}/{self.bleaddr}/"
+                userdir = f"{self.srcdir}/"
+            else:
+                dstdir = (f"{self.srcdir}/"
+                            f'{self.bleaddr}/'
+                            f'{str_date}')
+                userdir = f"{self.srcdir}/{self.bleaddr}/"
         print(f'setRec: dstdir={dstdir}\nuserdir={userdir}')
         if not os.path.exists(dstdir):
             os.makedirs(dstdir)
