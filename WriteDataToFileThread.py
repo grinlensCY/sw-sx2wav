@@ -110,25 +110,26 @@ class RecThread(threading.Thread):
                         msg = ''
                         tmp = self.q.get_nowait()
                         micdata = np.array(tmp[1:])/self.fullscale
-                        
-                        # print('record ',micdata.shape)
                         if t0 is None:  # initial
                             t0 = tmp[0]
                             data_dim = len(micdata)
                             pkglen = len(micdata[0])
-                            tlast5 = [0]
+                            tlast5 = np.array([0],dtype='uint32')
                         tstmp = tmp[0] + toffset-t0
-                        if tmp[0] < t0 or tstmp < tlast5[-1]:    # ts was reset
-                            msg += (f'\n{self.job} ts was reset {tstmp*4e-6:.3f}  '
-                                    f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
-                            msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}')
+                        if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0:    # ts was reset
+                            msg += (f'\n{self.job} ts was reset because ')
+                            msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}  ')
+                            msg += f'tlast5={tlast5}  toffset={toffset}\n'
                             t0 = tmp[0]
                             toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
-
+                            tstmp = tmp[0] + toffset-t0
+                            msg += (f'\corrected t0={t0}  toffset={toffset} tstmp={tstmp*4e-6:.3f} = '
+                                    f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
                         elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
                             ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
                             msg += (f'\nmic pkgloss at {tstmp*4e-6:.3f} {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
-                            msg += (f'\t{tstmp}({tstmp*4e-6:.3f}) - {tlast5[-1]}({tlast5[-1]*4e-6:.3f}) = {tstmp - tlast5[-1]}> {max_ts_diff}')
+                            msg += (f'\t{tstmp}({tstmp*4e-6:.3f}) - {tlast5[-1]}({tlast5[-1]*4e-6:.3f})'
+                                    f' = {tstmp - tlast5[-1]}={(tstmp - tlast5[-1])*4e-6:.2f}sec > {max_ts_diff}')
                             add_cnt = 1
                             while tstmp - tlast5[-1] > max_ts_diff:
                                 tstmp2 = tlast5[-1] + ts_diff_target
@@ -136,16 +137,11 @@ class RecThread(threading.Thread):
                                 if tlast5.size > 5:
                                     tlast5 = tlast5[-5:]
                                 ts = tstmp2 * 4e-6
-                                msg += (f'\tadd {add_cnt} ts:{tstmp2} {ts:.3f}')
+                                # msg += (f'\tadd {add_cnt} ts:{tstmp2} {ts:.3f}')
                                 add_cnt += 1
                                 buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = np.zeros((data_dim,seglen))
-                                # tstmp = tlast5[-1] + ts_diff_target + toffset-t0 
-                                # tlast5 = np.r_[tlast5, tstmp]
-                                # if tlast5.size > 5:
-                                #     tlast5 = tlast5[-5:]
                                 buffer_ts[cnt] = ts
                                 cnt += 1
-                                
                                 if cnt == seg_cnt:
                                     for i,q in enumerate(buffer_mic):
                                         fileList[i].write(q)
@@ -202,14 +198,17 @@ class RecThread(threading.Thread):
                         tmp = self.q.get(timeout=self.waitTime)
                         if t0 is None:
                             t0 = tmp[0]
-                            tlast5 = [0]
+                            tlast5 = np.array([0],dtype='uint32')
                         tstmp = tmp[0] + toffset-t0
-                        if tmp[0] < t0 or tstmp < tlast5[-1]:   # ts was reset
+                        if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0:   # ts was reset
+                            msg += (f'\n{self.job} ts was reset because ')
+                            msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}  ')
+                            msg += f'tlast5={tlast5}  toffset={toffset}\n'
                             t0 = tmp[0]
                             toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
-                            msg += (f'\n{self.job} ts was reset at {tstmp*4e-6:.3f}  '
+                            tstmp = tmp[0] + toffset-t0
+                            msg += (f'\corrected t0={t0}  toffset={toffset} tstmp={tstmp*4e-6:.3f} = '
                                     f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
-                            msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}')
                         if len(msg):
                             try:
                                 print(msg, file=open(self.fn_errlog,'a',newline=''))
@@ -262,20 +261,23 @@ class RecThread(threading.Thread):
                             t0 = tmp[0]
                             data_dim = len(tmp[1][0])
                             pkglen = len(tmp[1])
-                            tlast5 = [0]
+                            tlast5 = np.array([0],dtype='uint32')
                         tstmp = tmp[0] + toffset-t0
-                        if tmp[0] < t0 or tstmp < tlast5[-1] : # ts was reset
+                        if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0: # ts was reset
+                            msg += (f'\n{self.job} ts was reset because')
+                            msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}  ')
+                            msg += f'tlast5={tlast5}  toffset={toffset}\n'
                             t0 = tmp[0]
                             toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
-                            msg += (f'\n{self.job} ts was reset at {tstmp*4e-6:.3f}  '
+                            tstmp = tmp[0] + toffset-t0
+                            msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={tstmp*4e-6:.3f} = '
                                     f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
-                            msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}')
                         elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
                             ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
                             msg += (f'\n{self.job} pkgloss at {tstmp*4e-6:.3f}  '
                                     f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
-                            msg += (f'\t{tstmp}({tstmp*4e-6:.3f}) - {tlast5[-1]}({tlast5[-1]*4e-6:.3f}) = '
-                                    f'{tstmp - tlast5[-1]}> {max_ts_diff}')
+                            msg += (f'\t{tstmp}({tstmp*4e-6:.3f}) - {tlast5[-1]}({tlast5[-1]*4e-6:.3f})'
+                                    f' = {tstmp - tlast5[-1]}={(tstmp - tlast5[-1])*4e-6:.2f}sec > {max_ts_diff}')
                             add_cnt = 1
                             while tstmp - tlast5[-1] > max_ts_diff:
                                 tstmp2 = tlast5[-1] + ts_diff_target
@@ -283,12 +285,17 @@ class RecThread(threading.Thread):
                                 if tlast5.size > 5:
                                     tlast5 = tlast5[-5:]
                                 ts = np.linspace(tstmp2, tstmp2+ts_diff_target, pkglen, endpoint=False) * 4e-6
-                                # msg += )f'\tadd {add_cnt} ts:{tstmp2} {ts[0]:.3f} {ts[-1]:.3f}')
-                                # msg += )f'\t{self.job} mean={np.mean(tmp[1],axis=0).reshape((3,1))}')
                                 fileList[0].write(
                                     np.block([[ts],
                                             [np.array(tmp[1])[0].reshape((3,1))*np.ones((data_dim,pkglen))/self.fullscale]]).T)
                                 add_cnt += 1
+                        tstmp = tmp[0] + toffset-t0
+                        # if tstmp < 0 or tlast5[-1] < 0:
+                        #     msg += (f'{self.job} before tlast5({tlast5[-1]}) < 0 at {tstmp*4e-6} tstmp={tstmp}  tmp[0]={tmp[0]}  toffset={toffset}  t0={t0}\n')
+                        tlast5 = np.r_[tlast5, tstmp]
+                        # if tlast5[-1] < 0:
+                        #     msg += (f'{self.job} after tlast5({tlast5[-1]}) < 0 at {tstmp*4e-6} tstmp={tstmp}  tmp[0]={tmp[0]}  toffset={toffset}  t0={t0}\n')
+                        #     tlast5[-1] = tstmp
                         if len(msg):
                             try:
                                 print(msg, file=open(self.fn_errlog,'a',newline=''))
@@ -296,8 +303,6 @@ class RecThread(threading.Thread):
                                 print(e)
                                 time.sleep(0.01)
                                 print(msg, file=open(self.fn_errlog,'a',newline=''))
-                        tstmp = tmp[0] + toffset-t0
-                        tlast5 = np.r_[tlast5, tstmp]
                         if tlast5.size > 5:
                             tlast5 = tlast5[-5:]
                         ts = np.linspace(tstmp, tstmp+ts_diff_target, pkglen, endpoint=False) * 4e-6
