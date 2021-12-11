@@ -29,7 +29,7 @@ class RecThread(threading.Thread):
         self.isdualmic = isdualmic
         self.name = f'{job}_rec'
         self.fn_errlog = f'{self.filename_prefix}-errlog.txt'
-        print('', file=open(self.fn_errlog,'w',newline=''))
+        # print('', file=open(self.fn_errlog,'w',newline=''))
         if job == 'mic':
             self.filename_new.append(f'{self.filename_prefix}-audio-main01.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-env01.wav')
@@ -61,6 +61,11 @@ class RecThread(threading.Thread):
 
     def stopped(self):
         return self._stop_event.is_set()
+
+    def hhmmss(self, sec):
+        h, r = divmod(sec, 3600)
+        m, s = divmod(r, 60)
+        return f'{h:02.0f}:{m:02.0f}:{s:02.0f}'
     
     def addData(self, data, ch=None):
         if ch is None:
@@ -103,7 +108,6 @@ class RecThread(threading.Thread):
                 buffer_mic = np.zeros((data_dim,seglen*seg_cnt),dtype=np.float64)
                 buffer_ts = np.zeros(seg_cnt,dtype=np.float64)
                 toffset = 0
-                tlast5 = np.array([],dtype='int64')
                 cnt = 0
                 while not self._stop_event.is_set():
                     if not self.q.empty():
@@ -151,7 +155,7 @@ class RecThread(threading.Thread):
                             try:
                                 print(msg, file=open(self.fn_errlog,'a',newline=''))
                             except Exception as e:
-                                print(e)
+                                print(f'{self.job}: {e}')
                                 time.sleep(0.01)
                                 print(msg, file=open(self.fn_errlog,'a',newline=''))
                         tstmp = tmp[0] + toffset-t0
@@ -213,7 +217,7 @@ class RecThread(threading.Thread):
                             try:
                                 print(msg, file=open(self.fn_errlog,'a',newline=''))
                             except Exception as e:
-                                print(e)
+                                print(f'{self.job}: {e}')
                                 time.sleep(0.01)
                                 print(msg, file=open(self.fn_errlog,'a',newline=''))
                         tstmp = tmp[0] + toffset-t0
@@ -300,7 +304,7 @@ class RecThread(threading.Thread):
                             try:
                                 print(msg, file=open(self.fn_errlog,'a',newline=''))
                             except Exception as e:
-                                print(e)
+                                print(f'{self.job}: {e}')
                                 time.sleep(0.01)
                                 print(msg, file=open(self.fn_errlog,'a',newline=''))
                         if tlast5.size > 5:
@@ -349,6 +353,8 @@ class RecThread(threading.Thread):
         #                     del data[i][0]
         
         print(f'Stop recording {self.job}')
+        for fn in self.filename_new:
+            print('finish recording',fn)
         # for i,f in enumerate(fileList):
         #     print(f'is {self.job} file{i} closed? {f.closed}')
         # time.sleep(self.waitTime)

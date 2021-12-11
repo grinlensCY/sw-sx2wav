@@ -361,6 +361,11 @@ def updateConfig(engine=None, config=None):
         print('update config')
         return config
 
+def hhmmss(sec):
+    h, r = divmod(sec, 3600)
+    m, s = divmod(r, 60)
+    return f'{h:02.0f}:{m:02.0f}:{s:02.0f}'
+
 def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyChkTS=False, sx_dict={}):
     root = tk.Tk()
     root.withdraw()
@@ -401,7 +406,8 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
     for fn in fns:
         ts = float(os.path.basename(fn)[:-3])/1000
         recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
-        print(f'{os.path.basename(fn)}  recording time:{recTime}')
+        print((f'{os.path.basename(fn)}  recording start at:{recTime}  '
+                f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}'))
         sx_dict[os.path.basename(fn)] = {'user_srcdir':user_srcdir,
                                             'recTime':recTime,
                                             'ble':'',
@@ -526,9 +532,10 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 last_merged_dict[first_user].append(basefn)
                 cum_sxData += buf
                 cum_logdata['stop_ts'] = log['stop_ts']
-                cum_logdata['evt'].extend(log['evt'])
-                cum_logdata['hr'].extend(log['hr'])
-                cum_logdata['fm'].extend(log['fm'])
+                if config["dirList_load_S3zip"]:
+                    cum_logdata['evt'].extend(log['evt'])
+                    cum_logdata['hr'].extend(log['hr'])
+                    cum_logdata['fm'].extend(log['fm'])
                 cum_cnt += 1
                 cum_duration += (log['stop_ts']-log['start_ts'])
                 if config['delSX']:
@@ -571,7 +578,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20211205b')
+    print('version: 20211205c')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
@@ -642,6 +649,7 @@ if __name__ == "__main__":
                 continue
             ts = float(os.path.basename(fn)[:-3])/1000
             recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+            print(f'{fn} was converted!')
             datainfo['recTime'] = recTime
             datainfo['sxfn'] = os.path.basename(fn)
             if userdirkw:
