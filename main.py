@@ -149,10 +149,10 @@ class Engine:
         ts = float(os.path.basename(sx_fn)[:-3])/1000
         self.flag_ble_addr.clear()
         print(f'\nrecording time:{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}')
-        print('sx_fn: ', sx_fn)
+        print('chk_files_format sx_fn: ', sx_fn)
         # fnstr = sx_fn.split("/")[-2:] if len(sx_fn.split("/"))>1 else sx_fn.split("\\")[-2:]
         # self.input = '_'.join(fnstr)
-        if self.srcdir and sx_fn.endswith('sx'):
+        if self.srcdir and (sx_fn.endswith('sx') or sx_fn.endswith('sxr')) :
             drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
             self.data_retriever = PRO.Protocol(drv,'sxFile')
@@ -245,7 +245,7 @@ class Engine:
         print('sx_fn: ', sx_fn)
         fnstr = sx_fn.split("/")[-2:] if len(sx_fn.split("/"))>1 else sx_fn.split("\\")[-2:]
         self.input = '_'.join(fnstr)
-        if self.srcdir and sx_fn.endswith('sx'):
+        if self.srcdir and (sx_fn.endswith('sx') or sx_fn.endswith('sxr')):
             drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
             self.data_retriever = PRO.Protocol(drv,'sxFile')
@@ -371,13 +371,13 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
     root.withdraw()
 
     srcdir = config['dirToloadFile'] if not srcdir else srcdir
-    tfn = filedialog.askopenfilename(initialdir=sdir,filetypes=[("SX File",(f"*{kw}*.sx",f"*{kw}*.zip"))])
+    tfn = filedialog.askopenfilename(initialdir=sdir,filetypes=[("SX File",(f"*{kw}*.sxr",f"*{kw}*.sx",f"*{kw}*.zip"))])
     if not tfn:
         return ''
     srcdir = os.path.dirname(tfn)
     if loadall:
         fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
-                if fn.endswith('.sx') or fn.endswith('.zip')]
+                if fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip')]
         if not onlyChkTS:
             for fn in fns:
                 if fn.endswith('zip'):
@@ -388,7 +388,7 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                                 # myzip.extract(zipfn,path=srcdir)
                                 myzip.extractall(path=srcdir)
             fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
-                    if fn.endswith('.sx')]
+                    if fn.endswith('.sxr') or fn.endswith('.sx')]
     else:
         if tfn.endswith('zip'):
             with ZipFile(tfn) as myzip:
@@ -503,8 +503,9 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
     cum_duration = 0
     for i,fn in enumerate(sxfns):
         basefn = os.path.basename(fn)
-        if os.path.exists(fn.replace(".sx",".log")):
-            with open(fn.replace(".sx",".log"), 'r', newline='') as jf:
+        logfn = fn.replace(".sxr",".log").replace(".sx",".log")
+        if os.path.exists(logfn):
+            with open(logfn, 'r', newline='') as jf:
                 log = json.loads(jf.read())
         else:
             new_sxfns.append(fn)
@@ -541,13 +542,15 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 if config['delSX']:
                     print('mergeSX: remove',fn,'of',userlist[i])
                     os.remove(fn)
-                    os.remove(fn.replace(".sx",".log"))
-                if fn == sxfns[-1] or not os.path.exists(sxfns[i+1].replace(".sx",".log")):
+                    os.remove(logfn)
+                if (fn == sxfns[-1]
+                        or (not os.path.exists(sxfns[i+1].replace(".sx",".log"))
+                            and not os.path.exists(sxfns[i+1].replace(".sxr",".log")))):
                     print((f'merging {merged_sxfns} into\n\t{os.path.basename(first_sxfn)}'
                             f'({first_user}: {cum_cnt} files,{cum_duration/1000/60:.2f}min)'))
                     with open(first_sxfn, "wb") as f:
                         f.write(cum_sxData)
-                    with open(first_sxfn.replace(".sx",".log"), 'w', newline='') as jf:
+                    with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='') as jf:
                         json.dump(cum_logdata, jf, ensure_ascii=False)
                     sx_dict[basefn]['duration'] = cum_duration/1000
             else:
@@ -557,7 +560,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                     sx_dict[basefn]['duration'] = cum_duration/1000
                     with open(first_sxfn, "wb") as f:
                         f.write(cum_sxData)
-                    with open(first_sxfn.replace(".sx",".log"), 'w', newline='') as jf:
+                    with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='') as jf:
                         json.dump(cum_logdata, jf, ensure_ascii=False)
                     merged_sxfns = []
                     cum_duration = 0
@@ -578,7 +581,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20211205c')
+    print('version: 20211205d')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):

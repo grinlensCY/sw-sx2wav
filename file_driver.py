@@ -12,6 +12,9 @@ class Driver:
 
         self.rx_queue=queue.Queue()
 
+        self.isSXR = True if file_path.endswith('sxr') else False
+        print('sx file drv: isSXR?',self.isSXR)
+
     def write(self,ba):
         pass
 

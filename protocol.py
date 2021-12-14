@@ -85,7 +85,7 @@ class Protocol:
     def __init__(self,drv,name):
         self.driver=drv
 
-        if(type(drv) is FD.Driver):
+        if(type(drv) is FD.Driver and not drv.isSXR):
             self.read_file_mode=True
         else:
             self.read_file_mode=False
@@ -455,8 +455,8 @@ class Protocol:
                 if(not is_busy):
                     # print('protocol not is_busy, emptyCnt=',emptyCnt)
                     emptyCnt += 1
-                    if emptyCnt > 50:
-                        print('protocol empty cnt=',emptyCnt)
+                    if emptyCnt > 200 and self.rx_queue.empty():
+                        print(f'protocol empty cnt={emptyCnt}  rxq_size={self.rx_queue.qsize()}')
                         self.endingTX_callback()
                     time.sleep(0.02)
 
