@@ -3,7 +3,8 @@
 1. 延長flag_checked_fileformat的waiting times，確保可以解出
 2. 修正ts was reset的條件
 3. 修正pkgloss的條件
-4. pkgloss時，能把資料數補0(audio) 或 最新封包的第一筆數值(
+4. pkgloss時，能把資料數補0(audio) 或 最新封包的第一筆數值(not audio)
+5. 可以讀sxr(剛從drv.read()讀進來的資料)
 
 # 20211101
 
