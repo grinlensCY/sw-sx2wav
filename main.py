@@ -1,4 +1,4 @@
-import os,threading,time,json
+import os,threading,time,json,shutil
 import shutil
 import file_driver as FD
 from package_handler import PackageHandler
@@ -525,6 +525,11 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
             cum_cnt = 1
             cum_duration += (log['stop_ts']-log['start_ts'])
             print(f'first sx/user: {os.path.basename(first_sxfn)} / {first_user}')
+            if first_sxfn.endswith('sxr'):
+                shutil.copy2(first_sxfn,first_sxfn.replace(".sxr","_orig.sxr"))
+            else:
+                shutil.copy2(first_sxfn,first_sxfn.replace(".sx","_orig.sx"))
+            shutil.copy2(logfn,logfn.replace(".log","_orig.log"))
             last_merged_dict[first_user] = [basefn]
         else:
             interval = log['start_ts'] - last_stop_ts
@@ -539,7 +544,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                     cum_logdata['fm'].extend(log['fm'])
                 cum_cnt += 1
                 cum_duration += (log['stop_ts']-log['start_ts'])
-                if config['delSX']:
+                cum_logdata['duration'] = cum_duration/1000
+                if config['delSX'] and not config['dirList_load_S3zip']:
                     print('mergeSX: remove',fn,'of',userlist[i])
                     os.remove(fn)
                     os.remove(logfn)
@@ -558,6 +564,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                     print((f'merging {merged_sxfns} into\n\t{os.path.basename(first_sxfn)}'
                             f'({cum_cnt} files,{cum_duration/1000/60:.2f}min)'))
                     sx_dict[basefn]['duration'] = cum_duration/1000
+                    cum_logdata['duration'] = cum_duration/1000
                     with open(first_sxfn, "wb") as f:
                         f.write(cum_sxData)
                     with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='') as jf:
@@ -640,6 +647,9 @@ if __name__ == "__main__":
         engine = Engine(datainfo,config,stopped_flag=stop_flag)
         t0 = time.time()
         for i,fn in enumerate(fns):
+            if os.path.getsize(fn)/20000 < 20:
+                print(fn,'data duration maybe less than 20sec --> skip!\n')
+                continue
             stop_flag.clear()
             userdirkw = usersrcdirs[i] if len(usersrcdirs) else ''
             thisdict = sxdict[os.path.basename(fn)] if len(sxdict) else {}
@@ -672,7 +682,7 @@ if __name__ == "__main__":
             with open(wavdictfn, 'w', newline='') as wavjson:
                 json.dump(wavdict, wavjson, indent=4, ensure_ascii=False)
 
-            if config['delSX']:
+            if config['delSX'] and not config['dirList_load_S3zip']:    # not to del sx in manual mode
                 os.remove(fn)
                 print('remove sx',os.path.basename(fn))
             elif (config['moveSX'] and config['dirList_load_S3zip']) and bleaddr:
