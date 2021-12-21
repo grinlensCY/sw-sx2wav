@@ -517,6 +517,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
         if not last_stop_ts:
             first_sxfn = fn
+            first_sxbasefn = os.path.basename(fn)
             first_user = userlist[i]
             cum_sxData = buf
             cum_logdata = log
@@ -558,12 +559,12 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                         f.write(cum_sxData)
                     with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='') as jf:
                         json.dump(cum_logdata, jf, ensure_ascii=False)
-                    sx_dict[basefn]['duration'] = cum_duration/1000
+                    sx_dict[first_sxbasefn]['duration'] = cum_duration/1000
             else:
                 if cum_cnt > 1:
                     print((f'merging {merged_sxfns} into\n\t{os.path.basename(first_sxfn)}'
                             f'({cum_cnt} files,{cum_duration/1000/60:.2f}min)'))
-                    sx_dict[basefn]['duration'] = cum_duration/1000
+                    sx_dict[first_sxbasefn]['duration'] = cum_duration/1000
                     cum_logdata['duration'] = cum_duration/1000
                     with open(first_sxfn, "wb") as f:
                         f.write(cum_sxData)
@@ -574,6 +575,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                     
                 cum_cnt = 1
                 first_sxfn = fn
+                first_sxbasefn = os.path.basename(fn)
                 first_user = userlist[i]
                 new_sxfns.append(fn)
                 new_userlist.append(userlist[i])
@@ -588,7 +590,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20211205d')
+    print('version: 20211205e')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
@@ -608,7 +610,8 @@ if __name__ == "__main__":
                 'dualmic':False,
                 'user_srcdir':'',
                 'recTime':'',
-                'sxfn':''}
+                'sxfn':'',
+                'duration':0}
     kw = ''
     sxdict = {}
     usersrcdirs = []
@@ -678,7 +681,8 @@ if __name__ == "__main__":
                                 'micsr': datainfo["mic"]["sr"],
                                 'imusr': datainfo["acc"]["sr"],
                                 'dualmic':isdualmic,
-                                'sxfn': datainfo['sxfn']}
+                                'sxfn': datainfo['sxfn'],
+                                'duration': sxdict[datainfo['sxfn']]['duration']}
             with open(wavdictfn, 'w', newline='') as wavjson:
                 json.dump(wavdict, wavjson, indent=4, ensure_ascii=False)
 
