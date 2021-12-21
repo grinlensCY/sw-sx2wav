@@ -406,15 +406,20 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
     for fn in fns:
         ts = float(os.path.basename(fn)[:-3])/1000
         recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
-        print((f'{os.path.basename(fn)}  recording start at:{recTime}  '
-                f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}'))
+        msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
+                f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+        print(msg)
         sx_dict[os.path.basename(fn)] = {'user_srcdir':user_srcdir,
                                             'recTime':recTime,
                                             'ble':'',
                                             'mic_sr':0,
                                             'imu_sr':0,
                                             'dualmic':False,
-                                            'duration':0}
+                                            'duration':os.path.getsize(fn)/20000,
+                                            'duration_hhmmss':hhmmss(os.path.getsize(fn)/20000)}
+    fn_log = f'{srcdir}/{time.strftime("%Y-%m-%d", time.localtime())}.log'
+    with open(fn_log, 'w') as jout:
+        json.dump(sxdict, jout, indent=4, ensure_ascii=False)
     if len(fns) == 1:
         datainfo['recTime'] = recTime
         datainfo['sxfn'] = fns[0]
