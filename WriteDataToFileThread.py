@@ -123,7 +123,7 @@ class RecThread(threading.Thread):
                         if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0:    # ts was reset
                             msg += (f'\n{self.job} ts was reset because ')
                             msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}  ')
-                            msg += f'tlast5={tlast5}  toffset={toffset}\n'
+                            msg += f'tlast5[-3:]={tlast5[-3:]}  toffset={toffset}\n'
                             t0 = tmp[0]
                             toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
                             tstmp = tmp[0] + toffset-t0
@@ -207,11 +207,11 @@ class RecThread(threading.Thread):
                         if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0:   # ts was reset
                             msg += (f'\n{self.job} ts was reset because ')
                             msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}  ')
-                            msg += f'tlast5={tlast5}  toffset={toffset}\n'
+                            msg += f'tlast5[-3:]={tlast5[-3:]}  toffset={toffset}\n'
                             t0 = tmp[0]
                             toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
                             tstmp = tmp[0] + toffset-t0
-                            msg += (f'\corrected t0={t0}  toffset={toffset} tstmp={tstmp*4e-6:.3f} = '
+                            msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={tstmp*4e-6:.3f} = '
                                     f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
                         if len(msg):
                             try:

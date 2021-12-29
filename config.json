@@ -1,5 +1,5 @@
 ﻿{
-    "dirToloadFile": "G:/My Drive/Experiment/compilation/FJ_baby/9m/ECCF7D5AC784/20211206",
+    "dirToloadFile": "C:/Users/chenyikuo/Downloads/tmp",
     "//dirToloadFile": "G:/My Drive/Code/sx2wav/test_files",
     "dirList_load_S3zip": "",
     "//dirList_load_S3zip": [
@@ -17,7 +17,7 @@
         20211123,
         20221231
     ],
-    "load_all_sx": 0,
+    "load_all_sx": 10,
     "mergeNearby": 10,
     "dir_Export": "G:/My Drive/Experiment/compilation/在家受測者",
     "fj_dir_kw": [

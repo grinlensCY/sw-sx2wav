@@ -1,4 +1,5 @@
 import os,threading,time,json,shutil
+from posixpath import basename
 import shutil
 import file_driver as FD
 from package_handler import PackageHandler
@@ -137,6 +138,8 @@ class Engine:
                             f'{self.bleaddr}/'
                             f'{str_date}')
                 userdir = f"{self.srcdir}/{self.bleaddr}/"
+        dstdir = dstdir.replace('/merged','')
+        userdir = userdir.replace('/merged','')
         print(f'setRec: dstdir={dstdir}\nuserdir={userdir}')
         if not os.path.exists(dstdir):
             os.makedirs(dstdir)
@@ -215,7 +218,7 @@ class Engine:
             # self.srcdir = os.path.dirname(sx_fn)
             dstdir,wavfnkw_ts,userdir,dstdir2,userdir2 = self.getDstdir(sx_fn,userdir_kw)
             # = log
-            log_srcfn = sx_fn.replace("sx","log")
+            log_srcfn = sx_fn.replace("sxr","log").replace("sx","log")
             log_dstfn = f'{dstdir}/{wavfnkw_ts}.log'
             if os.path.exists(log_srcfn) and not os.path.exists(log_dstfn):
                 print('move log to',log_dstfn)
@@ -506,6 +509,9 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
     merged_sxfns = []
     cum_cnt = 0
     cum_duration = 0
+    sxpool = os.path.dirname(sxfns[0])+'/merged'
+    if not os.path.exists(sxpool):
+        os.makedirs(sxpool)
     for i,fn in enumerate(sxfns):
         basefn = os.path.basename(fn)
         logfn = fn.replace(".sxr",".log").replace(".sx",".log")
@@ -513,29 +519,30 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
             with open(logfn, 'r', newline='') as jf:
                 log = json.loads(jf.read())
         else:
-            new_sxfns.append(fn)
+            new_sxfns.append(f'{sxpool}/{basefn}')
             new_userlist.append(userlist[i])
             continue
         
         with open(fn, 'rb') as f:
             buf = f.read()
 
-        if not last_stop_ts:
-            first_sxfn = fn
+        if not last_stop_ts:    # first of sxfns
+            first_sxfn = f'{sxpool}/{basefn}'
+            shutil.copy2(fn,first_sxfn)
             first_sxbasefn = os.path.basename(fn)
             first_user = userlist[i]
             cum_sxData = buf
             cum_logdata = log
-            new_sxfns.append(fn)
+            new_sxfns.append(first_sxfn)
             new_userlist.append(userlist[i])
             cum_cnt = 1
             cum_duration += (log['stop_ts']-log['start_ts'])
-            print(f'first sx/user: {os.path.basename(first_sxfn)} / {first_user}')
-            if first_sxfn.endswith('sxr'):
-                shutil.copy2(first_sxfn,first_sxfn.replace(".sxr","_orig.sxr"))
-            else:
-                shutil.copy2(first_sxfn,first_sxfn.replace(".sx","_orig.sx"))
-            shutil.copy2(logfn,logfn.replace(".log","_orig.log"))
+            print(f'first sx/user: {first_sxbasefn} / {first_user}')
+            # if first_sxfn.endswith('sxr'):
+            #     shutil.copy2(first_sxfn,first_sxfn.replace(".sxr","_orig.sxr"))
+            # else:
+            #     shutil.copy2(first_sxfn,first_sxfn.replace(".sx","_orig.sx"))
+            # shutil.copy2(logfn,logfn.replace(".log","_orig.log"))
             last_merged_dict[first_user] = [basefn]
         else:
             interval = log['start_ts'] - last_stop_ts
@@ -577,16 +584,19 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                         json.dump(cum_logdata, jf, ensure_ascii=False)
                     merged_sxfns = []
                     cum_duration = 0
-                    
+                # == another first_sxfn  
                 cum_cnt = 1
-                first_sxfn = fn
+                first_sxfn = f'{sxpool}/{basefn}'
+                shutil.copy2(fn,first_sxfn)
                 first_sxbasefn = os.path.basename(fn)
                 first_user = userlist[i]
-                new_sxfns.append(fn)
+                new_sxfns.append(first_sxfn)
                 new_userlist.append(userlist[i])
                 cum_sxData = buf
                 cum_logdata = log
                 cum_duration += (log['stop_ts']-log['start_ts'])
+                with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='') as jf:
+                    json.dump(cum_logdata, jf, ensure_ascii=False)
                 print(f'first sx/user: {os.path.basename(first_sxfn)} / {first_user}')
                 last_merged_dict[first_user] = [basefn]
         last_stop_ts = log['stop_ts']
@@ -595,7 +605,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20211205e')
+    print('version: 20211205f')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
@@ -648,7 +658,7 @@ if __name__ == "__main__":
     if not config['onlyChkTS']:
         if config['mergeNearby'] and len(fns)>1:
             fns,usersrcdirs = mergeSX(fns,usersrcdirs,last_merged_dict,sxdict)
-        [print(fn) for fn in fns]
+        [print('going to converting',fn) for fn in fns]
         if input('Enter:go  Others:quit '):
             sys.exit()
         stop_flag = threading.Event()
@@ -687,7 +697,8 @@ if __name__ == "__main__":
                                 'imusr': datainfo["acc"]["sr"],
                                 'dualmic':isdualmic,
                                 'sxfn': datainfo['sxfn'],
-                                'duration': sxdict[datainfo['sxfn']]['duration']}
+                                'duration': sxdict[datainfo['sxfn']]['duration'],
+                                'duration_hhmmss': sxdict[datainfo['sxfn']]['duration_hhmmss']}
             with open(wavdictfn, 'w', newline='') as wavjson:
                 json.dump(wavdict, wavjson, indent=4, ensure_ascii=False)
 
