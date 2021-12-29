@@ -1,5 +1,4 @@
 import os,threading,time,json,shutil
-from posixpath import basename
 import shutil
 import file_driver as FD
 from package_handler import PackageHandler
@@ -667,6 +666,8 @@ if __name__ == "__main__":
         for i,fn in enumerate(fns):
             if os.path.getsize(fn)/20000 < 20:
                 print(fn,'data duration maybe less than 20sec --> skip!\n')
+                os.remove(fn)
+                os.remove(fn.replace('sxr','log').replace('sx','log'))
                 continue
             stop_flag.clear()
             userdirkw = usersrcdirs[i] if len(usersrcdirs) else ''
@@ -702,7 +703,7 @@ if __name__ == "__main__":
             with open(wavdictfn, 'w', newline='') as wavjson:
                 json.dump(wavdict, wavjson, indent=4, ensure_ascii=False)
 
-            if config['delSX'] and not config['dirList_load_S3zip']:    # not to del sx in manual mode
+            if config['delSX']:    # not to del sx in manual mode
                 os.remove(fn)
                 print('remove sx',os.path.basename(fn))
             elif (config['moveSX'] and config['dirList_load_S3zip']) and bleaddr:
