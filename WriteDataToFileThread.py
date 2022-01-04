@@ -29,7 +29,9 @@ class RecThread(threading.Thread):
         self.isdualmic = isdualmic
         self.name = f'{job}_rec'
         self.fn_errlog = f'{self.filename_prefix}-errlog.txt'
-        # print('', file=open(self.fn_errlog,'w',newline=''))
+        self.fn_ts_t0_mic = f'{self.filename_prefix}-ts_t0_mic.txt'
+        self.fn_ts_t0_acc = f'{self.filename_prefix}-ts_t0_acc.txt'
+        print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'w',newline=''))
         if job == 'mic':
             self.filename_new.append(f'{self.filename_prefix}-audio-main01.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-env01.wav')
@@ -119,6 +121,8 @@ class RecThread(threading.Thread):
                             data_dim = len(micdata)
                             pkglen = len(micdata[0])
                             tlast5 = np.array([0],dtype='uint32')
+                            msg = f'{self.job},t0_fw={t0},pkglen={micdata[0].size}'
+                            print(msg, file=open(self.fn_ts_t0_mic,'w',newline=''))
                         tstmp = tmp[0] + toffset-t0
                         if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0:    # ts was reset
                             msg += (f'\n{self.job} ts was reset because ')
@@ -266,6 +270,9 @@ class RecThread(threading.Thread):
                             data_dim = len(tmp[1][0])
                             pkglen = len(tmp[1])
                             tlast5 = np.array([0],dtype='uint32')
+                            if self.job == 'acc':
+                                msg = f'{self.job},t0_fw={t0},pkglen={len(tmp[1])}'
+                                print(msg, file=open(self.fn_ts_t0_acc,'w',newline=''))
                         tstmp = tmp[0] + toffset-t0
                         if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0: # ts was reset
                             msg += (f'\n{self.job} ts was reset because')
@@ -278,7 +285,7 @@ class RecThread(threading.Thread):
                                     f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
                         elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
                             ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
-                            msg += (f'\n{self.job} pkgloss at {tstmp*4e-6:.3f}  '
+                            msg += (f'\n\t{self.job} pkgloss at {tstmp*4e-6:.3f} '
                                     f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
                             msg += (f'\t{tstmp}({tstmp*4e-6:.3f}) - {tlast5[-1]}({tlast5[-1]*4e-6:.3f})'
                                     f' = {tstmp - tlast5[-1]}={(tstmp - tlast5[-1])*4e-6:.2f}sec > {max_ts_diff}')
