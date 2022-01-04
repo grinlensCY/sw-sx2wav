@@ -737,6 +737,6 @@ if __name__ == "__main__":
                     json.dump(sxdict, jout, indent=4, ensure_ascii=False)
         time.sleep(3)
         if len(sxpool) and config['delmergedSX']:
-            os.remove(sxpool)
+            shutil.rmtree(sxpool)
 
     print('threading.active=',threading.active_count(),threading.enumerate())
