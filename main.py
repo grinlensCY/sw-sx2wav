@@ -599,12 +599,12 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 print(f'first sx/user: {os.path.basename(first_sxfn)} / {first_user}')
                 last_merged_dict[first_user] = [basefn]
         last_stop_ts = log['stop_ts']
-    return new_sxfns,new_userlist
+    return new_sxfns,new_userlist,sxpool
     
 
 if __name__ == "__main__":
     import sys
-    print('version: 20211205f')
+    print('version: 20211205g')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
@@ -655,8 +655,9 @@ if __name__ == "__main__":
             config['dirToloadFile'] = os.path.dirname(fns[0])
             updateConfig(config=config)
     if not config['onlyChkTS']:
+        sxpool = ''
         if config['mergeNearby'] and len(fns)>1:
-            fns,usersrcdirs = mergeSX(fns,usersrcdirs,last_merged_dict,sxdict)
+            fns,usersrcdirs,sxpool = mergeSX(fns,usersrcdirs,last_merged_dict,sxdict)
         [print('going to converting',fn) for fn in fns]
         if input('Enter:go  Others:quit '):
             sys.exit()
@@ -703,7 +704,7 @@ if __name__ == "__main__":
             with open(wavdictfn, 'w', newline='') as wavjson:
                 json.dump(wavdict, wavjson, indent=4, ensure_ascii=False)
 
-            if config['delSX']:    # not to del sx in manual mode
+            if config['delSX']:
                 os.remove(fn)
                 print('remove sx',os.path.basename(fn))
             elif (config['moveSX'] and config['dirList_load_S3zip']) and bleaddr:
@@ -735,5 +736,7 @@ if __name__ == "__main__":
                 with open(fn_log, 'w') as jout:
                     json.dump(sxdict, jout, indent=4, ensure_ascii=False)
         time.sleep(3)
+        if len(sxpool) and config['delmergedSX']:
+            os.remove(sxpool)
 
     print('threading.active=',threading.active_count(),threading.enumerate())

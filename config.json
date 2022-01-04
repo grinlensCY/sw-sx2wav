@@ -38,5 +38,6 @@
     "onlyMovelog": 0,
     "overwrite": 0,
     "delSX": 0,
+    "delmergedSX": 10,
     "moveSX": 0
 }
