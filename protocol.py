@@ -82,7 +82,7 @@ class Protocol:
     CMD_TYPE_TX_POWER                =0xCE
     CMD_TYPE_ECHO                    =0xCF
 
-    def __init__(self,drv,name):
+    def __init__(self,drv,name,skipPkgCnt):
         self.driver=drv
 
         if(type(drv) is FD.Driver and not drv.isSXR):
@@ -112,6 +112,9 @@ class Protocol:
         self.pre_statistic_ts=0
         self.data_spd=0
         self.interval_data_amount=0
+
+        self.pkgcnt = 0
+        self.skipPkgCnt = skipPkgCnt
 
         '''
         static uint8_t protocol_iv_key[16] = {'S', 'i', 'r', 'i', 'u', 'X', 'e', 'n', 
@@ -330,6 +333,9 @@ class Protocol:
         return out_ba
 
     def decry_and_prase_to_pkg(self,ba):#without header and footer
+        self.pkgcnt += 1
+        if self.pkgcnt < self.skipPkgCnt:
+            return None
         pkg_len=len(ba)
         cxt_len=struct.unpack('<H',ba[0:2])[0]
 

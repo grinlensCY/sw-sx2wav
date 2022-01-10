@@ -157,7 +157,7 @@ class Engine:
         if self.srcdir and (sx_fn.endswith('sx') or sx_fn.endswith('sxr')) :
             drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
-            self.data_retriever = PRO.Protocol(drv,'sxFile')
+            self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'])
             self.data_retriever.set_sys_info_handler(pkg_handler)
             self.data_retriever.set_mic_data_handler(pkg_handler)
             self.data_retriever.set_imu_data_handler(pkg_handler)
@@ -250,7 +250,7 @@ class Engine:
         if self.srcdir and (sx_fn.endswith('sx') or sx_fn.endswith('sxr')):
             drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
-            self.data_retriever = PRO.Protocol(drv,'sxFile')
+            self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'])
             self.data_retriever.set_sys_info_handler(pkg_handler)
             self.data_retriever.set_mic_data_handler(pkg_handler)
             self.data_retriever.set_imu_data_handler(pkg_handler)
@@ -282,35 +282,35 @@ class Engine:
                 self.recThd_audio = RecThread(self.datainfo['mic']['sr'],
                                             1, 0.04, dstfn_prefix, 'mic',
                                             self.datainfo['mic']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0)
+                                            self.flag_dualmic.is_set(),recT0,config)
                 self.recThd_audio.start()
                 self.recThd_acc = RecThread(int(self.datainfo['acc']['sr']),
                                             4, 0.04, dstfn_prefix,'acc',
                                             self.datainfo['acc']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0)
+                                            self.flag_dualmic.is_set(),recT0,config)
                 self.recThd_acc.start()
                 # self.recThd_ecg = RecThread(self.datainfo['ecg']['sr'],
                 #                             2, 0.01, dstfn_prefix, 'ecg',
-                #                             self.datainfo['ecg']['fullscale'])
+                #                             self.datainfo['ecg']['fullscale'],config)
                 # self.recThd_ecg.start()
                 self.recThd_gyro = RecThread(int(self.datainfo['gyro']['sr']),
                                             4, 0.04, dstfn_prefix, 'gyro',
                                             self.datainfo['gyro']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0)
+                                            self.flag_dualmic.is_set(),recT0,config)
                 self.recThd_gyro.start()
                 self.recThd_mag = RecThread(int(self.datainfo['mag']['sr']),
                                             4, 0.04, dstfn_prefix, 'mag',
                                             self.datainfo['mag']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0)
+                                            self.flag_dualmic.is_set(),recT0,config)
                 self.recThd_mag.start()
                 self.recThd_quaternion = RecThread(int(self.datainfo['quaternion']['sr']),
                                                 5, 0.04, dstfn_prefix, 'quaternion',
                                                 self.datainfo['quaternion']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0)
+                                            self.flag_dualmic.is_set(),recT0,config)
                 self.recThd_quaternion.start()
             self.recThd_sysinfo = RecThread(1,
                                             3, 0.09, dstfn_prefix, 'sysinfo',
-                                            1,recT0=recT0)
+                                            1,recT0=recT0,config=config)
             self.recThd_sysinfo.start()
             self.thd_rec_flag.set()
             return True
@@ -508,27 +508,41 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
     merged_sxfns = []
     cum_cnt = 0
     cum_duration = 0
-    sxpool = os.path.dirname(sxfns[0])+'/merged'
+    sxpool = os.path.dirname(sxfns[0])+'/merged' if not config['onlytst0'] else os.path.dirname(sxfns[0])
+    mergelog_fn = f'{sxpool}/merge.log'
+    if os.path.exists(mergelog_fn):
+        with open(mergelog_fn,'r',newline='') as jf:
+            mergelog = json.loads(jf.read())
+    else:
+        mergelog = {}
     if not os.path.exists(sxpool):
         os.makedirs(sxpool)
     for i,fn in enumerate(sxfns):
         basefn = os.path.basename(fn)
         logfn = fn.replace(".sxr",".log").replace(".sx",".log")
+        print(f'\treading {basefn}')
         if os.path.exists(logfn):
             with open(logfn, 'r', newline='') as jf:
                 log = json.loads(jf.read())
         else:
             new_sxfns.append(f'{sxpool}/{basefn}')
+            if not config['onlytst0']:
+                shutil.copy2(fn,new_sxfns[-1])
             new_userlist.append(userlist[i])
             continue
         
+        if basefn in mergelog and mergelog[basefn]:
+            continue
+        else:
+            mergelog[basefn] = False
         with open(fn, 'rb') as f:
             buf = f.read()
 
         if not last_stop_ts:    # first of sxfns
             first_sxfn = f'{sxpool}/{basefn}'
-            shutil.copy2(fn,first_sxfn)
-            first_sxbasefn = os.path.basename(fn)
+            if not config['onlytst0']:
+                shutil.copy2(fn,first_sxfn)
+            first_sxbasefn = basefn
             first_user = userlist[i]
             cum_sxData = buf
             cum_logdata = log
@@ -546,6 +560,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
         else:
             interval = log['start_ts'] - last_stop_ts
             if userlist[i] == first_user and interval <= 5000:  # the same user and interval < 5sec
+                if config['onlytst0']:
+                    continue
                 merged_sxfns.append(basefn)
                 last_merged_dict[first_user].append(basefn)
                 cum_sxData += buf
@@ -571,8 +587,11 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                     with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='') as jf:
                         json.dump(cum_logdata, jf, ensure_ascii=False)
                     sx_dict[first_sxbasefn]['duration'] = cum_duration/1000
+                    merged_sxfns.append(first_sxbasefn)
+                    for fn in merged_sxfns:
+                        mergelog[fn] = True
             else:
-                if cum_cnt > 1:
+                if cum_cnt > 1 and not config['onlytst0']:
                     print((f'merging {merged_sxfns} into\n\t{os.path.basename(first_sxfn)}'
                             f'({cum_cnt} files,{cum_duration/1000/60:.2f}min)'))
                     sx_dict[first_sxbasefn]['duration'] = cum_duration/1000
@@ -581,16 +600,22 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                         f.write(cum_sxData)
                     with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='') as jf:
                         json.dump(cum_logdata, jf, ensure_ascii=False)
-                    merged_sxfns = []
-                    cum_duration = 0
+                merged_sxfns.append(first_sxbasefn)
+                for sfn in merged_sxfns:
+                    mergelog[sfn] = True
+                merged_sxfns = []
+                cum_duration = 0
                 # == another first_sxfn  
                 cum_cnt = 1
                 first_sxfn = f'{sxpool}/{basefn}'
-                shutil.copy2(fn,first_sxfn)
+                if not config['onlytst0']:
+                    shutil.copy2(fn,first_sxfn)
                 first_sxbasefn = os.path.basename(fn)
                 first_user = userlist[i]
                 new_sxfns.append(first_sxfn)
                 new_userlist.append(userlist[i])
+                if config['onlytst0']:
+                    continue
                 cum_sxData = buf
                 cum_logdata = log
                 cum_duration += (log['stop_ts']-log['start_ts'])
@@ -599,12 +624,14 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 print(f'first sx/user: {os.path.basename(first_sxfn)} / {first_user}')
                 last_merged_dict[first_user] = [basefn]
         last_stop_ts = log['stop_ts']
+        with open(mergelog_fn,'w',newline='') as jf:
+            json.dump(mergelog, jf, indent=4, ensure_ascii=False)
     return new_sxfns,new_userlist,sxpool
     
 
 if __name__ == "__main__":
     import sys
-    print('version: 20211205g')
+    print('version: 20220110a')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
@@ -668,7 +695,9 @@ if __name__ == "__main__":
             if os.path.getsize(fn)/20000 < 20:
                 print(fn,'data duration maybe less than 20sec --> skip!\n')
                 os.remove(fn)
-                os.remove(fn.replace('sxr','log').replace('sx','log'))
+                logfn = fn.replace('sxr','log').replace('sx','log')
+                if os.path.exists(logfn):
+                    os.remove(logfn)
                 continue
             stop_flag.clear()
             userdirkw = usersrcdirs[i] if len(usersrcdirs) else ''
@@ -736,7 +765,7 @@ if __name__ == "__main__":
                 with open(fn_log, 'w') as jout:
                     json.dump(sxdict, jout, indent=4, ensure_ascii=False)
         time.sleep(3)
-        if len(sxpool) and config['delmergedSX']:
+        if not config['onlytst0'] and len(sxpool) and config['delmergedSX']:
             shutil.rmtree(sxpool)
 
     print('threading.active=',threading.active_count(),threading.enumerate())

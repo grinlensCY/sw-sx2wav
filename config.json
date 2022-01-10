@@ -36,8 +36,10 @@
     "onlylog": 0,
     "//onlyMovelog": "only rename and move log to dstdir",
     "onlyMovelog": 0,
+    "onlytst0": 0,
     "overwrite": 0,
     "delSX": 0,
     "delmergedSX": 10,
     "moveSX": 0
+    "skipPkgCnt": 10
 }
