@@ -197,7 +197,11 @@ class PackageHandler:
             self.pkg_len = len(dat[idx])
             sr = None
         else:
-            sr = self.pkg_len / ((dat[0]-self.pre_ts_pkg)*4e-6)
+            sr = self.pkg_len / ((dat[0]-self.pre_ts_pkg)/self.engine.ts_Hz)
+            if sr > 230:
+                print(f'PackageHandler: {name} sr={sr:.2f}Hz > 230 --> update ts_Hz {self.engine.ts_Hz} ==> 32768')
+                self.engine.ts_Hz = 32768
+                sr = self.pkg_len / ((dat[0]-self.pre_ts_pkg)/self.engine.ts_Hz)
             print(f'PackageHandler: {name} sr={sr:.2f}Hz  data_len={self.pkg_len}')
             self.pre_ts_pkg = dat[0]
             self.pkg_len = len(dat[idx])

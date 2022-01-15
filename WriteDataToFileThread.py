@@ -8,7 +8,7 @@ import numpy as np
 import csv
 
 class RecThread(threading.Thread):    
-    def __init__(self, sampleRate, channels, waitTime, fn_prefix, job, fullscale, isdualmic=False, recT0=None, config={}):
+    def __init__(self, sampleRate, channels, waitTime, fn_prefix, job, fullscale, isdualmic=False, recT0=None, config={}, ts_Hz=32768):
         #QtCore.QThread.__init__(self)
         super(RecThread, self).__init__()
         self.sampleRate = sampleRate
@@ -32,6 +32,7 @@ class RecThread(threading.Thread):
         self.fn_ts_t0_mic = f'{self.filename_prefix}-ts_t0_mic.txt'
         self.fn_ts_t0_acc = f'{self.filename_prefix}-ts_t0_acc.txt'
         self.config = config
+        self.ts_Hz = ts_Hz
         print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'a',newline=''))
         if job == 'mic':
             self.filename_new.append(f'{self.filename_prefix}-audio-main01.wav')
@@ -103,7 +104,7 @@ class RecThread(threading.Thread):
                         time.sleep(self.waitTime)
             else:
                 sr_PatchTS = int(1/0.016)
-                ts_diff_target = 0.016 / 4e-6
+                ts_diff_target = 0.016 * self.ts_Hz
                 max_ts_diff = ts_diff_target*1.4
                 with sf.SoundFile(self.filename_new[0], mode='x',
                                     samplerate=self.sampleRate, channels=self.channels,
@@ -149,20 +150,20 @@ class RecThread(threading.Thread):
                                 t0 = tmp[0]
                                 toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
                                 tstmp = tmp[0] + toffset-t0
-                                msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={tstmp*4e-6:.3f} = '
-                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
+                                msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={tstmp/self.ts_Hz:.3f} = '
+                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp/self.ts_Hz))}')
                             elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
                                 ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
-                                msg += (f'\nmic pkgloss at {tstmp*4e-6:.3f} {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
-                                msg += (f'\t{tstmp}({tstmp*4e-6:.3f}) - {tlast5[-1]}({tlast5[-1]*4e-6:.3f})'
-                                        f' = {tstmp - tlast5[-1]}={(tstmp - tlast5[-1])*4e-6:.2f}sec > {max_ts_diff}')
+                                msg += (f'\nmic pkgloss at {tstmp/self.ts_Hz:.3f} {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp/self.ts_Hz))}')
+                                msg += (f'\t{tstmp}({tstmp/self.ts_Hz:.3f}) - {tlast5[-1]}({tlast5[-1]/self.ts_Hz:.3f})'
+                                        f' = {tstmp - tlast5[-1]}={(tstmp - tlast5[-1])/self.ts_Hz:.2f}sec > {max_ts_diff}')
                                 add_cnt = 1
                                 while tstmp - tlast5[-1] > max_ts_diff:
                                     tstmp2 = tlast5[-1] + ts_diff_target
                                     tlast5 = np.r_[tlast5, tstmp2]
                                     if tlast5.size > 5:
                                         tlast5 = tlast5[-5:]
-                                    ts = tstmp2 * 4e-6
+                                    ts = tstmp2 / self.ts_Hz
                                     # msg += (f'\tadd {add_cnt} ts:{tstmp2} {ts:.3f}')
                                     add_cnt += 1
                                     buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = np.zeros((data_dim,seglen))
@@ -184,7 +185,7 @@ class RecThread(threading.Thread):
                             tlast5 = np.r_[tlast5, tstmp]
                             if tlast5.size > 5:
                                 tlast5 = tlast5[-5:]
-                            buffer_ts[cnt] = (tstmp) * 4e-6
+                            buffer_ts[cnt] = (tstmp) / self.ts_Hz
                             buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = micdata
                             cnt += 1
                             if cnt == seg_cnt:
@@ -194,7 +195,7 @@ class RecThread(threading.Thread):
                                 cnt = 0
                             # if t0 is None:
                             #     t0 = tmp[0]
-                            # ts = (tmp[0]-t0) * 4e-6
+                            # ts = (tmp[0]-t0) / self.ts_Hz
                             # for i,q in enumerate(micdata):
                             #     fileList[i].write(q)  # block=True, timeout=0.05
                             # fileList[-1].write(ts)
@@ -237,8 +238,8 @@ class RecThread(threading.Thread):
                                 t0 = tmp[0]
                                 toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
                                 tstmp = tmp[0] + toffset-t0
-                                msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={tstmp*4e-6:.3f} = '
-                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
+                                msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={tstmp/self.ts_Hz:.3f} = '
+                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp/self.ts_Hz))}')
                             if len(msg):
                                 try:
                                     print(msg, file=open(self.fn_errlog,'a',newline=''))
@@ -250,7 +251,7 @@ class RecThread(threading.Thread):
                             tlast5 = np.r_[tlast5, tstmp]
                             if tlast5.size > 5:
                                 tlast5 = tlast5[-5:]
-                            tmp[0] = tstmp * 4e-6
+                            tmp[0] = tstmp / self.ts_Hz
                             # print('sysinfo rec',tmp)
                             writer.writerow(tmp)
                             hasData |= True
@@ -308,7 +309,7 @@ class RecThread(threading.Thread):
                                 pkglen = len(tmp[1])
                                 tlast5 = np.array([0],dtype='uint32')
                                 ts_interval = pkglen/self.sampleRate
-                                ts_diff_target = ts_interval/4e-6
+                                ts_diff_target = ts_interval*self.ts_Hz
                                 max_ts_diff = ts_diff_target*1.4
                                 if self.job == 'acc':
                                     msg = f'{self.job},t0_fw={t0},pkglen={len(tmp[1])}'
@@ -321,31 +322,31 @@ class RecThread(threading.Thread):
                                 t0 = tmp[0]
                                 toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
                                 tstmp = tmp[0] + toffset-t0
-                                msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={tstmp*4e-6:.3f} = '
-                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
+                                msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={tstmp/self.ts_Hz:.3f} = '
+                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp/self.ts_Hz))}')
                             elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
                                 ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
-                                msg += (f'\n\t{self.job} pkgloss at {tstmp*4e-6:.3f} '
-                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp*4e-6))}')
-                                msg += (f'\t{tstmp}({tstmp*4e-6:.3f}) - {tlast5[-1]}({tlast5[-1]*4e-6:.3f})'
-                                        f' = {tstmp - tlast5[-1]}={(tstmp - tlast5[-1])*4e-6:.2f}sec > {max_ts_diff}')
+                                msg += (f'\n\t{self.job} pkgloss at {tstmp/self.ts_Hz:.3f} '
+                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp/self.ts_Hz))}')
+                                msg += (f'\t{tstmp}({tstmp/self.ts_Hz:.3f}) - {tlast5[-1]}({tlast5[-1]/self.ts_Hz:.3f})'
+                                        f' = {tstmp - tlast5[-1]}={(tstmp - tlast5[-1])/self.ts_Hz:.2f}sec > {max_ts_diff}')
                                 add_cnt = 1
                                 while tstmp - tlast5[-1] > max_ts_diff:
                                     tstmp2 = tlast5[-1] + ts_diff_target
                                     tlast5 = np.r_[tlast5, tstmp2]
                                     if tlast5.size > 5:
                                         tlast5 = tlast5[-5:]
-                                    ts = np.linspace(tstmp2, tstmp2+ts_diff_target, pkglen, endpoint=False) * 4e-6
+                                    ts = np.linspace(tstmp2, tstmp2+ts_diff_target, pkglen, endpoint=False) / self.ts_Hz
                                     fileList[0].write(
                                         np.block([[ts],
                                                 [np.array(tmp[1])[0].reshape((3,1))*np.ones((data_dim,pkglen))/self.fullscale]]).T)
                                     add_cnt += 1
                             tstmp = tmp[0] + toffset-t0
                             # if tstmp < 0 or tlast5[-1] < 0:
-                            #     msg += (f'{self.job} before tlast5({tlast5[-1]}) < 0 at {tstmp*4e-6} tstmp={tstmp}  tmp[0]={tmp[0]}  toffset={toffset}  t0={t0}\n')
+                            #     msg += (f'{self.job} before tlast5({tlast5[-1]}) < 0 at {tstmp/self.ts_Hz} tstmp={tstmp}  tmp[0]={tmp[0]}  toffset={toffset}  t0={t0}\n')
                             tlast5 = np.r_[tlast5, tstmp]
                             # if tlast5[-1] < 0:
-                            #     msg += (f'{self.job} after tlast5({tlast5[-1]}) < 0 at {tstmp*4e-6} tstmp={tstmp}  tmp[0]={tmp[0]}  toffset={toffset}  t0={t0}\n')
+                            #     msg += (f'{self.job} after tlast5({tlast5[-1]}) < 0 at {tstmp/self.ts_Hz} tstmp={tstmp}  tmp[0]={tmp[0]}  toffset={toffset}  t0={t0}\n')
                             #     tlast5[-1] = tstmp
                             if len(msg):
                                 try:
@@ -356,7 +357,7 @@ class RecThread(threading.Thread):
                                     print(msg, file=open(self.fn_errlog,'a',newline=''))
                             if tlast5.size > 5:
                                 tlast5 = tlast5[-5:]
-                            ts = np.linspace(tstmp, tstmp+ts_diff_target, pkglen, endpoint=False) * 4e-6
+                            ts = np.linspace(tstmp, tstmp+ts_diff_target, pkglen, endpoint=False) / self.ts_Hz
                             fileList[0].write(
                                         np.block([[ts],
                                                 [np.array(list(tmp[1])).T/self.fullscale]]).T)
@@ -392,7 +393,7 @@ class RecThread(threading.Thread):
             #                     if t0[i] is None:
             #                         t0[i] = data[i][0][0]
             #                     ts = np.linspace(data[i][0][0]-t0[i], data[i][1][0]-t0[i],
-            #                                     len(data[i][0][1]), endpoint=False) * 4e-6
+            #                                     len(data[i][0][1]), endpoint=False) / self.ts_Hz
             #                     fileList[i].write(
             #                         np.block([[ts],
             #                                 [np.array(list(data[i][0][1])).T

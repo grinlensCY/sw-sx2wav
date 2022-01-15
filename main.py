@@ -13,6 +13,7 @@ class Engine:
         self.datainfo = datainfo
 
         self.config = config
+        self.ts_Hz = 250000
 
         self.thd_rec_flag = threading.Event()
         self.stopped_flag = stopped_flag
@@ -282,35 +283,35 @@ class Engine:
                 self.recThd_audio = RecThread(self.datainfo['mic']['sr'],
                                             1, 0.04, dstfn_prefix, 'mic',
                                             self.datainfo['mic']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0,config)
+                                            self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
                 self.recThd_audio.start()
                 self.recThd_acc = RecThread(int(self.datainfo['acc']['sr']),
                                             4, 0.04, dstfn_prefix,'acc',
                                             self.datainfo['acc']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0,config)
+                                            self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
                 self.recThd_acc.start()
                 # self.recThd_ecg = RecThread(self.datainfo['ecg']['sr'],
                 #                             2, 0.01, dstfn_prefix, 'ecg',
-                #                             self.datainfo['ecg']['fullscale'],config)
+                #                             self.datainfo['ecg']['fullscale'],config,self.ts_Hz)
                 # self.recThd_ecg.start()
                 self.recThd_gyro = RecThread(int(self.datainfo['gyro']['sr']),
                                             4, 0.04, dstfn_prefix, 'gyro',
                                             self.datainfo['gyro']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0,config)
+                                            self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
                 self.recThd_gyro.start()
                 self.recThd_mag = RecThread(int(self.datainfo['mag']['sr']),
                                             4, 0.04, dstfn_prefix, 'mag',
                                             self.datainfo['mag']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0,config)
+                                            self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
                 self.recThd_mag.start()
                 self.recThd_quaternion = RecThread(int(self.datainfo['quaternion']['sr']),
                                                 5, 0.04, dstfn_prefix, 'quaternion',
                                                 self.datainfo['quaternion']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0,config)
+                                            self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
                 self.recThd_quaternion.start()
             self.recThd_sysinfo = RecThread(1,
                                             3, 0.09, dstfn_prefix, 'sysinfo',
-                                            1,recT0=recT0,config=config)
+                                            1,recT0=recT0,config=config,ts_Hz=self.ts_Hz)
             self.recThd_sysinfo.start()
             self.thd_rec_flag.set()
             return True
@@ -631,7 +632,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220110a')
+    print('version: 20220116a')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):

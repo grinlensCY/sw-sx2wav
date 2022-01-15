@@ -40,6 +40,6 @@
     "overwrite": 0,
     "delSX": 0,
     "delmergedSX": 10,
-    "moveSX": 0
+    "moveSX": 0,
     "skipPkgCnt": 10
 }
