@@ -1,6 +1,6 @@
 # 20220116
 
-1. 藉由acc sr來偵測fw ts
+1. 藉由acc sr來偵測fw ts(old:250000  new:32768)
 2. skipPkgCnt(忽略前幾筆封包，避免剛好在fw ts被reset階段，mic/imu/sysinfo的t0相差太大)
 3. 儲存第一筆fw ts
 4. 將合併的sx移到暫存目錄merged，避免干擾原始檔
