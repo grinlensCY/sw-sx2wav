@@ -140,7 +140,7 @@ class RecThread(threading.Thread):
                                 data_dim = len(micdata)
                                 pkglen = len(micdata[0])
                                 tlast5 = np.array([0],dtype='uint32')
-                                msg = f'{self.job},t0_fw={t0},pkglen={micdata[0].size}'
+                                msg = f'{self.job},t0_fw={t0},pkglen={micdata[0].size},tsHz={self.ts_Hz}'
                                 print(msg, file=open(self.fn_ts_t0_mic,'w',newline=''))
                             tstmp = tmp[0] + toffset-t0
                             if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0:    # ts was reset
@@ -275,7 +275,7 @@ class RecThread(threading.Thread):
                         pkglen = len(tmp[1])
                         tlast5 = np.array([0],dtype='uint32')
                         if self.job == 'acc':
-                            msg = f'{self.job},t0_fw={t0},pkglen={len(tmp[1])}'
+                            msg = f'{self.job},t0_fw={t0},pkglen={len(tmp[1])},tsHz={self.ts_Hz}'
                             print(msg, file=open(self.fn_ts_t0_acc,'w',newline=''))
                         self.stop()
                     else:
@@ -312,7 +312,7 @@ class RecThread(threading.Thread):
                                 ts_diff_target = ts_interval*self.ts_Hz
                                 max_ts_diff = ts_diff_target*1.4
                                 if self.job == 'acc':
-                                    msg = f'{self.job},t0_fw={t0},pkglen={len(tmp[1])}'
+                                    msg = f'{self.job},t0_fw={t0},pkglen={len(tmp[1])},tsHz={self.ts_Hz}'
                                     print(msg, file=open(self.fn_ts_t0_acc,'w',newline=''))
                             tstmp = tmp[0] + toffset-t0
                             if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0: # ts was reset
