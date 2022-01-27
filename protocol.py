@@ -15,6 +15,11 @@ try:
 except:
     from . import file_driver as FD
 
+class SimpleAlgResHandler:
+    def handle_alg_res_pkg(self,dat):
+        # print('get alg res')
+        pass
+
 class SimpleSysInfoHandler:
     def handle_sys_info_pkg(self,dat):
         #print('get sys info')
@@ -74,6 +79,7 @@ class Protocol:
     MSG_TYPE_ECG_RAW_DATA           =0xE3
 
     MSG_TYPE_SYS_INFO               =0xF0
+    MSG_TYPE_ALG_RES                =0xFA
 
     CMD_TYPE_CHANGE_PW              =0xC0
     CMD_TYPE_CHANGE_GAIN            =0xC1
@@ -81,6 +87,17 @@ class Protocol:
 
     CMD_TYPE_TX_POWER                =0xCE
     CMD_TYPE_ECHO                    =0xCF
+
+    ALG_TYPE_ACC_RR                 =0x01
+    ALG_TYPE_ACC_HR                 =0x02
+    ALG_TYPE_SND_RR                 =0x11
+    ALG_TYPE_SND_HR                 =0x12
+    ALG_TYPE_BOWEL                  =0x21
+    ALG_TYPE_POSTURE                =0x31
+
+    int_to_pose_map={}
+    int_to_status_map={}
+    int_to_act_map={}
 
     def __init__(self,drv,name,skipPkgCnt):
         self.driver=drv
@@ -104,6 +121,7 @@ class Protocol:
         self.enable_auto_prase_pkg()
         self.auto_prase_thd=None
 
+        self.set_alg_res_handler(SimpleAlgResHandler())
         self.set_sys_info_handler(SimpleSysInfoHandler())
         self.set_mic_data_handler(SimpleMicDataHandler())
         self.set_ecg_data_handler(SimpleEcgDataHandler())
@@ -123,6 +141,26 @@ class Protocol:
         self.key='SiriuXense2100Fw'.encode('ASCII')
         self.iv= 'akWLytV$N-_X:2zK'.encode('ASCII')
         self.cipher = Cipher(algorithms.AES(self.key), modes.CBC(self.iv),backend=default_backend())
+
+        self.int_to_pose_map[0]='None'
+        self.int_to_pose_map[1]='sit'
+        self.int_to_pose_map[2]='side_right'
+        self.int_to_pose_map[3]='side_left'
+        self.int_to_pose_map[4]='back'
+        self.int_to_pose_map[5]='stomach'
+
+        self.int_to_status_map[0]='None'
+        self.int_to_status_map[1]='sleep'
+        self.int_to_status_map[2]='calm'
+        self.int_to_status_map[3]='motion'
+        self.int_to_status_map[4]='shock_or_fall'
+        self.int_to_status_map[5]='rest_on_stomach'
+
+        self.int_to_act_map[0]='None'
+        self.int_to_act_map[1]='shock_like'
+        self.int_to_act_map[2]='shock'
+        self.int_to_act_map[3]='large_motion'
+        self.int_to_act_map[4]='gentle_motion'
 
         self.q_mic=queue.Queue()
         self.mic_package_queue=queue.Queue()
@@ -152,6 +190,9 @@ class Protocol:
             print("{:.3f} kBps".format(self.data_spd/1000))
             self.interval_data_amount=0
             self.pre_statistic_ts=curr_ts
+
+    def set_alg_res_handler(self,h):
+        self.alg_res_handler=h
 
     def set_sys_info_handler(self,h):
         self.sys_info_handler=h
@@ -302,6 +343,7 @@ class Protocol:
         encoded_pkg.append(self.PKG_FRAME_START_BYTE)
         self.__encode_bytes(en_pkg,encoded_pkg)
         encoded_pkg.append(self.PKG_FRAME_FINISH_BYTE)
+
         print(list(encoded_pkg))
         self.tx_queue.put_nowait(encoded_pkg)
 
@@ -466,10 +508,47 @@ class Protocol:
                         self.endingTX_callback()
                     time.sleep(0.02)
 
-            drv.stop()            
+            drv.stop()
+    
+    def __prase_alg_res_pkg(self,pkg):
+        ba=pkg[2]
+
+        data_len=len(ba)
+        if(data_len <1):
+            return None
+
+        ts=pkg[1]
+        alg_type=ba[0]
+
+        
+
+        if(alg_type==self.ALG_TYPE_ACC_RR):
+            val=struct.unpack('<ddd',ba[1:(1+8*3)])
+            return (ts,alg_type,*val)
+
+        elif(alg_type==self.ALG_TYPE_ACC_HR):
+            val=struct.unpack('<ddd',ba[1:(1+8*3)])
+            return (ts,alg_type,*val)
+
+        elif(alg_type==self.ALG_TYPE_SND_RR):
+            return (ts,alg_type)
+
+        elif(alg_type==self.ALG_TYPE_SND_HR):
+            val=struct.unpack('<ddd',ba[1:(1+8*3)])
+            return (ts,alg_type,*val)
+
+        elif(alg_type==self.ALG_TYPE_BOWEL):
+            return (ts,alg_type)
+
+        elif(alg_type==self.ALG_TYPE_POSTURE):
+            val=struct.unpack('<IIIIdddddd',ba[1:(1+8*6+4*4)])
+            return (ts,alg_type,*val)
+
+        return (ts,alg_type)
 
     def __prase_sys_info_pkg(self,pkg):
         ba=pkg[2]
+
         data_len=len(ba)
         if(data_len != 14 and data_len!=13 and data_len!=18):
             return None
@@ -635,11 +714,16 @@ class Protocol:
             
             pkg_type=pkg[0]
 
+            if(pkg_type==self.MSG_TYPE_ALG_RES and self.alg_res_handler is not None):
+                pkg=self.__prase_alg_res_pkg(pkg)
+                if(pkg is not None):
+                    self.alg_res_handler.handle_alg_res_pkg(pkg)
+
             if(pkg_type==self.MSG_TYPE_SYS_INFO and self.sys_info_handler is not None):
                 pkg=self.__prase_sys_info_pkg(pkg)
                 if(pkg is not None):
                     self.sys_info_handler.handle_sys_info_pkg(pkg)
-            
+
             elif(pkg_type==self.MSG_TYPE_DUAL_MIC and self.mic_data_handler is not None):
                 pkg=self.__prase_dual_mic_pkg(pkg)
                 if(pkg is not None):
@@ -682,7 +766,7 @@ class Protocol:
             else:
                 if(crq.qsize()<100):
                     crq.put_nowait(pkg)
-                print(pkg)
+                # print(pkg)
 
     def get_mic_data_q(self):
         return self.q_mic
