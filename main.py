@@ -550,7 +550,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
             new_sxfns.append(first_sxfn)
             new_userlist.append(userlist[i])
             cum_cnt = 1
-            cum_duration += (log['stop_ts']-log['start_ts'])
+            if 'stop_ts' in log.keys():
+                cum_duration += (log['stop_ts']-log['start_ts'])
             print(f'first sx/user: {first_sxbasefn} / {first_user}')
             # if first_sxfn.endswith('sxr'):
             #     shutil.copy2(first_sxfn,first_sxfn.replace(".sxr","_orig.sxr"))
@@ -561,17 +562,21 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
         else:
             interval = log['start_ts'] - last_stop_ts
             if userlist[i] == first_user and interval <= 5000:  # the same user and interval < 5sec
+            # if userlist[i] == first_user and interval <= 50000:  # the same user and interval < 5sec
                 if config['onlytst0']:
                     continue
                 merged_sxfns.append(basefn)
                 last_merged_dict[first_user].append(basefn)
                 cum_sxData += buf
-                cum_logdata['stop_ts'] = log['stop_ts']
                 if config["dirList_load_S3zip"]:
                     cum_logdata['evt'].extend(log['evt'])
                     cum_logdata['hr'].extend(log['hr'])
                     cum_logdata['fm'].extend(log['fm'])
                 cum_cnt += 1
+                if 'stop_ts' in log.keys():
+                    cum_logdata['stop_ts'] = log['stop_ts']
+                else:
+                    cum_logdata['stop_ts'] = log['stop_ts'] = log['start_ts'] + os.path.getsize(fn)/20000*1000
                 cum_duration += (log['stop_ts']-log['start_ts'])
                 cum_logdata['duration'] = cum_duration/1000
                 if config['delSX'] and not config['dirList_load_S3zip']:
@@ -580,7 +585,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                     os.remove(logfn)
                 if (fn == sxfns[-1]
                         or (not os.path.exists(sxfns[i+1].replace(".sx",".log"))
-                            and not os.path.exists(sxfns[i+1].replace(".sxr",".log")))):
+                            and not os.path.exists(sxfns[i+1].replace(".sxr",".log")))
+                        or 'stop_ts' not in log.keys()):
                     print((f'merging {merged_sxfns} into\n\t{os.path.basename(first_sxfn)}'
                             f'({first_user}: {cum_cnt} files,{cum_duration/1000/60:.2f}min)'))
                     with open(first_sxfn, "wb") as f:
@@ -632,7 +638,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220116a')
+    print('version: 20220204a')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
