@@ -204,14 +204,17 @@ class PackageHandler:
                 sr = self.pkg_len / ((dat[0]-self.pre_ts_pkg)/self.engine.ts_Hz)
             if sr <= 90:
                 print(f'PackageHandler: {name} data_len={self.pkg_len} sr={sr:.2f}Hz <= 90Hz ==> pkgloss? ==> try to assign sr based on acc_sr_list')
-                if len(self.acc_sr_list):
-                    if 102 < np.mean(self.acc_sr_list) < 106:
-                        sr = 104
-                    elif 190 < np.mean(self.acc_sr_list) < 220:
-                        sr = 208
-                else:
-                    return None
-            print(f'PackageHandler: {name} sr={sr:.2f}Hz  data_len={self.pkg_len}')
+                # if len(self.acc_sr_list):
+                #     print(f'PackageHandler: {name} ')
+                #     if 102 < np.mean(self.acc_sr_list) < 106:
+                #         sr = 104
+                #     elif 190 < np.mean(self.acc_sr_list) < 220:
+                #         sr = 208
+                #     else:
+                #         sr = None
+                # else:
+                sr = None
+            print(f'PackageHandler: {name} sr={sr}Hz  data_len={self.pkg_len}')
             self.pre_ts_pkg = dat[0]
             self.pkg_len = len(dat[idx])
             if self.pkg_len != 20 and self.pkg_len != 32 and self.pkg_len != 64:

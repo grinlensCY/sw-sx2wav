@@ -169,14 +169,13 @@ class Engine:
             self.flag_imu_sr_checked.clear()
             self.flag_mic_sr_checked.clear()
             cnt = 0
-            while not self.flag_checked_fileformat.wait(0.5):
+            while not self.flag_checked_fileformat.wait(1):
                 cnt+=1
-                print('wait for receiving file format',cnt)
+                print('\nwait for receiving file format',cnt,'\n')
                 if cnt>20:
-                    input(f'quit {os.path.basename(sx_fn)}, having waited for format check too long time')
-                    print(f'quit {os.path.basename(sx_fn)}, having waited for format check too long time'
-                          ,file=open('log.txt','a',newline=''))
                     self.stop()
+                    print(f'quit {os.path.basename(sx_fn)}, having waited for format check too long time'
+                        ,file=open('log.txt','a',newline=''))
                     break
             cnt = 0
             while not self.flag_ble_addr.wait(0.5):
@@ -213,7 +212,8 @@ class Engine:
                 thisSXdict['mic_sr'] = self.datainfo["mic"]["sr"]
                 thisSXdict['dualmic'] = self.flag_dualmic.is_set()
                 thisSXdict['ble'] = self.bleaddr
-            self.data_retriever.stop()
+            if self.data_retriever is not None:
+                self.data_retriever.stop()
             # == handle log and sx file
             # self.srcdir = os.path.dirname(sx_fn)
             dstdir,wavfnkw_ts,userdir,dstdir2,userdir2 = self.getDstdir(sx_fn,userdir_kw)
@@ -349,7 +349,7 @@ class Engine:
     
     def endingTX_callback(self):
         print('stop data_retriever')
-        self.data_retriever.stop()
+        self.data_retriever.stop(typ='empty receiving data')
 
 
 def updateConfig(engine=None, config=None):
@@ -379,10 +379,20 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
         return ''
     srcdir = os.path.dirname(tfn)
     if loadall:
-        fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
+        fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                 if fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip')]
+        fns_list.sort()
+        fns = []
         if not onlyChkTS:
-            for fn in fns:
+            for fn in fns_list:
+                if len(config['ts_range_sx']):
+                    fnidx = os.path.basename(fn).find('.')
+                    ts = int(os.path.basename(fn)[:fnidx])
+                    ti = ts if config['ts_range_sx'][0] == -1 else config['ts_range_sx'][0]
+                    tf = ts if config['ts_range_sx'][-1] == -1 else config['ts_range_sx'][-1]
+                    if ts < ti or ts >= tf:
+                        print(f"{ts} is beyond specified range {config['ts_range_sx']} ==> skip it")
+                        continue
                 if fn.endswith('zip'):
                     with ZipFile(fn) as myzip:
                         for zipfn in myzip.namelist():
@@ -390,8 +400,11 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                                 print('going to upzip',zipfn)
                                 # myzip.extract(zipfn,path=srcdir)
                                 myzip.extractall(path=srcdir)
-            fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
-                    if fn.endswith('.sxr') or fn.endswith('.sx')]
+                if fn not in fns and (fn.endswith('.sx') or fn.endswith('.sxr')):
+                    fns.append(fn)
+            # fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
+            #         if fn.endswith('.sxr') or fn.endswith('.sx')]
+            # fns.sort()
     else:
         if tfn.endswith('zip'):
             with ZipFile(tfn) as myzip:
@@ -403,7 +416,6 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
         fns = [tfn.replace(".zip",".sx")]
         datainfo['user_srcdir'] = srcdir.split('\\')[-1]
         datainfo['sxfn'] = tfn
-    fns.sort()
     print()
     user_srcdir = srcdir.split('\\')[-1]
     for fn in fns:
@@ -532,10 +544,10 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
             new_userlist.append(userlist[i])
             continue
         
-        if basefn in mergelog and mergelog[basefn]:
-            continue
-        else:
-            mergelog[basefn] = False
+        # if basefn in mergelog and mergelog[basefn]:
+        #     continue
+        # else:
+        mergelog[basefn] = False
         with open(fn, 'rb') as f:
             buf = f.read()
 
@@ -638,7 +650,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220204a')
+    print('version: 20220208a')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
