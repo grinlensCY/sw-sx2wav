@@ -349,7 +349,7 @@ class Engine:
     
     def endingTX_callback(self):
         print('stop data_retriever')
-        self.data_retriever.stop(typ='empty receiving data')
+        self.data_retriever.stop()
 
 
 def updateConfig(engine=None, config=None):
