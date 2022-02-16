@@ -118,12 +118,12 @@ class Engine:
             dstdir =  f"{self.config['dir_Export_fj']}/{self.bleaddr}/{str_date}"
             userdir = f"{self.config['dir_Export_fj']}/{self.bleaddr}"
         elif self.config['dir_Export'] == self.config['dir_savSX']:
-            for folder in os.listdir(self.config['dir_Export']):
-                # if folder[-4:] == f"{self.bleaddr[-4:]}" or folder == userdir_kw or len(self.config['dirList_load_S3zip']):
-                if folder == userdir_kw:
-                    dstdir =  f"{self.config['dir_savSX']}/{folder}/{str_date}"
-                    userdir = f"{self.config['dir_savSX']}/{folder}"
-                    break
+            # for folder in os.listdir(self.config['dir_Export']):
+            #     # if folder[-4:] == f"{self.bleaddr[-4:]}" or folder == userdir_kw or len(self.config['dirList_load_S3zip']):
+            #     if folder == userdir_kw:
+            #         dstdir =  f"{self.config['dir_savSX']}/{folder}/{str_date}"
+            #         userdir = f"{self.config['dir_savSX']}/{folder}"
+            #         break
             if not dstdir and len(self.config['dirList_load_S3zip']):
                 dstdir =  f"{self.config['dir_savSX']}/{userdir_kw}/{str_date}"
                 userdir = f"{self.config['dir_savSX']}/{userdir_kw}"
