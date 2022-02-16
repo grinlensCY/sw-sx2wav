@@ -169,7 +169,8 @@ class PackageHandler:
                     self.engine.datainfo[key]['sr'] = updated_sr
                 self.engine.flag_imu_sr_checked.set()
                 print('\nPackageHandler: imu sr was confirmed!',self.engine.datainfo[key]['sr'],'Hz')
-        if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
+        # if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
+        if self.engine.flag_imu_sr_checked.is_set():
             self.engine.flag_checked_fileformat.set()
 
     def handle_imu_gyro_pkg(self,dat):
@@ -198,12 +199,12 @@ class PackageHandler:
             sr = None
         else:
             sr = self.pkg_len / ((dat[0]-self.pre_ts_pkg)/self.engine.ts_Hz)
-            if sr > 230:
-                print(f'PackageHandler: {name} sr={sr:.2f}Hz > 230 --> update ts_Hz {self.engine.ts_Hz} ==> 32768')
-                self.engine.ts_Hz = 32768
-                sr = self.pkg_len / ((dat[0]-self.pre_ts_pkg)/self.engine.ts_Hz)
-            if sr <= 90:
-                print(f'PackageHandler: {name} data_len={self.pkg_len} sr={sr:.2f}Hz <= 90Hz ==> pkgloss? ==> try to assign sr based on acc_sr_list')
+            # if sr > 230:
+            #     print(f'PackageHandler: {name} sr={sr:.2f}Hz > 230 --> update ts_Hz {self.engine.ts_Hz} ==> 32768')
+            #     self.engine.ts_Hz = 32768
+            #     sr = self.pkg_len / ((dat[0]-self.pre_ts_pkg)/self.engine.ts_Hz)
+            if sr <= 390:
+                print(f'PackageHandler: {name} data_len={self.pkg_len} sr={sr:.2f} <= 390 ==> pkgloss? ==> try to assign sr based on acc_sr_list')
                 # if len(self.acc_sr_list):
                 #     print(f'PackageHandler: {name} ')
                 #     if 102 < np.mean(self.acc_sr_list) < 106:
