@@ -381,8 +381,8 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
     if loadall:
         fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                 if fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip')]
-        fns_list.sort()
-        fns = []
+        # fns_list.sort()
+        # fns = []
         if not onlyChkTS:
             for fn in fns_list:
                 if len(config['ts_range_sx']):
@@ -400,11 +400,12 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                                 print('going to upzip',zipfn)
                                 # myzip.extract(zipfn,path=srcdir)
                                 myzip.extractall(path=srcdir)
-                if fn not in fns and (fn.endswith('.sx') or fn.endswith('.sxr')):
-                    fns.append(fn)
-            # fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
-            #         if fn.endswith('.sxr') or fn.endswith('.sx')]
-            # fns.sort()
+                # if fn not in fns and (fn.endswith('.sx') or fn.endswith('.sxr')):
+                #     fns.append(fn)
+                #     print(fn,'is appended')
+            fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
+                    if fn.endswith('.sxr') or fn.endswith('.sx')]
+            fns.sort()
     else:
         if tfn.endswith('zip'):
             with ZipFile(tfn) as myzip:
@@ -650,7 +651,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220208a')
+    print('version: 20220204c')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
