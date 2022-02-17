@@ -663,8 +663,8 @@ if __name__ == "__main__":
         sys.exit()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
                 'ecg':{'fullscale':2000.0, 'sr':512},
-                'acc':{'fullscale':4.0, 'sr':112.5/2},
-                'gyro':{'fullscale':4.0, 'sr':112.5/2},
+                'acc':{'fullscale':16.0, 'sr':112.5/2},
+                'gyro':{'fullscale':2000.0, 'sr':112.5/2},
                 'mag':{'fullscale':4900.0, 'sr':112.5/2},
                 'quaternion':{'fullscale':1.0, 'sr':112.5/2},
                 'ble':'',
@@ -712,13 +712,13 @@ if __name__ == "__main__":
         engine = Engine(datainfo,config,stopped_flag=stop_flag)
         t0 = time.time()
         for i,fn in enumerate(fns):
-            if os.path.getsize(fn)/20000 < 20:
-                print(fn,'data duration maybe less than 20sec --> skip!\n')
-                os.remove(fn)
-                logfn = fn.replace('sxr','log').replace('sx','log')
-                if os.path.exists(logfn):
-                    os.remove(logfn)
-                continue
+            # if os.path.getsize(fn)/20000 < 20:
+            #     print(fn,'data duration maybe less than 20sec --> skip!\n')
+            #     os.remove(fn)
+            #     logfn = fn.replace('sxr','log').replace('sx','log')
+            #     if os.path.exists(logfn):
+            #         os.remove(logfn)
+            #     continue
             stop_flag.clear()
             userdirkw = usersrcdirs[i] if len(usersrcdirs) else ''
             thisdict = sxdict[os.path.basename(fn)] if len(sxdict) else {}
