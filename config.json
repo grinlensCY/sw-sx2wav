@@ -1,5 +1,5 @@
 ﻿{
-    "dirToloadFile": "G:/My Drive/Experiment/compilation/FJ_baby/10M_baby_patch_DVT/E2CC14E0EE23_2022_01_29_30",
+    "dirToloadFile": "C:/Users/chenyikuo/Downloads/tmp/A80PBY~0",
     "//dirToloadFile": "G:/My Drive/Code/sx2wav/test_files",
     "dirList_load_S3zip": "",
     "//dirList_load_S3zip": [
@@ -17,19 +17,19 @@
         20211123,
         20221231
     ],
-    "ts_range_sx": [
-    ],
+    "ts_range_sx": [],
     "load_all_sx": 10,
     "mergeNearby": 10,
-    "dir_Export": "G:/My Drive/Experiment/compilation/在家受測者",
-    "fj_dir_kw": [
+    "dir_Export": "G:/My Drive/Experiment/compilation/",
+    "fj_dir_kw": [],
+    "//fj_dir_kw": [
         "AOIS3T~5",
         "AO7G2X~7",
         "A80PBY~0"
     ],
     "dir_Export_fj": "//192.168.50.250/SiriuXense數據庫/寶寶音資料庫/9M_baby_patch_DVT",
     "//dir_Export": "./",
-    "dir_savSX": "G:/My Drive/Experiment/compilation/在家受測者",
+    "dir_savSX": "G:/My Drive/Experiment/compilation/",
     "//onlySelectedBle": "F37D711D38E0",
     "onlySelectedBle": "",
     "onlyChkTS": 0,
