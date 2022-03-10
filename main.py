@@ -379,8 +379,19 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
         return ''
     srcdir = os.path.dirname(tfn)
     if loadall:
-        fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
-                if fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip')]
+        if '在家受測者' in srcdir and len(config["ts_loadS3"]):
+            ti = time.mktime(time.strptime(f'{config["ts_loadS3"][0]}', "%Y%m%d"))*1000
+            if config["ts_loadS3"][1] < config["ts_loadS3"][0]:
+                config["ts_loadS3"][1] = config["ts_loadS3"][0]+1
+            try:
+                tf = time.mktime(time.strptime(f'{config["ts_loadS3"][1]+1}', "%Y%m%d"))*1000
+            except ValueError:
+                tf = (config["ts_loadS3"][1]+1-config["ts_loadS3"][0])*60*60*24*1000+ti
+            fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
+                if ti <= float(fn[:-3]) <= tf and (fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip'))]
+        else:
+            fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
+                    if fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip')]
         # fns_list.sort()
         # fns = []
         if not onlyChkTS:
@@ -656,7 +667,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220204c')
+    print('version: 20220310a')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
@@ -689,7 +700,7 @@ if __name__ == "__main__":
             with open(fn_log, 'r', newline='') as jf:
                 sxdict = json.loads(jf.read())
         fns,usersrcdirs = unzipS3(
-                            config["dirList_load_S3zip"],config["dir_upzipS3"],config['ts_loadS3'],
+                            config["dirList_load_S3zip"],config["dir_upzipS3"],config["ts_loadS3"],
                             config['overwrite'],config['onlyChkTS'],sx_dict=sxdict)
         # == if no zip fns found in unzipS3, process sx fns in dir_upzipS3 if they are also in sxdict
         if not len(fns):
