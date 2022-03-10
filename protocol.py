@@ -99,7 +99,7 @@ class Protocol:
     int_to_status_map={}
     int_to_act_map={}
 
-    def __init__(self,drv,name,skipPkgCnt):
+    def __init__(self,drv,name,skipPkgCnt): #skipPkgCnt only for sx2wav/sxReport
         self.driver=drv
 
         if(type(drv) is FD.Driver and not drv.isSXR):
@@ -162,8 +162,7 @@ class Protocol:
         self.int_to_act_map[3]='large_motion'
         self.int_to_act_map[4]='gentle_motion'
 
-        self.q_mic=queue.Queue()
-        self.mic_package_queue=queue.Queue()
+        # self.q_mic=queue.Queue()    # for QML
         self.name = name
 
     def __encrypt_content(self,pkg):
@@ -509,7 +508,7 @@ class Protocol:
                     time.sleep(0.02)
 
             drv.stop()
-    
+
     def __prase_alg_res_pkg(self,pkg):
         ba=pkg[2]
 
@@ -548,7 +547,6 @@ class Protocol:
 
     def __prase_sys_info_pkg(self,pkg):
         ba=pkg[2]
-
         data_len=len(ba)
         if(data_len != 14 and data_len!=13 and data_len!=18):
             return None
@@ -768,8 +766,8 @@ class Protocol:
                     crq.put_nowait(pkg)
                 # print(pkg)
 
-    def get_mic_data_q(self):
-        return self.q_mic
+    # def get_mic_data_q(self): # for QML
+    #     return self.q_mic
 
     def start(self):
         self.stop()
