@@ -343,7 +343,6 @@ class Protocol:
         encoded_pkg.append(self.PKG_FRAME_START_BYTE)
         self.__encode_bytes(en_pkg,encoded_pkg)
         encoded_pkg.append(self.PKG_FRAME_FINISH_BYTE)
-
         print(list(encoded_pkg))
         self.tx_queue.put_nowait(encoded_pkg)
 
@@ -478,7 +477,7 @@ class Protocol:
         return get_esp
 
     def __decode_thd_fun(self,flag,drv,txq,rxq):
-        emptyCnt = 0
+        emptyCnt = 0    # only for sx2wav
         while(flag.is_set()):
             print('protocol: t0   emptyCnt=', emptyCnt)
             get_esp=False
@@ -501,6 +500,7 @@ class Protocol:
                     drv.write(msg)
 
                 if(not is_busy):
+                    # only for sx2wav
                     # print('protocol not is_busy, emptyCnt=',emptyCnt)
                     emptyCnt += 1
                     if emptyCnt > 200 and self.rx_queue.empty():
@@ -815,7 +815,7 @@ class Protocol:
         self.thd=None
         self.auto_prase_thd=None
 
-    def set_endingTX_callback(self, cb):
+    def set_endingTX_callback(self, cb):    # only for sx2wav
         self.endingTX_callback = cb
 
 if __name__ == "__main__":

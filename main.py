@@ -385,6 +385,11 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
         # fns = []
         if not onlyChkTS:
             for fn in fns_list:
+                ts = float(os.path.basename(fn)[:-3])/1000
+                recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+                msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
+                        f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+                print(msg)
                 if len(config['ts_range_sx']):
                     fnidx = os.path.basename(fn).find('.')
                     ts = int(os.path.basename(fn)[:fnidx])
@@ -393,7 +398,7 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                     if ts < ti or ts >= tf:
                         print(f"{ts} is beyond specified range {config['ts_range_sx']} ==> skip it")
                         continue
-                if fn.endswith('zip'):
+                if not config['onlytst0'] and fn.endswith('zip'):
                     with ZipFile(fn) as myzip:
                         for zipfn in myzip.namelist():
                             if zipfn.endswith('sx') and not os.path.exists(f'{srcdir}\{zipfn.replace("zip","sx")}'):

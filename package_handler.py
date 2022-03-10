@@ -79,7 +79,7 @@ class PackageHandler:
             for c in range(-2,-len(tmp)-1,-2):
                 addr += f'{tmp[c]}{tmp[c+1]}:' if c!=-len(tmp)else tmp[c]+tmp[c+1]
             print('BLE addr:',addr.upper(),addr.replace(':','').upper())
-            print(f'FW ver:{dat[1]}\tHW ver:{dat[2]}')
+            print(f'FW ver:{hex(dat[1])}\tHW ver:{hex(dat[2])}')
             # if dat[2] >= 32:
             #     self.engine.datainfo['acc']['sr'] = 104
             #     self.engine.datainfo['gyro']['sr'] = 104
@@ -203,7 +203,9 @@ class PackageHandler:
                 self.engine.ts_Hz = 32768
                 sr = self.pkg_len / ((dat[0]-self.pre_ts_pkg)/self.engine.ts_Hz)
             if sr <= 90:
-                print(f'PackageHandler: {name} data_len={self.pkg_len} sr={sr:.2f}Hz <= 90Hz ==> pkgloss? ==> try to assign sr based on acc_sr_list')
+                print(f'PackageHandler: {name} data_len={self.pkg_len} sr={sr:.2f}Hz <= 90Hz ==> pkgloss?')
+                time.sleep(0.3)
+                # print(f'PackageHandler: {name} data_len={self.pkg_len} sr={sr:.2f}Hz <= 90Hz ==> pkgloss? ==> try to assign sr based on acc_sr_list')
                 # if len(self.acc_sr_list):
                 #     print(f'PackageHandler: {name} ')
                 #     if 102 < np.mean(self.acc_sr_list) < 106:
@@ -213,7 +215,7 @@ class PackageHandler:
                 #     else:
                 #         sr = None
                 # else:
-                sr = None
+                #     sr = None
             print(f'PackageHandler: {name} sr={sr}Hz  data_len={self.pkg_len}')
             self.pre_ts_pkg = dat[0]
             self.pkg_len = len(dat[idx])
