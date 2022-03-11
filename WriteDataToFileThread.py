@@ -28,12 +28,17 @@ class RecThread(threading.Thread):
         self.fullscale = fullscale
         self.isdualmic = isdualmic
         self.name = f'{job}_rec'
-        self.fn_errlog = f'{self.filename_prefix}-errlog.txt'
+        self.fn_errlog = f'{self.filename_prefix}-errlog_{job}.txt'
         self.fn_ts_t0_mic = f'{self.filename_prefix}-ts_t0_mic.txt'
         self.fn_ts_t0_acc = f'{self.filename_prefix}-ts_t0_acc.txt'
         self.config = config
         self.ts_Hz = ts_Hz
-        print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'a',newline=''))
+        try:
+            print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'a',newline=''))
+        except Exception as e:
+            print(f'{self.job}: {e}')
+            time.sleep(0.01)
+            print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'a',newline=''))
         if job == 'mic':
             self.filename_new.append(f'{self.filename_prefix}-audio-main01.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-env01.wav')

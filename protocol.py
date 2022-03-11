@@ -162,7 +162,7 @@ class Protocol:
         self.int_to_act_map[3]='large_motion'
         self.int_to_act_map[4]='gentle_motion'
 
-        # self.q_mic=queue.Queue()    # for QML
+        # self.q_mic=queue.Queue()    # for QML,sxReport
         self.name = name
 
     def __encrypt_content(self,pkg):
@@ -476,7 +476,7 @@ class Protocol:
         return get_esp
 
     def __decode_thd_fun(self,flag,drv,txq,rxq):
-        emptyCnt = 0    # only for sx2wav
+        emptyCnt = 0    # only for sx2wav, sxReport
         while(flag.is_set()):
             print('protocol: t0   emptyCnt=', emptyCnt)
             get_esp=False
@@ -499,7 +499,7 @@ class Protocol:
                     drv.write(msg)
 
                 if(not is_busy):
-                    # only for sx2wav
+                    # only for sx2wav, sxReport
                     # print('protocol not is_busy, emptyCnt=',emptyCnt)
                     emptyCnt += 1
                     if emptyCnt > 200 and self.rx_queue.empty():
