@@ -24,6 +24,8 @@ class PackageHandler:
 
         self.pre_ts=0
         self.pre_ts_pkg = 0
+        self.cumm_accpkgCnt = 0
+        self.accpkg_step_sec = 20/104
 
         self.acc_sr_list = []
         # self.sys_v=0
@@ -41,7 +43,8 @@ class PackageHandler:
         curr_ts=time.time()
         diff_ts=curr_ts-self.pre_ts
         if(diff_ts>3):
-            msg = f'elapsed time: {(curr_ts-self.t0)/60:.1f}mins\n'
+            msg = (f'\nelapsed time: {(curr_ts-self.t0)/60:.1f}mins  processed:{self.cumm_accpkgCnt*self.accpkg_step_sec/60:.1f}mins  '
+                    f'speed=processed/elapsed={self.cumm_accpkgCnt*self.accpkg_step_sec/(curr_ts-self.t0):.1f}\n')
             msg+="imu: {0:2.2f},{1:2.2f},{2:2.2f},{3:2.2f}; ".format(self.acc_pkg_cnt/diff_ts,self.gyro_pkg_cnt/diff_ts,self.mag_pkg_cnt/diff_ts,self.quat_pkg_cnt/diff_ts)
             msg+="ecg: {0:2.2f},{1:2.2f},{2:2.2f}; ".format(self.ecg_sq_pkg_cnt/diff_ts,self.ecg_hr_pkg_cnt/diff_ts,self.ecg_raw_pkg_cnt/diff_ts)
             msg+="mic: {0:2.1f}pkg/sec".format(self.mic_pkg_cnt/diff_ts)
@@ -153,6 +156,7 @@ class PackageHandler:
 
     def handle_imu_acc_pkg(self,dat):
         self.acc_pkg_cnt+=1
+        self.cumm_accpkgCnt += 1
         self.prepare_statistic_output()
         if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog']:
             self.engine.recThd_acc.addData([dat[0],dat[2]], ch=dat[1])
@@ -165,6 +169,7 @@ class PackageHandler:
                 self.acc_sr_list.append(sr)
             if len(self.acc_sr_list) == 5:
                 updated_sr = np.round(np.median(self.acc_sr_list)+0.0001,2)
+                self.accpkg_step_sec = self.pkg_len/updated_sr
                 for key in ['acc','gyro','mag','quaternion']:
                     self.engine.datainfo[key]['sr'] = updated_sr
                 self.engine.flag_imu_sr_checked.set()
