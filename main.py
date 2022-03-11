@@ -108,9 +108,10 @@ class Engine:
         self.config = config
 
     def getDstdir(self,sx_fn,userdir_kw):
-        ts = float(os.path.basename(sx_fn)[:-3])/1000
+        ts = self.getTsOfFn(sx_fn,ms=False)     # float(os.path.basename(sx_fn)[:-3])/1000
         wavfnkw_ts = f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}'
         str_date = time.strftime("%Y-%m-%d", time.localtime(ts))
+
         dstdir = ''
         dstdir2 = ''
         userdir2 = ''
@@ -149,7 +150,7 @@ class Engine:
 
     def chk_files_format(self,sx_fn='',cnt=0, userdir_kw='', thisSXdict={}):
         self.srcdir = os.path.dirname(sx_fn)
-        ts = float(os.path.basename(sx_fn)[:-3])/1000
+        ts = self.getTsOfFn(sx_fn,ms=False)
         self.flag_ble_addr.clear()
         print(f'\nrecording time:{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))}')
         print('chk_files_format sx_fn: ', sx_fn)
@@ -350,6 +351,23 @@ class Engine:
     def endingTX_callback(self):
         print('stop data_retriever')
         self.data_retriever.stop()
+    
+    def getTsOfFn(self,fn,ti=0,ms=True):
+        bn = os.path.basename(fn)
+        bn_split = bn.split('_')
+        if bn.startswith('log') and len(bn_split)==2:    # log_00000035.sx
+            return ti
+        elif bn.startswith('dev') or bn.startswith('log'):  # dev0_20_1646953956142.sx  log_0_xxxxx.sx
+            if ms:
+                return float(bn_split[-1][:-3])
+            else:
+                return float(bn_split[-1][:-3])/1000
+        else:   # 1646693225364.sx or .sxr
+            idx = len(bn.split('.')[-1])+1
+            if ms:
+                return float(bn[:-idx])
+            else:
+                return float(bn[:-idx])/1000
 
 
 def updateConfig(engine=None, config=None):
@@ -368,6 +386,23 @@ def hhmmss(sec):
     h, r = divmod(sec, 3600)
     m, s = divmod(r, 60)
     return f'{h:02.0f}:{m:02.0f}:{s:02.0f}'
+
+def getTsOfFn(fn,ti=0,ms=True):
+    bn = os.path.basename(fn)
+    bn_split = bn.split('_')
+    if bn.startswith('log') and len(bn_split)==2:    # log_00000035.sx
+        return ti
+    elif bn.startswith('dev') or bn.startswith('log'):  # dev0_20_1646953956142.sx  log_0_xxxxx.sx
+        if ms:
+            return float(bn_split[-1][:-3])
+        else:
+            return float(bn_split[-1][:-3])/1000
+    else:   # 1646693225364.sx or .sxr
+        idx = len(bn.split('.')[-1])+1
+        if ms:
+            return float(bn[:-idx])
+        else:
+            return float(bn[:-idx])/1000
 
 def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyChkTS=False, sx_dict={}):
     root = tk.Tk()
@@ -388,7 +423,7 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
             except ValueError:
                 tf = (config["ts_loadS3"][1]+1-config["ts_loadS3"][0])*60*60*24*1000+ti
             fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
-                if ti <= float(fn[:-3]) <= tf and (fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip'))]
+                if ti <= getTsOfFn(fn,ti) <= tf and (fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip'))]
         else:
             fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                     if fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip')]
@@ -396,12 +431,17 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
         # fns = []
         if not onlyChkTS:
             for fn in fns_list:
-                ts = float(os.path.basename(fn)[:-3])/1000
-                recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
-                msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
-                        f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+                ts = getTsOfFn(fn,ms=False) #float(os.path.basename(fn)[:-3])/1000
+                if ts:
+                    recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+                    msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
+                            f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+                else:
+                    recTime = 'SD_card_unknown'
+                    msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
+                            f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
                 print(msg)
-                if len(config['ts_range_sx']):
+                if len(config['ts_range_sx']) and recTime != 'SD_card_unknown':
                     fnidx = os.path.basename(fn).find('.')
                     ts = int(os.path.basename(fn)[:fnidx])
                     ti = ts if config['ts_range_sx'][0] == -1 else config['ts_range_sx'][0]
@@ -421,7 +461,8 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                 #     print(fn,'is appended')
             fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                     if fn.endswith('.sxr') or fn.endswith('.sx')]
-            fns.sort()
+            # if fns[0].startswith('log') or fns[0].startswith('dev'):
+            fns.sort(key=lambda x:os.path.basename(x).split('_')[-1])
     else:
         if tfn.endswith('zip'):
             with ZipFile(tfn) as myzip:
@@ -436,10 +477,15 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
     print()
     user_srcdir = srcdir.split('\\')[-1]
     for fn in fns:
-        ts = float(os.path.basename(fn)[:-3])/1000
-        recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
-        msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
-                f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+        ts = getTsOfFn(fn,ms=False)     #float(os.path.basename(fn)[:-3])/1000
+        if ts:
+            recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+            msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
+                    f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+        else:
+            recTime = 'SD_card_unknown'
+            msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
+                    f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
         print(msg)
         sx_dict[os.path.basename(fn)] = {'user_srcdir':user_srcdir,
                                             'recTime':recTime,
@@ -547,14 +593,17 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
         mergelog = {}
     if not os.path.exists(sxpool):
         os.makedirs(sxpool)
+    print('merging...')
     for i,fn in enumerate(sxfns):
         basefn = os.path.basename(fn)
         logfn = fn.replace(".sxr",".log").replace(".sx",".log")
-        print(f'\treading {basefn}')
+        mustMerge = basefn.startswith('log') or basefn.startswith('dev')
+        log = {'start_ts':0}
+        print(f'\treading {basefn} mustMerge={mustMerge}')
         if os.path.exists(logfn):
             with open(logfn, 'r', newline='') as jf:
                 log = json.loads(jf.read())
-        else:
+        elif not mustMerge:
             new_sxfns.append(f'{sxpool}/{basefn}')
             if not config['onlytst0']:
                 shutil.copy2(fn,new_sxfns[-1])
@@ -579,8 +628,10 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
             new_sxfns.append(first_sxfn)
             new_userlist.append(userlist[i])
             cum_cnt = 1
-            if 'stop_ts' in log.keys():
-                cum_duration += (log['stop_ts']-log['start_ts'])
+            if 'stop_ts' not in log.keys():
+                log['stop_ts'] = log['start_ts'] + os.path.getsize(fn)/20000*1000
+                cum_logdata['stop_ts'] = log['stop_ts']
+            cum_duration += (log['stop_ts']-log['start_ts'])
             print(f'first sx/user: {first_sxbasefn} / {first_user}')
             # if first_sxfn.endswith('sxr'):
             #     shutil.copy2(first_sxfn,first_sxfn.replace(".sxr","_orig.sxr"))
@@ -590,7 +641,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
             last_merged_dict[first_user] = [basefn]
         else:
             interval = log['start_ts'] - last_stop_ts
-            if userlist[i] == first_user and interval <= 5000:  # the same user and interval < 5sec
+            if userlist[i] == first_user and (mustMerge or interval <= 5000):  # the same user and interval < 5sec
             # if userlist[i] == first_user and interval <= 50000:  # the same user and interval < 5sec
                 if config['onlytst0']:
                     continue
@@ -605,7 +656,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 if 'stop_ts' in log.keys():
                     cum_logdata['stop_ts'] = log['stop_ts']
                 else:
-                    cum_logdata['stop_ts'] = log['stop_ts'] = log['start_ts'] + os.path.getsize(fn)/20000*1000
+                    log['stop_ts'] = log['start_ts'] + os.path.getsize(fn)/20000*1000
+                    cum_logdata['stop_ts'] = log['stop_ts']
                 cum_duration += (log['stop_ts']-log['start_ts'])
                 cum_logdata['duration'] = cum_duration/1000
                 if config['delSX'] and not config['dirList_load_S3zip']:
@@ -613,9 +665,10 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                     os.remove(fn)
                     os.remove(logfn)
                 if (fn == sxfns[-1]
-                        or (not os.path.exists(sxfns[i+1].replace(".sx",".log"))
-                            and not os.path.exists(sxfns[i+1].replace(".sxr",".log")))
-                        or 'stop_ts' not in log.keys()):
+                        or (not mustMerge and
+                            (not os.path.exists(sxfns[i+1].replace(".sx",".log"))
+                                and not os.path.exists(sxfns[i+1].replace(".sxr",".log"))))
+                        or (not mustMerge and 'stop_ts' not in log.keys())):
                     print((f'merging {merged_sxfns} into\n\t{os.path.basename(first_sxfn)}'
                             f'({first_user}: {cum_cnt} files,{cum_duration/1000/60:.2f}min)'))
                     with open(first_sxfn, "wb") as f:
@@ -667,7 +720,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220310a')
+    print('version: 20220311a')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
@@ -745,8 +798,18 @@ if __name__ == "__main__":
                 print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
             if bleaddr is None or not dstdir:
                 continue
-            ts = float(os.path.basename(fn)[:-3])/1000
-            recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+            # ts = float(os.path.basename(fn)[:-3])/1000
+            # recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+            ts = getTsOfFn(fn,ms=False)     #float(os.path.basename(fn)[:-3])/1000
+            if not ts:
+                recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+                # msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
+                #         f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+            else:
+                recTime = 'SD_card_unknown'
+                # msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
+                #         f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+
             print(f'{fn} was converted!')
             datainfo['recTime'] = recTime
             datainfo['sxfn'] = os.path.basename(fn)
