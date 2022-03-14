@@ -429,25 +429,34 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                     if fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip')]
         # fns_list.sort()
         # fns = []
+        skip_list = []
         if not onlyChkTS:
             for fn in fns_list:
                 ts = getTsOfFn(fn,ms=False) #float(os.path.basename(fn)[:-3])/1000
+                fsize = os.path.getsize(fn)
+                basefn = os.path.basename(fn)
                 if ts:
                     recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
-                    msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
-                            f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+                    msg = (f'{basefn}  recording start at:{recTime}  '
+                            f'file size:{os.path.getsize(fn)}=>{hhmmss(fsize/20000)}')
                 else:
                     recTime = 'SD_card_unknown'
-                    msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
-                            f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+                    msg = (f'{basefn}  recording start at:{recTime}  '
+                            f'file size:{os.path.getsize(fn)}=>{hhmmss(fsize/20000)}')
+                if fsize < 1600:     # < 5sec
+                    msg += f"==>duration < 5sec==>quit!"
+                    print(msg)
+                    skip_list.append(basefn)
+                    continue
                 print(msg)
                 if len(config['ts_range_sx']) and recTime != 'SD_card_unknown':
-                    fnidx = os.path.basename(fn).find('.')
-                    ts = int(os.path.basename(fn)[:fnidx])
+                    fnidx = basefn.find('.')
+                    ts = int(basefn[:fnidx])
                     ti = ts if config['ts_range_sx'][0] == -1 else config['ts_range_sx'][0]
                     tf = ts if config['ts_range_sx'][-1] == -1 else config['ts_range_sx'][-1]
                     if ts < ti or ts >= tf:
                         print(f"{ts} is beyond specified range {config['ts_range_sx']} ==> skip it")
+                        skip_list.append(basefn)
                         continue
                 if not config['onlytst0'] and fn.endswith('zip'):
                     with ZipFile(fn) as myzip:
@@ -460,7 +469,7 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                 #     fns.append(fn)
                 #     print(fn,'is appended')
             fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
-                    if fn.endswith('.sxr') or fn.endswith('.sx')]
+                    if (fn.endswith('.sxr') or fn.endswith('.sx') and fn not in skip_list)]
             # if fns[0].startswith('log') or fns[0].startswith('dev'):
             fns.sort(key=lambda x:os.path.basename(x).split('_')[-1])
     else:
@@ -478,16 +487,17 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
     user_srcdir = srcdir.split('\\')[-1]
     for fn in fns:
         ts = getTsOfFn(fn,ms=False)     #float(os.path.basename(fn)[:-3])/1000
+        basefn = os.path.basename(fn)
         if ts:
             recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
-            msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
+            msg = (f'{basefn}  recording start at:{recTime}  '
                     f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
         else:
             recTime = 'SD_card_unknown'
-            msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
+            msg = (f'{basefn}  recording start at:{recTime}  '
                     f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
         print(msg)
-        sx_dict[os.path.basename(fn)] = {'user_srcdir':user_srcdir,
+        sx_dict[basefn] = {'user_srcdir':user_srcdir,
                                             'recTime':recTime,
                                             'ble':'',
                                             'mic_sr':0,
@@ -720,7 +730,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220311a')
+    print('version: 20220311c')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):

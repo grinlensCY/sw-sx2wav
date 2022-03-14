@@ -2,7 +2,6 @@ import time
 import threading
 import math
 import numpy as np
-
 import queue
 
 from WriteDataToFileThread import RecThread
