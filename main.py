@@ -1,4 +1,4 @@
-import os,threading,time,json,shutil
+import os,threading,time,json,shutil,csv
 import shutil
 import file_driver as FD
 from package_handler import PackageHandler
@@ -599,13 +599,25 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
         mergelog = {}
     if not os.path.exists(sxpool):
         os.makedirs(sxpool)
+
+    ts_log_fn = f"{os.path.dirname(sxfns[0])}/ts_log.txt"
+    tslog = {}
+    if os.path.exists(ts_log_fn):
+        with open(ts_log_fn, 'r', newline='') as csvfile:
+            rows = csv.reader(csvfile, delimiter=',', skipinitialspace=True)
+            for row in rows:
+                basefn = os.path.basename(row[0])
+                tslog[f"{basefn}"] = {'start_ts':row[1],'stop_ts':row[2]}
+
     print('merging...')
     for i,fn in enumerate(sxfns):
         basefn = os.path.basename(fn)
         logfn = fn.replace(".sxr",".log").replace(".sx",".log")
         mustMerge = basefn.startswith('log') or basefn.startswith('dev')
         print(f'\treading {basefn} mustMerge={mustMerge}')
-        if os.path.exists(logfn):
+        if tslog != {}:
+            log = tslog[basefn]
+        elif os.path.exists(logfn):
             with open(logfn, 'r', newline='') as jf:
                 log = json.loads(jf.read())
         elif not mustMerge:
