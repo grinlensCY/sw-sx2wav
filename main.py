@@ -413,26 +413,25 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
     if not tfn:
         return ''
     srcdir = os.path.dirname(tfn)
+    ts_range = [0,0]
+    if len(config["ts_loadS3"]):
+        ts_range[0] = time.mktime(time.strptime(f'{config["ts_loadS3"][0]}', "%Y%m%d"))*1000
+        if config["ts_loadS3"][1] < config["ts_loadS3"][0]:
+            config["ts_loadS3"][1] = config["ts_loadS3"][0]+1
+        try:
+            ts_range[1] = time.mktime(time.strptime(f'{config["ts_loadS3"][1]+1}', "%Y%m%d"))*1000
+        except ValueError:
+            ts_range[1] = (config["ts_loadS3"][1]+1-config["ts_loadS3"][0])*60*60*24*1000+ts_range[0]
+    if len(config['ts_range_sx']):
+        ts_range[0] = ts_range[0] if config['ts_range_sx'][0] == -1 else max(ts_range[0],config['ts_range_sx'][0])
+        ts_range[1] = ts_range[1] if config['ts_range_sx'][-1] == -1 else min(ts_range[1],config['ts_range_sx'][-1])
     if loadall:
-        if '在家受測者' in srcdir and len(config["ts_loadS3"]):
-            ti = time.mktime(time.strptime(f'{config["ts_loadS3"][0]}', "%Y%m%d"))*1000
-            if config["ts_loadS3"][1] < config["ts_loadS3"][0]:
-                config["ts_loadS3"][1] = config["ts_loadS3"][0]+1
-            try:
-                tf = time.mktime(time.strptime(f'{config["ts_loadS3"][1]+1}', "%Y%m%d"))*1000
-            except ValueError:
-                tf = (config["ts_loadS3"][1]+1-config["ts_loadS3"][0])*60*60*24*1000+ti
-            fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
-                if ti <= getTsOfFn(fn,ti) <= tf and (fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip'))]
-        else:
-            fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
-                    if fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip')]
-        # fns_list.sort()
-        # fns = []
+        fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
+                if fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip')]
         skip_list = []
         if not onlyChkTS:
             for fn in fns_list:
-                ts = getTsOfFn(fn,ms=False) #float(os.path.basename(fn)[:-3])/1000
+                ts = getTsOfFn(fn,ms=False)
                 fsize = os.path.getsize(fn)
                 basefn = os.path.basename(fn)
                 if ts:
@@ -449,13 +448,14 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                     skip_list.append(basefn)
                     continue
                 print(msg)
-                if len(config['ts_range_sx']) and recTime != 'SD_card_unknown':
+                if (ts_range[0] != 0 and ts_range[1] != 0) and recTime != 'SD_card_unknown':
                     fnidx = basefn.find('.')
                     ts = int(basefn[:fnidx])
-                    ti = ts if config['ts_range_sx'][0] == -1 else config['ts_range_sx'][0]
-                    tf = ts if config['ts_range_sx'][-1] == -1 else config['ts_range_sx'][-1]
-                    if ts < ti or ts >= tf:
-                        print(f"{ts} is beyond specified range {config['ts_range_sx']} ==> skip it")
+                    ts_range[1] = max(ts, ts_range[1])
+                    ts_range_str = [time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts_range[0]/1000)),
+                                    time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts_range[1]/1000))]
+                    if ts < ts_range[0] or ts > ts_range[1]:
+                        print(f"\tis beyond specified range {ts_range}={ts_range_str} ==> skip it")
                         skip_list.append(basefn)
                         continue
                 if not config['onlytst0'] and fn.endswith('zip'):
@@ -465,12 +465,8 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                                 print('going to upzip',zipfn)
                                 # myzip.extract(zipfn,path=srcdir)
                                 myzip.extractall(path=srcdir)
-                # if fn not in fns and (fn.endswith('.sx') or fn.endswith('.sxr')):
-                #     fns.append(fn)
-                #     print(fn,'is appended')
             fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                     if (fn.endswith('.sxr') or fn.endswith('.sx') and fn not in skip_list)]
-            # if fns[0].startswith('log') or fns[0].startswith('dev'):
             fns.sort(key=lambda x:os.path.basename(x).split('_')[-1])
     else:
         if tfn.endswith('zip'):
