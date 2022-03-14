@@ -5,7 +5,10 @@ import time
 import os
 import queue
 import numpy as np
-import csv
+import csv, json
+import matplotlib.pyplot as plt
+import matplotlib
+chinese_font = matplotlib.font_manager.FontProperties(fname='C:\Windows\Fonts\mingliu.ttc')
 
 class RecThread(threading.Thread):    
     def __init__(self, sampleRate, channels, waitTime, fn_prefix, job, fullscale, isdualmic=False, recT0=None, config={}, ts_Hz=32768):
@@ -33,6 +36,8 @@ class RecThread(threading.Thread):
         self.fn_ts_t0_acc = f'{self.filename_prefix}-ts_t0_acc.txt'
         self.config = config
         self.ts_Hz = ts_Hz
+        self.err = {'reset_ts':[], 'pkgloss_ts':[], 'pkgloss_duration':[]}
+        self.fn_errJson = f'{self.filename_prefix}-errlog_{job}.json'
         try:
             print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'a',newline=''))
         except Exception as e:
@@ -85,6 +90,72 @@ class RecThread(threading.Thread):
         else:
             self.qMulti[ch].put_nowait(data)
             # print(f'qMutil[{ch}] size={self.qMulti[ch].qsize()}')
+    
+    def plt_pkgloss(self,fn):
+        # path = r'P:\Backups\Google - Chenyi Kuo\Google Drive\Experiment\compilation\FJ_baby\12M_baby_patch_DVT\F2_CF_F9_99_7D_F4_內建天線_綁帶加扣具測試_未脫落_2022_03_13_14\F2CFF9997DF4\2022-03-13'
+        # fn = [f'{path}\\{fn}' for fn in os.listdir(path) if fn.endswith('json')][0]
+        with open(fn, 'r', newline='') as jf:
+            log = json.loads(jf.read())
+        if log['whole_duration'] < 10*60:
+            xtick_step = 30*60
+            minor_xtick_step = 10
+            xticks = np.arange(0,log['whole_duration']+minor_xtick_step,xtick_step)
+            xticks_minor = np.arange(0,log['whole_duration']+minor_xtick_step,minor_xtick_step)
+            # xticks_str = '10sec/div'
+        elif log['whole_duration'] < 30*60:
+            xtick_step = 30*60
+            minor_xtick_step = 1*60
+            xticks = np.arange(0,log['whole_duration']+minor_xtick_step,xtick_step)
+            xticks_minor = np.arange(0,log['whole_duration']+minor_xtick_step,minor_xtick_step)
+        elif log['whole_duration'] < 60*60:
+            xtick_step = 30*60
+            minor_xtick_step = 5*60
+            xticks = np.arange(0,log['whole_duration']+minor_xtick_step,xtick_step)
+            xticks_minor = np.arange(0,log['whole_duration']+minor_xtick_step,minor_xtick_step)
+            # xticks_str = '10sec/div'
+        else:
+            xtick_step = 30*60
+            minor_xtick_step = 10*60
+            xticks = np.arange(0,log['whole_duration']+minor_xtick_step,xtick_step)
+            xticks_minor = np.arange(0,log['whole_duration']+minor_xtick_step,minor_xtick_step)
+            # xticks_str = '10min/div'
+        figw = max(min(1*log['whole_duration']/minor_xtick_step+2,72),16)
+        print(f'estimated figW={figw:.1f}')
+        if 'ts0' in log.keys():
+            time_ts = log['ts0']
+        else:
+            time_ts = time.mktime(time.strptime(os.path.basename(fn)[:19],"%Y-%m-%d-%H-%M-%S"))
+        xticklabels = [f'{time.strftime("%b/%d %H:%M:%S",time.localtime(time_ts+sec))}'
+                                for sec in xticks]
+        xticklabels_minor = [f'{time.strftime("%H:%M:%S",time.localtime(time_ts+sec))}'
+                                        for sec in xticks_minor]
+        fig, axs = plt.subplots(2,1,figsize=(figw,6))
+        print(fn)
+        path_str = fn.split('\\')[-6:]
+        plt.suptitle(f"trend chart of empty_duration\n{path_str}", fontproperties=chinese_font)
+        axs[0].plot(log['pkgloss_ts'],log['pkgloss_duration'],marker='o',ls='')
+        if len(log['reset_ts']):
+            axs[0].plot(log['reset_ts'],1,marker='o',ls='')
+        axs[1].plot(log['pkgloss_ts'],log['pkgloss_duration'],marker='o',ls='')
+        if len(log['pkgloss_duration']) > 2:
+            ul = np.std(log['pkgloss_duration'])*4 + np.mean(log['pkgloss_duration'])
+            mask = log['pkgloss_duration'] < ul
+            if np.count_nonzero(mask) > 2:
+                new_UL = np.std(np.array(log['pkgloss_duration'])[mask])*5 + np.mean(np.array(log['pkgloss_duration'])[mask])
+                axs[1].set_ylim((0,new_UL))
+        axs[0].set_xticks(xticks)
+        axs[0].set_xticklabels(xticklabels)
+        axs[0].set_xticks(xticks_minor,minor=True)
+        axs[0].set_xticklabels(xticklabels,va='bottom')
+        axs[0].set_xticklabels(xticklabels_minor,minor=True)
+        axs[1].set_xticks(xticks_minor)
+        axs[0].grid(axis='both',which='both')
+        axs[1].grid(axis='both',which='both')
+        plt.tight_layout()
+        pngfn = fn.replace('json','png')
+        plt.savefig(pngfn)
+        # plt.show()
+        plt.close()
 
     def run(self):
         # while True:
@@ -155,14 +226,20 @@ class RecThread(threading.Thread):
                                 t0 = tmp[0]
                                 toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
                                 tstmp = tmp[0] + toffset-t0
-                                msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={tstmp/self.ts_Hz:.3f} = '
-                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp/self.ts_Hz))}')
+                                ts_sec = tstmp/self.ts_Hz
+                                msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={ts_sec:.3f} = '
+                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+ts_sec))}')
+                                self.err['reset_ts'].append(ts_sec)
                             elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
+                                ts_sec = tstmp/self.ts_Hz
+                                empty_sec = (tstmp - tlast5[-1])/self.ts_Hz
                                 ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
-                                msg += (f'\nmic pkgloss at {tstmp/self.ts_Hz:.3f} {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp/self.ts_Hz))}')
-                                msg += (f'\t{tstmp}({tstmp/self.ts_Hz:.3f}) - {tlast5[-1]}({tlast5[-1]/self.ts_Hz:.3f})'
-                                        f' = {tstmp - tlast5[-1]}={(tstmp - tlast5[-1])/self.ts_Hz:.2f}sec > {max_ts_diff}')
+                                msg += (f'\nmic pkgloss at {ts_sec:.3f} {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+ts_sec))}')
+                                msg += (f'\t{tstmp}({ts_sec:.3f}) - {tlast5[-1]}({tlast5[-1]/self.ts_Hz:.3f})'
+                                        f' = {tstmp - tlast5[-1]}={empty_sec:.2f}sec > {max_ts_diff}')
                                 add_cnt = 1
+                                self.err['pkgloss_ts'].append(ts_sec)
+                                self.err['pkgloss_duration'].append(empty_sec)
                                 while tstmp - tlast5[-1] > max_ts_diff:
                                     tstmp2 = tlast5[-1] + ts_diff_target
                                     tlast5 = np.r_[tlast5, tstmp2]
@@ -179,6 +256,7 @@ class RecThread(threading.Thread):
                                             fileList[i].write(q)
                                         fileList[-1].write(buffer_ts)
                                         cnt = 0
+                                
                             if len(msg):
                                 try:
                                     print(msg, file=open(self.fn_errlog,'a',newline=''))
@@ -213,6 +291,18 @@ class RecThread(threading.Thread):
                                     for i,q in enumerate(buffer_mic[:,:cnt*seglen]):
                                         fileList[i].write(q)
                                     fileList[-1].write(buffer_ts[:cnt])
+                                self.err['whole_duration'] = buffer_ts[-1]
+                                self.err['reset_cnt'] = len(self.err['reset_ts'])
+                                self.err['pkgloss_cnt'] = len(self.err['pkgloss_ts'])
+                                self.err['pkgloss_sec_sum'] = np.sum(self.err['pkgloss_duration'])
+                                self.err['pkgloss_avgcnt'] = self.err['pkgloss_cnt']/self.err['whole_duration']
+                                self.err['pkgloss_avgsec'] = self.err['pkgloss_sec_sum']/self.err['whole_duration']
+                                self.err['ts0'] = self.recT0
+                                # print((f"\nerr:  reset_cnt={self.err['reset_cnt']}\n"
+                                #         f"err:  pkgloss cnt={self.err['pkgloss_cnt']} duration={self.err['pkgloss_sec_sum']}\n"))
+                                with open(self.fn_errJson, 'w', newline='') as jout:
+                                    json.dump(self.err, jout, ensure_ascii=False)
+                                self.plt_pkgloss(self.fn_errJson)
                                 self.stop()
                             time.sleep(self.waitTime)
                             # break

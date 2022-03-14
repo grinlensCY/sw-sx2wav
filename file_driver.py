@@ -39,7 +39,7 @@ class Driver:
         empty_cnt = 0
         while(flag.is_set()):
             try:
-                in_len=800
+                in_len=2400
                 dat=fp.read(in_len)
                 empty_cnt = 0
             except:
