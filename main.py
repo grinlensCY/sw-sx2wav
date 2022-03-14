@@ -608,7 +608,6 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
         basefn = os.path.basename(fn)
         logfn = fn.replace(".sxr",".log").replace(".sx",".log")
         mustMerge = basefn.startswith('log') or basefn.startswith('dev')
-        log = {'start_ts':0}
         print(f'\treading {basefn} mustMerge={mustMerge}')
         if os.path.exists(logfn):
             with open(logfn, 'r', newline='') as jf:
@@ -619,6 +618,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 shutil.copy2(fn,new_sxfns[-1])
             new_userlist.append(userlist[i])
             continue
+        else:
+            log = {'start_ts':getTsOfFn(fn)}
         
         # if basefn in mergelog and mergelog[basefn]:
         #     continue
@@ -651,7 +652,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
             last_merged_dict[first_user] = [basefn]
         else:
             interval = log['start_ts'] - last_stop_ts
-            if userlist[i] == first_user and (mustMerge or interval <= 5000):  # the same user and interval < 5sec
+            print(f"\t\t\tinterval = {interval/1000:.1f}sec")
+            if userlist[i] == first_user and ((mustMerge and interval <= 180000) or interval <= 5000):  # the same user and interval < 5sec
             # if userlist[i] == first_user and interval <= 50000:  # the same user and interval < 5sec
                 if config['onlytst0']:
                     continue
@@ -679,8 +681,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                             (not os.path.exists(sxfns[i+1].replace(".sx",".log"))
                                 and not os.path.exists(sxfns[i+1].replace(".sxr",".log"))))
                         or (not mustMerge and 'stop_ts' not in log.keys())):
-                    print((f'merging {merged_sxfns} into\n\t{os.path.basename(first_sxfn)}'
-                            f'({first_user}: {cum_cnt} files,{cum_duration/1000/60:.2f}min)'))
+                    print((f'\n\tmerging {merged_sxfns} \n\t\tinto  {os.path.basename(first_sxfn)}'
+                            f'({first_user}: {cum_cnt} files,{cum_duration/1000/60:.2f}min)\n'))
                     with open(first_sxfn, "wb") as f:
                         f.write(cum_sxData)
                     with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='') as jf:
@@ -716,6 +718,11 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 if config['onlytst0']:
                     continue
                 cum_sxData = buf
+                if 'stop_ts' in log.keys():
+                    cum_logdata['stop_ts'] = log['stop_ts']
+                else:
+                    log['stop_ts'] = log['start_ts'] + os.path.getsize(fn)/20000*1000
+                    cum_logdata['stop_ts'] = log['stop_ts']
                 cum_logdata = log
                 cum_duration += (log['stop_ts']-log['start_ts'])
                 with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='') as jf:
