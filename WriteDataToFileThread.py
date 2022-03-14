@@ -96,25 +96,22 @@ class RecThread(threading.Thread):
         # fn = [f'{path}\\{fn}' for fn in os.listdir(path) if fn.endswith('json')][0]
         with open(fn, 'r', newline='') as jf:
             log = json.loads(jf.read())
+        xtick_step = 60*60
         if log['whole_duration'] < 10*60:
-            xtick_step = 30*60
             minor_xtick_step = 10
             xticks = np.arange(0,log['whole_duration']+minor_xtick_step,xtick_step)
             xticks_minor = np.arange(0,log['whole_duration']+minor_xtick_step,minor_xtick_step)
             # xticks_str = '10sec/div'
         elif log['whole_duration'] < 30*60:
-            xtick_step = 30*60
             minor_xtick_step = 1*60
             xticks = np.arange(0,log['whole_duration']+minor_xtick_step,xtick_step)
             xticks_minor = np.arange(0,log['whole_duration']+minor_xtick_step,minor_xtick_step)
         elif log['whole_duration'] < 60*60:
-            xtick_step = 30*60
             minor_xtick_step = 5*60
             xticks = np.arange(0,log['whole_duration']+minor_xtick_step,xtick_step)
             xticks_minor = np.arange(0,log['whole_duration']+minor_xtick_step,minor_xtick_step)
             # xticks_str = '10sec/div'
         else:
-            xtick_step = 30*60
             minor_xtick_step = 10*60
             xticks = np.arange(0,log['whole_duration']+minor_xtick_step,xtick_step)
             xticks_minor = np.arange(0,log['whole_duration']+minor_xtick_step,minor_xtick_step)
@@ -154,7 +151,6 @@ class RecThread(threading.Thread):
         plt.tight_layout()
         pngfn = fn.replace('json','png')
         plt.savefig(pngfn)
-        # plt.show()
         plt.close()
 
     def run(self):
