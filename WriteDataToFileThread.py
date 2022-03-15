@@ -175,6 +175,7 @@ class RecThread(threading.Thread):
                     else:
                         time.sleep(self.waitTime)
             else:
+                self.processedT = 0
                 sr_PatchTS = int(1/0.016)
                 ts_diff_target = 0.016 * self.ts_Hz
                 max_ts_diff = ts_diff_target*1.4
@@ -267,6 +268,7 @@ class RecThread(threading.Thread):
                             buffer_ts[cnt] = (tstmp) / self.ts_Hz
                             buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = micdata
                             cnt += 1
+                            self.processedT += 0.016
                             if cnt == seg_cnt:
                                 for i,q in enumerate(buffer_mic):
                                     fileList[i].write(q)

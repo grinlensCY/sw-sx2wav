@@ -86,7 +86,7 @@ class Engine:
             isRun = False
             if not self.config['onlylog']:
                 isRun |= not self.recThd_audio.stopped()
-                print('\nisRun',isRun,'self.recThd_audio.stopped()', self.recThd_audio.stopped())
+                print('\nisRun',isRun,'self.recThd_audio.stopped()', self.recThd_audio.stopped(), f'processed={self.recThd_audio.processedT/60:.1f}')
                 isRun |= not self.recThd_acc.stopped()
                 print(isRun,'self.recThd_acc.stopped()', self.recThd_acc.stopped())
                 # isRun |= not self.recThd_ecg.stopped()
@@ -449,12 +449,12 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                     continue
                 print(msg)
                 if (ts_range[0] != 0 and ts_range[1] != 0) and recTime != 'SD_card_unknown':
-                    fnidx = basefn.find('.')
-                    ts = int(basefn[:fnidx])
+                    # fnidx = basefn.find('.')
+                    # ts = int(basefn[:fnidx])
                     ts_range[1] = max(ts, ts_range[1])
                     ts_range_str = [time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts_range[0]/1000)),
                                     time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts_range[1]/1000))]
-                    if ts < ts_range[0] or ts > ts_range[1]:
+                    if ts*1000 < ts_range[0] or ts*1000 > ts_range[1]:
                         print(f"\tis beyond specified range {ts_range}={ts_range_str} ==> skip it")
                         skip_list.append(basefn)
                         continue
@@ -745,7 +745,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220311c')
+    print('version: 20220311d')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
