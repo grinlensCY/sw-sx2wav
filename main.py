@@ -79,14 +79,17 @@ class Engine:
     
     def chkRecThd(self, flag):
         print('start to ChkRecThd')
-        # t0 = time.time()
+        t0 = time.time()
         while not flag.wait(5):
             if self.data_retriever.thd_run_flag is not None:  print(self.strPkgSpd)
             # print(f'chkRecThd: elapsed time={time.time()-t0:.2f}sec')
             isRun = False
             if not self.config['onlylog']:
                 isRun |= not self.recThd_audio.stopped()
-                print('\nisRun',isRun,'self.recThd_audio.stopped()', self.recThd_audio.stopped(), f'processed={self.recThd_audio.processedT/60:.1f}')
+                print('\nisRun',isRun)
+                print((f'self.recThd_audio.stopped() {self.recThd_audio.stopped()} '
+                        f'processed={self.recThd_audio.processedT/60:.1f}mins  '
+                        f'speed={self.recThd_audio.processedT/(time.time()-t0):.1f}'))
                 isRun |= not self.recThd_acc.stopped()
                 print(isRun,'self.recThd_acc.stopped()', self.recThd_acc.stopped())
                 # isRun |= not self.recThd_ecg.stopped()
