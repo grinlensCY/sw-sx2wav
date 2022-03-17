@@ -179,7 +179,7 @@ class Engine:
                 if cnt>20:
                     self.stop()
                     print(f'quit {os.path.basename(sx_fn)}, having waited for format check too long time'
-                        ,file=open('log.txt','a',newline=''))
+                        ,file=open('log.txt','a',newline='', encoding='utf-8-sig'))
                     break
             cnt = 0
             while not self.flag_ble_addr.wait(0.5):
@@ -188,7 +188,7 @@ class Engine:
                 if cnt > 10:
                     input(f'ble addr of {os.path.basename(sx_fn)} is unknown!')
                     print(f'ble addr of {os.path.basename(sx_fn)} is unknown!'
-                          ,file=open('log.txt','a',newline=''))
+                          ,file=open('log.txt','a',newline='', encoding='utf-8-sig'))
                     break
         if self.flag_checked_fileformat.is_set():
             print(f'format checked:{self.flag_checked_fileformat.is_set()}  '
@@ -483,7 +483,7 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
         datainfo['user_srcdir'] = srcdir.split('\\')[-1]
         datainfo['sxfn'] = tfn
     print()
-    user_srcdir = srcdir.split('\\')[-1]
+    user_srcdir = os.path.basename(srcdir) #srcdir.split('\\')[-1]
     for fn in fns:
         ts = getTsOfFn(fn,ms=False)     #float(os.path.basename(fn)[:-3])/1000
         basefn = os.path.basename(fn)
@@ -497,15 +497,15 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                     f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
         print(msg)
         sx_dict[basefn] = {'user_srcdir':user_srcdir,
-                                            'recTime':recTime,
-                                            'ble':'',
-                                            'mic_sr':0,
-                                            'imu_sr':0,
-                                            'dualmic':False,
-                                            'duration':os.path.getsize(fn)/20000,
-                                            'duration_hhmmss':hhmmss(os.path.getsize(fn)/20000)}
+                            'recTime':recTime,
+                            'ble':'',
+                            'mic_sr':0,
+                            'imu_sr':0,
+                            'dualmic':False,
+                            'duration':os.path.getsize(fn)/20000,
+                            'duration_hhmmss':hhmmss(os.path.getsize(fn)/20000)}
     fn_log = f'{srcdir}/{time.strftime("%Y-%m-%d", time.localtime())}.log'
-    with open(fn_log, 'w') as jout:
+    with open(fn_log, 'w', newline='', encoding='utf-8-sig') as jout:
         json.dump(sxdict, jout, indent=4, ensure_ascii=False)
     if len(fns) == 1:
         datainfo['recTime'] = recTime
@@ -596,7 +596,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
     sxpool = os.path.dirname(sxfns[0])+'/merged' if not config['onlytst0'] else os.path.dirname(sxfns[0])
     mergelog_fn = f'{sxpool}/merge.log'
     if os.path.exists(mergelog_fn):
-        with open(mergelog_fn,'r',newline='') as jf:
+        with open(mergelog_fn,'r',newline='',encoding='utf-8-sig') as jf:
             mergelog = json.loads(jf.read())
     else:
         mergelog = {}
@@ -621,7 +621,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
         if tslog != {}:
             log = tslog[basefn]
         elif os.path.exists(logfn):
-            with open(logfn, 'r', newline='') as jf:
+            with open(logfn, 'r', newline='',encoding='utf-8-sig') as jf:
                 log = json.loads(jf.read())
         elif not mustMerge:
             new_sxfns.append(f'{sxpool}/{basefn}')
@@ -696,7 +696,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                             f'({first_user}: {cum_cnt} files,{cum_duration/1000/60:.2f}min)\n'))
                     with open(first_sxfn, "wb") as f:
                         f.write(cum_sxData)
-                    with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='') as jf:
+                    with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='', encoding='utf-8-sig') as jf:
                         json.dump(cum_logdata, jf, ensure_ascii=False)
                     sx_dict[first_sxbasefn]['duration'] = cum_duration/1000
                     merged_sxfns.append(first_sxbasefn)
@@ -710,7 +710,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                     cum_logdata['duration'] = cum_duration/1000
                     with open(first_sxfn, "wb") as f:
                         f.write(cum_sxData)
-                    with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='') as jf:
+                    with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='', encoding='utf-8-sig') as jf:
                         json.dump(cum_logdata, jf, ensure_ascii=False)
                 merged_sxfns.append(first_sxbasefn)
                 for sfn in merged_sxfns:
@@ -736,19 +736,19 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                     cum_logdata['stop_ts'] = log['stop_ts']
                 cum_logdata = log
                 cum_duration += (log['stop_ts']-log['start_ts'])
-                with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='') as jf:
+                with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='', encoding='utf-8-sig') as jf:
                     json.dump(cum_logdata, jf, ensure_ascii=False)
                 print(f'first sx/user: {os.path.basename(first_sxfn)} / {first_user}')
                 last_merged_dict[first_user] = [basefn]
         last_stop_ts = log['stop_ts']
-        with open(mergelog_fn,'w',newline='') as jf:
+        with open(mergelog_fn,'w',newline='', encoding='utf-8-sig') as jf:
             json.dump(mergelog, jf, indent=4, ensure_ascii=False)
     return new_sxfns,new_userlist,sxpool
     
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220311d')
+    print('version: 20220311e')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
@@ -778,7 +778,7 @@ if __name__ == "__main__":
     if config["dirList_load_S3zip"]:    # auto run mode, process files in s3
         fn_log = os.path.join(os.path.dirname(__file__),'s3filelog.json')
         if os.path.exists(fn_log):
-            with open(fn_log, 'r', newline='') as jf:
+            with open(fn_log, 'r', newline='',encoding='utf-8-sig') as jf:
                 sxdict = json.loads(jf.read())
         fns,usersrcdirs = unzipS3(
                             config["dirList_load_S3zip"],config["dir_upzipS3"],config["ts_loadS3"],
@@ -826,8 +826,6 @@ if __name__ == "__main__":
                 print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
             if bleaddr is None or not dstdir:
                 continue
-            # ts = float(os.path.basename(fn)[:-3])/1000
-            # recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
             ts = getTsOfFn(fn,ms=False)     #float(os.path.basename(fn)[:-3])/1000
             if not ts:
                 recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
@@ -846,7 +844,7 @@ if __name__ == "__main__":
 
             wavdictfn = f'{userdir}/{os.path.basename(userdir)}_fileinfo.json'
             if os.path.exists(wavdictfn):
-                with open(wavdictfn, 'r', newline='') as jf:
+                with open(wavdictfn, 'r', newline='',encoding='utf-8-sig') as jf:
                     wavdict = json.loads(jf.read())
             else:
                 wavdict = {}
@@ -857,7 +855,7 @@ if __name__ == "__main__":
                                 'sxfn': datainfo['sxfn'],
                                 'duration': sxdict[datainfo['sxfn']]['duration'],
                                 'duration_hhmmss': sxdict[datainfo['sxfn']]['duration_hhmmss']}
-            with open(wavdictfn, 'w', newline='') as wavjson:
+            with open(wavdictfn, 'w', newline='', encoding='utf-8-sig') as wavjson:
                 json.dump(wavdict, wavjson, indent=4, ensure_ascii=False)
 
             if config['delSX']:
@@ -871,25 +869,12 @@ if __name__ == "__main__":
                 elif fn != sx_dstfn:
                     print(sx_dstfn,'exists! remove src!')
                     os.remove(fn)
-                # for folder in os.listdir(config['dir_savSX']):
-                #     if folder[-4:] == f"{bleaddr[-4:]}":
-                #         dstdir = f"{config['dir_savSX']}\\{folder}\\raw"
-                #         print('move sx to',dstdir)
-                #         dstfn = f"{dstdir}\\{os.path.basename(fn)}"
-                #         if not os.path.exists(dstfn):
-                #             if not os.path.exists(dstdir):
-                #                 os.makedirs(dstdir)
-                #             shutil.move(fn,dstfn)
-                #         else:
-                #             print(dstfn,'exists! remove src!')
-                #             os.remove(fn)
-                #         break
             if (config["dirList_load_S3zip"]
                     and len(sxdict)
                     and userdirkw in last_merged_dict and os.path.basename(fn) not in last_merged_dict[userdirkw]
                     and (not config["onlyChkTS"] or not config["onlyChkFormat"]
                             or not config["onlylog"] or not config["onlyMovelog"])):
-                with open(fn_log, 'w') as jout:
+                with open(fn_log, 'w', encoding='utf-8-sig') as jout:
                     json.dump(sxdict, jout, indent=4, ensure_ascii=False)
         time.sleep(3)
         if not config['onlytst0'] and len(sxpool) and config['delmergedSX']:

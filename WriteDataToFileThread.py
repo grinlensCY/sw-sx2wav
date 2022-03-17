@@ -39,11 +39,11 @@ class RecThread(threading.Thread):
         self.err = {'reset_ts':[], 'pkgloss_ts':[], 'pkgloss_duration':[]}
         self.fn_errJson = f'{self.filename_prefix}-errlog_{job}.json'
         try:
-            print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'a',newline=''))
+            print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
         except Exception as e:
             print(f'{self.job}: {e}')
             time.sleep(0.01)
-            print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'a',newline=''))
+            print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
         if job == 'mic':
             self.filename_new.append(f'{self.filename_prefix}-audio-main01.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-env01.wav')
@@ -94,7 +94,7 @@ class RecThread(threading.Thread):
     def plt_pkgloss(self,fn):
         # path = r'P:\Backups\Google - Chenyi Kuo\Google Drive\Experiment\compilation\FJ_baby\12M_baby_patch_DVT\F2_CF_F9_99_7D_F4_內建天線_綁帶加扣具測試_未脫落_2022_03_13_14\F2CFF9997DF4\2022-03-13'
         # fn = [f'{path}\\{fn}' for fn in os.listdir(path) if fn.endswith('json')][0]
-        with open(fn, 'r', newline='') as jf:
+        with open(fn, 'r', newline='',encoding='utf-8-sig') as jf:
             log = json.loads(jf.read())
         xtick_step = 60*60
         if log['whole_duration'] < 10*60:
@@ -170,7 +170,7 @@ class RecThread(threading.Thread):
                         pkglen = len(micdata[0])
                         tlast5 = np.array([0],dtype='uint32')
                         msg = f'{self.job},t0_fw={t0},pkglen={micdata[0].size}'
-                        print(msg, file=open(self.fn_ts_t0_mic,'w',newline=''))
+                        print(msg, file=open(self.fn_ts_t0_mic,'w',newline='', encoding='utf-8-sig'))
                         self.stop()
                     else:
                         time.sleep(self.waitTime)
@@ -214,7 +214,7 @@ class RecThread(threading.Thread):
                                 pkglen = len(micdata[0])
                                 tlast5 = np.array([0],dtype='uint32')
                                 msg = f'{self.job},t0_fw={t0},pkglen={micdata[0].size},tsHz={self.ts_Hz}'
-                                print(msg, file=open(self.fn_ts_t0_mic,'w',newline=''))
+                                print(msg, file=open(self.fn_ts_t0_mic,'w',newline='', encoding='utf-8-sig'))
                             tstmp = tmp[0] + toffset-t0
                             if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0:    # ts was reset
                                 msg += (f'\n{self.job} ts was reset because ')
@@ -256,11 +256,11 @@ class RecThread(threading.Thread):
                                 
                             if len(msg):
                                 try:
-                                    print(msg, file=open(self.fn_errlog,'a',newline=''))
+                                    print(msg, file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
                                 except Exception as e:
                                     print(f'{self.job}: {e}')
                                     time.sleep(0.01)
-                                    print(msg, file=open(self.fn_errlog,'a',newline=''))
+                                    print(msg, file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
                             tstmp = tmp[0] + toffset-t0
                             tlast5 = np.r_[tlast5, tstmp]
                             if tlast5.size > 5:
@@ -335,11 +335,11 @@ class RecThread(threading.Thread):
                                         f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp/self.ts_Hz))}')
                             if len(msg):
                                 try:
-                                    print(msg, file=open(self.fn_errlog,'a',newline=''))
+                                    print(msg, file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
                                 except Exception as e:
                                     print(f'{self.job}: {e}')
                                     time.sleep(0.01)
-                                    print(msg, file=open(self.fn_errlog,'a',newline=''))
+                                    print(msg, file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
                             tstmp = tmp[0] + toffset-t0
                             tlast5 = np.r_[tlast5, tstmp]
                             if tlast5.size > 5:
@@ -369,7 +369,7 @@ class RecThread(threading.Thread):
                         tlast5 = np.array([0],dtype='uint32')
                         if self.job == 'acc':
                             msg = f'{self.job},t0_fw={t0},pkglen={len(tmp[1])},tsHz={self.ts_Hz}'
-                            print(msg, file=open(self.fn_ts_t0_acc,'w',newline=''))
+                            print(msg, file=open(self.fn_ts_t0_acc,'w',newline='', encoding='utf-8-sig'))
                         self.stop()
                     else:
                         emptyCnt += 1
@@ -406,7 +406,7 @@ class RecThread(threading.Thread):
                                 max_ts_diff = ts_diff_target*1.4
                                 if self.job == 'acc':
                                     msg = f'{self.job},t0_fw={t0},pkglen={len(tmp[1])},tsHz={self.ts_Hz}'
-                                    print(msg, file=open(self.fn_ts_t0_acc,'w',newline=''))
+                                    print(msg, file=open(self.fn_ts_t0_acc,'w',newline='', encoding='utf-8-sig'))
                             tstmp = tmp[0] + toffset-t0
                             if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0: # ts was reset
                                 msg += (f'\n{self.job} ts was reset because')
@@ -443,11 +443,11 @@ class RecThread(threading.Thread):
                             #     tlast5[-1] = tstmp
                             if len(msg):
                                 try:
-                                    print(msg, file=open(self.fn_errlog,'a',newline=''))
+                                    print(msg, file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
                                 except Exception as e:
                                     print(f'{self.job}: {e}')
                                     time.sleep(0.01)
-                                    print(msg, file=open(self.fn_errlog,'a',newline=''))
+                                    print(msg, file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
                             if tlast5.size > 5:
                                 tlast5 = tlast5[-5:]
                             ts = np.linspace(tstmp, tstmp+ts_diff_target, pkglen, endpoint=False) / self.ts_Hz
