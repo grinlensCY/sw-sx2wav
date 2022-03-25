@@ -1,5 +1,5 @@
 ﻿{
-    "dirToloadFile": "C:/Users/chenyikuo/Downloads/tmp/A80PBY~0",
+    "dirToloadFile": "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/在家受測者/苗栗黃小姐/2022-03-25/F37D711D38E0",
     "//dirToloadFile": "G:/My Drive/Code/sx2wav/test_files",
     "dirList_load_S3zip": "",
     "//dirList_load_S3zip": [
@@ -14,12 +14,13 @@
     ],
     "dir_upzipS3": "C:/Users/chenyikuo/downloads_S3",
     "ts_loadS3": [
-        20220309,
+        20220310,
         20220401
     ],
     "ts_range_sx": [],
     "load_all_sx": 10,
     "mergeNearby": 10,
+    "maxMergeInterval_ms": 5000,
     "dir_Export": "G:/My Drive/Experiment/compilation/",
     "fj_dir_kw": [],
     "//fj_dir_kw": [

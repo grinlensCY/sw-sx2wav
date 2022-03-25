@@ -664,7 +664,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
         else:
             interval = log['start_ts'] - last_stop_ts
             print(f"\t\t\tinterval = {interval/1000:.1f}sec")
-            if userlist[i] == first_user and ((mustMerge and interval <= 180000) or interval <= 5000):  # the same user and interval < 5sec
+            if userlist[i] == first_user and ((mustMerge and interval <= 180000) or interval <= config['maxMergeInterval_ms']):  # the same user and interval < 5sec
             # if userlist[i] == first_user and interval <= 50000:  # the same user and interval < 5sec
                 if config['onlytst0']:
                     continue
@@ -748,7 +748,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220311e')
+    print('version: 20220311g')
     config = updateConfig()
     for key in config.keys():
         if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
