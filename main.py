@@ -654,7 +654,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 log['stop_ts'] = log['start_ts'] + os.path.getsize(fn)/20000*1000
                 cum_logdata['stop_ts'] = log['stop_ts']
             cum_duration += (log['stop_ts']-log['start_ts'])
-            print(f'first sx/user: {first_sxbasefn} / {first_user}')
+            print((f"first sx/user: {first_sxbasefn} / {first_user}  duration={(log['stop_ts']-log['start_ts'])/1000:.1f}  "
+                    f"cum_duration={cum_duration/1000:.1f}"))
             # if first_sxfn.endswith('sxr'):
             #     shutil.copy2(first_sxfn,first_sxfn.replace(".sxr","_orig.sxr"))
             # else:
@@ -738,7 +739,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 cum_duration += (log['stop_ts']-log['start_ts'])
                 with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='', encoding='utf-8-sig') as jf:
                     json.dump(cum_logdata, jf, ensure_ascii=False)
-                print(f'first sx/user: {os.path.basename(first_sxfn)} / {first_user}')
+                print((f"first sx/user: {os.path.basename(first_sxfn)} / {first_user}  duration={(log['stop_ts']-log['start_ts'])/1000:.1f}  "
+                        f"cum_duration={cum_duration/1000:.1f}"))
                 last_merged_dict[first_user] = [basefn]
         last_stop_ts = log['stop_ts']
         with open(mergelog_fn,'w',newline='', encoding='utf-8-sig') as jf:
