@@ -21,8 +21,10 @@ class RecThread(threading.Thread):
         self.qMulti = [queue.Queue() for i in range(3)]
         self._stop_event = threading.Event()
         # self.filename_prefix = f'{os.path.dirname(__file__)}/record/{fn_prefix}'
-        self.recT0 = recT0
         self.filename_prefix = fn_prefix
+        if not os.path.exists(os.path.dirname(self.filename_prefix)):
+            os.makedirs(os.path.dirname(self.filename_prefix))
+        self.recT0 = recT0
         self.filename_new = []
         self.daemon = True
         self.job = job
@@ -65,8 +67,7 @@ class RecThread(threading.Thread):
                     print('replace existing',os.path.basename(fn))
         else:
             print('\nonly export fwt0')
-        if not os.path.exists(os.path.dirname(self.filename_prefix)):
-            os.makedirs(os.path.dirname(self.filename_prefix))
+
 
     def __del__(self):
         # self.wait()
@@ -130,10 +131,10 @@ class RecThread(threading.Thread):
         print(fn)
         path_str = fn.split('\\')[-6:]
         plt.suptitle(f"trend chart of empty_duration\n{path_str}", fontproperties=chinese_font)
-        axs[0].plot(log['pkgloss_ts'],log['pkgloss_duration'],marker='o',ls='')
+        axs[0].plot(log['pkgloss_ts'],log['pkgloss_duration'],marker='o',ls='',label='pkgloss_duration(sec)')
         if len(log['reset_ts']):
-            axs[0].plot(log['reset_ts'],1,marker='o',ls='')
-        axs[1].plot(log['pkgloss_ts'],log['pkgloss_duration'],marker='o',ls='')
+            axs[0].plot(log['reset_ts'],1,marker='o',ls='',label='reset_ts')
+        axs[1].plot(log['pkgloss_ts'],log['pkgloss_duration'],marker='o',ls='',label='pkgloss_duration(sec)')
         if len(log['pkgloss_duration']) > 2:
             ul = np.std(log['pkgloss_duration'])*4 + np.mean(log['pkgloss_duration'])
             mask = log['pkgloss_duration'] < ul
@@ -146,8 +147,11 @@ class RecThread(threading.Thread):
         axs[0].set_xticklabels(xticklabels,va='bottom')
         axs[0].set_xticklabels(xticklabels_minor,minor=True)
         axs[1].set_xticks(xticks_minor)
-        axs[0].grid(axis='both',which='both')
-        axs[1].grid(axis='both',which='both')
+        for ax in axs:
+            ax.grid(axis='both',which='both')
+            ax.legend(loc='upper left')
+        # axs[0].grid(axis='both',which='both')
+        # axs[1].grid(axis='both',which='both')
         plt.tight_layout()
         pngfn = fn.replace('json','png')
         plt.savefig(pngfn)
@@ -214,7 +218,7 @@ class RecThread(threading.Thread):
                                 pkglen = len(micdata[0])
                                 tlast5 = np.array([0],dtype='uint32')
                                 msg = f'{self.job},t0_fw={t0},pkglen={micdata[0].size},tsHz={self.ts_Hz}'
-                                print(msg, file=open(self.fn_ts_t0_mic,'w',newline='', encoding='utf-8-sig'))
+                                print(msg, file=open(self.fn_ts_t0_mic,'w',newline='',encoding='utf-8-sig'))
                             tstmp = tmp[0] + toffset-t0
                             if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0:    # ts was reset
                                 msg += (f'\n{self.job} ts was reset because ')
@@ -335,16 +339,16 @@ class RecThread(threading.Thread):
                                         f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp/self.ts_Hz))}')
                             if len(msg):
                                 try:
-                                    print(msg, file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
+                                    print(msg, file=open(self.fn_errlog,'a',newline='',encoding='utf-8-sig'))
                                 except Exception as e:
                                     print(f'{self.job}: {e}')
                                     time.sleep(0.01)
-                                    print(msg, file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
+                                    print(msg, file=open(self.fn_errlog,'a',newline='',encoding='utf-8-sig'))
                             tstmp = tmp[0] + toffset-t0
                             tlast5 = np.r_[tlast5, tstmp]
                             if tlast5.size > 5:
                                 tlast5 = tlast5[-5:]
-                            tmp[0] = tstmp / self.ts_Hz
+                            tmp[0] = tstmp/self.ts_Hz
                             # print('sysinfo rec',tmp)
                             writer.writerow(tmp)
                             hasData |= True
@@ -369,7 +373,7 @@ class RecThread(threading.Thread):
                         tlast5 = np.array([0],dtype='uint32')
                         if self.job == 'acc':
                             msg = f'{self.job},t0_fw={t0},pkglen={len(tmp[1])},tsHz={self.ts_Hz}'
-                            print(msg, file=open(self.fn_ts_t0_acc,'w',newline='', encoding='utf-8-sig'))
+                            print(msg, file=open(self.fn_ts_t0_acc,'w',newline='',encoding='utf-8-sig'))
                         self.stop()
                     else:
                         emptyCnt += 1
@@ -406,7 +410,7 @@ class RecThread(threading.Thread):
                                 max_ts_diff = ts_diff_target*1.4
                                 if self.job == 'acc':
                                     msg = f'{self.job},t0_fw={t0},pkglen={len(tmp[1])},tsHz={self.ts_Hz}'
-                                    print(msg, file=open(self.fn_ts_t0_acc,'w',newline='', encoding='utf-8-sig'))
+                                    print(msg, file=open(self.fn_ts_t0_acc,'w',newline='',encoding='utf-8-sig'))
                             tstmp = tmp[0] + toffset-t0
                             if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0: # ts was reset
                                 msg += (f'\n{self.job} ts was reset because')
@@ -429,7 +433,7 @@ class RecThread(threading.Thread):
                                     tlast5 = np.r_[tlast5, tstmp2]
                                     if tlast5.size > 5:
                                         tlast5 = tlast5[-5:]
-                                    ts = np.linspace(tstmp2, tstmp2+ts_diff_target, pkglen, endpoint=False) / self.ts_Hz
+                                    ts = np.linspace(tstmp2, tstmp2+ts_diff_target, pkglen, endpoint=False)/self.ts_Hz
                                     fileList[0].write(
                                         np.block([[ts],
                                                 [np.array(tmp[1])[0].reshape((3,1))*np.ones((data_dim,pkglen))/self.fullscale]]).T)
@@ -443,14 +447,14 @@ class RecThread(threading.Thread):
                             #     tlast5[-1] = tstmp
                             if len(msg):
                                 try:
-                                    print(msg, file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
+                                    print(msg, file=open(self.fn_errlog,'a',newline='',encoding='utf-8-sig'))
                                 except Exception as e:
                                     print(f'{self.job}: {e}')
                                     time.sleep(0.01)
-                                    print(msg, file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
+                                    print(msg, file=open(self.fn_errlog,'a',newline='',encoding='utf-8-sig'))
                             if tlast5.size > 5:
                                 tlast5 = tlast5[-5:]
-                            ts = np.linspace(tstmp, tstmp+ts_diff_target, pkglen, endpoint=False) / self.ts_Hz
+                            ts = np.linspace(tstmp, tstmp+ts_diff_target, pkglen, endpoint=False)/self.ts_Hz
                             fileList[0].write(
                                         np.block([[ts],
                                                 [np.array(list(tmp[1])).T/self.fullscale]]).T)
