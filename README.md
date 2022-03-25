@@ -2,6 +2,9 @@
 
 1. 可以轉 station所記錄在SD或透過uart傳給PC的sx檔
 2. 訊息加上 已轉的檔案時間、速度
+3. 在手動模式下，config['ts_loadS3']用來指定日期範圍，[20220310,20220401], 若為[]，則無限制
+4. config['ts_range_sx'] 則是以ts(ms)的格式來限制
+5. config['maxMergeInterval_ms'] 小於這時間間隔，就合併
 
 # 20220310
 
