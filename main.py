@@ -198,15 +198,15 @@ class Engine:
                     f'gyro sr:{self.datainfo["gyro"]["sr"]}')
             if pkg_handler.bleaddr is None:
                self.stop()
-               return pkg_handler.bleaddr,'','',''
+               return pkg_handler.bleaddr,'','','','','',''
             if self.config['onlySelectedBle'] not in pkg_handler.bleaddr:
                 print('onlySelectedBle not in pkg_handler.bleaddr')
                 self.stop()
-                return pkg_handler.bleaddr,'','',''
+                return pkg_handler.bleaddr,'','','','','',''
             if self.config['onlyChkFormat']:
                 print('onlyChkFormat',self.config['onlyChkFormat'])
                 self.stop()
-                return pkg_handler.bleaddr,'','',''
+                return pkg_handler.bleaddr,'','','','','',''
             # self.datainfo['mic']['sr'] = 4000 if self.flag_4kHz.is_set() else 2000
             self.bleaddr = pkg_handler.bleaddr if self.flag_ble_addr.is_set() else "unknownBLE"
             self.datainfo['ble'] = self.bleaddr
@@ -239,7 +239,7 @@ class Engine:
             if self.config['onlyMovelog']:
                 print('onlyMovelog ==> Stop!')
                 self.stop()
-                return '','','',''
+                return '','','','','','',''
             self.set_files_source(reset=False,sx_fn=sx_fn, wavfnkw_ts=wavfnkw_ts, dstdir=dstdir)
             # self.stop()
             return self.bleaddr, dstdir, userdir, self.flag_dualmic.is_set(), dstdir2, userdir2, wavfnkw_ts
@@ -411,7 +411,8 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
     root = tk.Tk()
     root.withdraw()
 
-    srcdir = config['dirToloadFile'] if not srcdir else srcdir
+    srcdir = config['dirToloadFile'][0] if not srcdir else srcdir
+    
     tfn = filedialog.askopenfilename(initialdir=sdir,filetypes=[("SX File",(f"*{kw}*.sxr",f"*{kw}*.sx",f"*{kw}*.zip"))])
     if not tfn:
         return ''
@@ -432,45 +433,45 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
         fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                 if fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip')]
         skip_list = []
-        if not onlyChkTS:
-            for fn in fns_list:
-                ts = getTsOfFn(fn,ms=False)
-                fsize = os.path.getsize(fn)
-                basefn = os.path.basename(fn)
-                if ts:
-                    recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
-                    msg = (f'{basefn}  recording start at:{recTime}  '
-                            f'file size:{os.path.getsize(fn)}=>{hhmmss(fsize/20000)}')
-                else:
-                    recTime = 'SD_card_unknown'
-                    msg = (f'{basefn}  recording start at:{recTime}  '
-                            f'file size:{os.path.getsize(fn)}=>{hhmmss(fsize/20000)}')
-                if fsize < 1600:     # < 5sec
-                    msg += f"==>duration < 5sec==>quit!"
-                    print(msg)
+        # if not onlyChkTS:
+        for fn in fns_list:
+            ts = getTsOfFn(fn,ms=False)
+            fsize = os.path.getsize(fn)
+            basefn = os.path.basename(fn)
+            if ts:
+                recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+                msg = (f'{basefn}  recording start at:{recTime}  '
+                        f'file size:{os.path.getsize(fn)}=>{hhmmss(fsize/20000)}')
+            else:
+                recTime = 'SD_card_unknown'
+                msg = (f'{basefn}  recording start at:{recTime}  '
+                        f'file size:{os.path.getsize(fn)}=>{hhmmss(fsize/20000)}')
+            if fsize < 1600:     # < 5sec
+                msg += f"==>duration < 5sec==>quit!"
+                print(msg)
+                skip_list.append(basefn)
+                continue
+            print(msg)
+            if (ts_range[0] != 0 and ts_range[1] != 0) and recTime != 'SD_card_unknown':
+                # fnidx = basefn.find('.')
+                # ts = int(basefn[:fnidx])
+                ts_range[1] = max(ts, ts_range[1])
+                ts_range_str = [time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts_range[0]/1000)),
+                                time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts_range[1]/1000))]
+                if ts*1000 < ts_range[0] or ts*1000 > ts_range[1]:
+                    print(f"\tis beyond specified range {ts_range}={ts_range_str} ==> skip it")
                     skip_list.append(basefn)
                     continue
-                print(msg)
-                if (ts_range[0] != 0 and ts_range[1] != 0) and recTime != 'SD_card_unknown':
-                    # fnidx = basefn.find('.')
-                    # ts = int(basefn[:fnidx])
-                    ts_range[1] = max(ts, ts_range[1])
-                    ts_range_str = [time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts_range[0]/1000)),
-                                    time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts_range[1]/1000))]
-                    if ts*1000 < ts_range[0] or ts*1000 > ts_range[1]:
-                        print(f"\tis beyond specified range {ts_range}={ts_range_str} ==> skip it")
-                        skip_list.append(basefn)
-                        continue
-                if not config['onlytst0'] and fn.endswith('zip'):
-                    with ZipFile(fn) as myzip:
-                        for zipfn in myzip.namelist():
-                            if zipfn.endswith('sx') and not os.path.exists(f'{srcdir}\{zipfn.replace("zip","sx")}'):
-                                print('going to upzip',zipfn)
-                                # myzip.extract(zipfn,path=srcdir)
-                                myzip.extractall(path=srcdir)
-            fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
-                    if (fn.endswith('.sxr') or fn.endswith('.sx') and fn not in skip_list)]
-            fns.sort(key=lambda x:os.path.basename(x).split('_')[-1])
+            if not config['onlytst0'] and fn.endswith('zip'):
+                with ZipFile(fn) as myzip:
+                    for zipfn in myzip.namelist():
+                        if zipfn.endswith('sx') and not os.path.exists(f'{srcdir}\{zipfn.replace("zip","sx")}'):
+                            print('going to upzip',zipfn)
+                            # myzip.extract(zipfn,path=srcdir)
+                            myzip.extractall(path=srcdir)
+        fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
+                if (fn.endswith('.sxr') or fn.endswith('.sx') and fn not in skip_list)]
+        fns.sort(key=lambda x:os.path.basename(x).split('_')[-1])
     else:
         if tfn.endswith('zip'):
             with ZipFile(tfn) as myzip:
@@ -612,7 +613,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 basefn = os.path.basename(row[0])
                 tslog[f"{basefn}"] = {'start_ts':row[1],'stop_ts':row[2]}
 
-    print('merging...')
+    if input('start merging? Enter:go  Others:quit  '):
+        sys.exit()
     for i,fn in enumerate(sxfns):
         basefn = os.path.basename(fn)
         logfn = fn.replace(".sxr",".log").replace(".sx",".log")
@@ -750,11 +752,14 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220311g')
+    print('version: 20220330')
     config = updateConfig()
     for key in config.keys():
-        if key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key):
-            print(key,config[key])
+        if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
+            if key in config['default'].keys() and config[key] != config['default'][key]:
+                print(f"{key} {config[key]} ===> not default={config['default'][key]}")
+            else:
+                print(f"{key} {config[key]}")
         elif key.startswith("dirList_load_S3zip"):
             for item in config[key]:
                 print(item)
@@ -793,12 +798,18 @@ if __name__ == "__main__":
                     fns.append(f'{dir_upzipS3}/{fn}')
                     usersrcdirs.append(sxdict[fn]['user_srcdir'])
     else:
-        sdir = config['dirToloadFile']
+        print('select dir')
+        [print(i,path) for i,path in enumerate(config['dirToloadFile'])]
+        o = input('which? ')
+        sdir = config['dirToloadFile'][int(o)]
         fns = findFileset(datainfo, config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
                             onlyChkTS=config['onlyChkTS'],sx_dict=sxdict)
         usersrcdirs = [os.path.basename(os.path.dirname(fn)) for fn in fns]
         if len(fns):
-            config['dirToloadFile'] = os.path.dirname(fns[0])
+            if os.path.dirname(fns[0]) not in config['dirToloadFile']:
+                config['dirToloadFile'].append(os.path.dirname(fns[0]))
+                if len(config['dirToloadFile']) > 3:
+                    del config['dirToloadFile'][0]
             updateConfig(config=config)
     if not config['onlyChkTS']:
         sxpool = ''

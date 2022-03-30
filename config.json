@@ -1,5 +1,27 @@
 ﻿{
-    "dirToloadFile": "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/在家受測者/苗栗黃小姐/2022-03-25/F37D711D38E0",
+    "default": {
+        "dirList_load_S3zip": "",
+        "ts_loadS3": [],
+        "ts_range_sx": [],
+        "load_all_sx": 10,
+        "mergeNearby": 10,
+        "maxMergeInterval_ms": 5000,
+        "onlySelectedBle": "",
+        "onlyChkTS": 0,
+        "onlyChkFormat": 0,
+        "onlylog": 0,
+        "onlyMovelog": 0,
+        "onlytst0": 0,
+        "overwrite": 0,
+        "delSX": 0,
+        "delmergedSX": 10,
+        "moveSX": 0,
+        "skipPkgCnt": 10
+    },
+    "dirToloadFile": [
+        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/FJ_baby/12M_baby_patch_DVT/F5C7B2C681F5_2022_03_29_Gyro_自黏綁帶",
+        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/在家受測者/苗栗黃小姐"
+    ],
     "//dirToloadFile": "G:/My Drive/Code/sx2wav/test_files",
     "dirList_load_S3zip": "",
     "//dirList_load_S3zip": [
