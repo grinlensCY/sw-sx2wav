@@ -349,6 +349,8 @@ class RecThread(threading.Thread):
                             if tlast5.size > 5:
                                 tlast5 = tlast5[-5:]
                             tmp[0] = tstmp/self.ts_Hz
+                            tmp[1] = hex(tmp[1])
+                            tmp[2] = hex(tmp[2])
                             # print('sysinfo rec',tmp)
                             writer.writerow(tmp)
                             hasData |= True
