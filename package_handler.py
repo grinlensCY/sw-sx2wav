@@ -105,8 +105,13 @@ class PackageHandler:
                 self.engine.datainfo['mic']['sr'] = 2000
                 print('dualmic: not 4kHz, pkg size=', len(dat[1]),'bleaddr=',self.bleaddr)
             self.engine.flag_mic_sr_checked.set()
-        if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
-            self.engine.flag_checked_fileformat.set()
+        if not self.engine.flag_checked_fileformat.is_set():
+            if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
+                self.engine.flag_checked_fileformat.set()
+            elif self.engine.flag_mic_sr_checked.is_set():
+                print('\n\tonly flag_mic_sr_checked\n')
+                self.engine.flag_checked_fileformat.set()
+        # print(self.engine.flag_checked_fileformat.is_set(),self.engine.flag_mic_sr_checked.is_set(),self.engine.flag_imu_sr_checked.is_set())
         # q.put_nowait(dat)
 
         self.mic_pkg_cnt+=1
@@ -130,6 +135,9 @@ class PackageHandler:
                 print('multimic: not 4kHz, pkg size=', len(dat[1]),'bleaddr=',self.bleaddr)
             self.engine.flag_mic_sr_checked.set()
         if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
+            self.engine.flag_checked_fileformat.set()
+        elif self.engine.flag_mic_sr_checked.is_set():
+            print('\n\tonly flag_mic_sr_checked\n')
             self.engine.flag_checked_fileformat.set()
         # q.put_nowait(dat)
 

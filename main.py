@@ -193,9 +193,13 @@ class Engine:
         if self.flag_checked_fileformat.is_set():
             print(f'format checked:{self.flag_checked_fileformat.is_set()}  '
                     f'4kHz:{self.flag_4kHz.is_set()}  dualmic:{self.flag_dualmic.is_set()}  '
-                    f'BLE addr:{pkg_handler.bleaddr} '
-                    f'acc sr:{self.datainfo["acc"]["sr"]} '
-                    f'gyro sr:{self.datainfo["gyro"]["sr"]}')
+                    f'BLE addr:{pkg_handler.bleaddr} ')
+            if not self.flag_imu_sr_checked.is_set():
+                self.config['onlylog'] = 10
+                print('\nimu_sr is confirmed ==> force to be onlylog mode!\n')
+            else:            
+                print(f'acc sr:{self.datainfo["acc"]["sr"]} '
+                        f'gyro sr:{self.datainfo["gyro"]["sr"]}')
             if pkg_handler.bleaddr is None:
                self.stop()
                return pkg_handler.bleaddr,'','','','','',''
