@@ -812,7 +812,7 @@ if __name__ == "__main__":
         if len(fns):
             if os.path.dirname(fns[0]) not in config['dirToloadFile']:
                 config['dirToloadFile'].append(os.path.dirname(fns[0]))
-                if len(config['dirToloadFile']) > 3:
+                if len(config['dirToloadFile']) > 5:
                     del config['dirToloadFile'][0]
             updateConfig(config=config)
     if not config['onlyChkTS']:
