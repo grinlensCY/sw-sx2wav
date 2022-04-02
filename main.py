@@ -629,12 +629,12 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
         elif os.path.exists(logfn):
             with open(logfn, 'r', newline='',encoding='utf-8-sig') as jf:
                 log = json.loads(jf.read())
-        elif not mustMerge:
-            new_sxfns.append(f'{sxpool}/{basefn}')
-            if not config['onlytst0']:
-                shutil.copy2(fn,new_sxfns[-1])
-            new_userlist.append(userlist[i])
-            continue
+        # elif not mustMerge:
+        #     new_sxfns.append(f'{sxpool}/{basefn}')
+        #     if not config['onlytst0']:
+        #         shutil.copy2(fn,new_sxfns[-1])
+        #     new_userlist.append(userlist[i])
+        #     continue
         else:
             log = {'start_ts':getTsOfFn(fn)}
         
