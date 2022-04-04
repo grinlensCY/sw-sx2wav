@@ -33,6 +33,8 @@ class PackageHandler:
 
         self.engine = engine
         self.bleaddr = None
+
+        self.waitingImuCnt = 0
     
     def prepare_statistic_output(self):
         if(self.pre_ts==0):
@@ -109,8 +111,13 @@ class PackageHandler:
             if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
                 self.engine.flag_checked_fileformat.set()
             elif self.engine.flag_mic_sr_checked.is_set():
-                print('\n\tonly flag_mic_sr_checked\n')
-                self.engine.flag_checked_fileformat.set()
+                if not self.cumm_accpkgCnt:
+                    self.waitingImuCnt += 1
+                else:
+                    self.waitingImuCnt = 0
+                if self.waitingImuCnt > 100:
+                    print(f'\n\tonly flag_mic_sr_checked  cumm_accpkgCnt={self.cumm_accpkgCnt}  waitingImuCnt={self.waitingImuCnt}\n')
+                    self.engine.flag_checked_fileformat.set()
         # print(self.engine.flag_checked_fileformat.is_set(),self.engine.flag_mic_sr_checked.is_set(),self.engine.flag_imu_sr_checked.is_set())
         # q.put_nowait(dat)
 

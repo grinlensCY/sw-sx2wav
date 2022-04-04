@@ -756,7 +756,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220330')
+    print('version: 20220401b')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
@@ -812,7 +812,7 @@ if __name__ == "__main__":
         if len(fns):
             if os.path.dirname(fns[0]) not in config['dirToloadFile']:
                 config['dirToloadFile'].append(os.path.dirname(fns[0]))
-                if len(config['dirToloadFile']) > 5:
+                if len(config['dirToloadFile']) > 8:
                     del config['dirToloadFile'][0]
             updateConfig(config=config)
     if not config['onlyChkTS']:
