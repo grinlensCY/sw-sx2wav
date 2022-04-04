@@ -1,3 +1,9 @@
+# 20220330
+
+1. config['default']: 用於比對目前的config，並提醒不同於default的
+2. config['dirToloadFile']: 保留最近3筆，可以選擇
+3. 修正 onlyChkTs
+
 # 20220311
 
 1. 可以轉 station所記錄在SD或透過uart傳給PC的sx檔
