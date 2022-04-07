@@ -618,6 +618,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 tslog[f"{basefn}"] = {'start_ts':row[1],'stop_ts':row[2]}
 
     if input('start merging? Enter:go  Others:quit  '):
+        shutil.rmtree(sxpool)
         sys.exit()
     for i,fn in enumerate(sxfns):
         basefn = os.path.basename(fn)
@@ -805,13 +806,15 @@ if __name__ == "__main__":
         print('select dir')
         [print(i,path) for i,path in enumerate(config['dirToloadFile'])]
         o = input('which? ')
+        if not o and o != 0:
+            sys.exit()
         sdir = config['dirToloadFile'][int(o)]
         fns = findFileset(datainfo, config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
                             onlyChkTS=config['onlyChkTS'],sx_dict=sxdict)
         usersrcdirs = [os.path.basename(os.path.dirname(fn)) for fn in fns]
         if len(fns):
             if os.path.dirname(fns[0]) not in config['dirToloadFile']:
-                config['dirToloadFile'].append(os.path.dirname(fns[0]))
+                config['dirToloadFile'].append(os.path.dirname(os.path.dirname(fns[0])))
                 if len(config['dirToloadFile']) > 8:
                     del config['dirToloadFile'][0]
             updateConfig(config=config)
