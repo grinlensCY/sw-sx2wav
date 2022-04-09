@@ -757,12 +757,13 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220401b')
+    print('version: 20220401c')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
             if key in config['default'].keys() and config[key] != config['default'][key]:
                 print(f"{key} {config[key]} ===> not default={config['default'][key]}")
+                time.sleep(3)
             else:
                 print(f"{key} {config[key]}")
         elif key.startswith("dirList_load_S3zip"):
@@ -813,10 +814,11 @@ if __name__ == "__main__":
                             onlyChkTS=config['onlyChkTS'],sx_dict=sxdict)
         usersrcdirs = [os.path.basename(os.path.dirname(fn)) for fn in fns]
         if len(fns):
-            if os.path.dirname(fns[0]) not in config['dirToloadFile']:
-                config['dirToloadFile'].append(os.path.dirname(os.path.dirname(fns[0])))
-                if len(config['dirToloadFile']) > 8:
-                    del config['dirToloadFile'][0]
+            thisdir = os.path.dirname(os.path.dirname(fns[0]))
+            if not len([path for path in config['dirToloadFile'] if thisdir in path]):
+                config['dirToloadFile'].append(thisdir)
+            if len(config['dirToloadFile']) > 4:
+                del config['dirToloadFile'][0]
             updateConfig(config=config)
     if not config['onlyChkTS']:
         sxpool = ''
