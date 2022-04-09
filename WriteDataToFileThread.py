@@ -133,7 +133,7 @@ class RecThread(threading.Thread):
         plt.suptitle(f"trend chart of empty_duration\n{path_str}", fontproperties=chinese_font)
         axs[0].plot(log['pkgloss_ts'],log['pkgloss_duration'],marker='o',ls='',label='pkgloss_duration(sec)')
         if len(log['reset_ts']):
-            axs[0].plot(log['reset_ts'],1,marker='o',ls='',label='reset_ts')
+            axs[0].plot(log['reset_ts'],np.ones(len(log['reset_ts'])),marker='o',ls='',label='reset_ts')
         axs[1].plot(log['pkgloss_ts'],log['pkgloss_duration'],marker='o',ls='',label='pkgloss_duration(sec)')
         if len(log['pkgloss_duration']) > 2:
             ul = np.std(log['pkgloss_duration'])*4 + np.mean(log['pkgloss_duration'])
