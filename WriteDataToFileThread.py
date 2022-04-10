@@ -146,7 +146,9 @@ class RecThread(threading.Thread):
         axs[0].set_xticks(xticks_minor,minor=True)
         axs[0].set_xticklabels(xticklabels,va='bottom')
         axs[0].set_xticklabels(xticklabels_minor,minor=True)
+        axs[0].set_xlim(xticks[[0,-1]])
         axs[1].set_xticks(xticks_minor)
+        axs[1].set_xlim(xticks[[0,-1]])
         for ax in axs:
             ax.grid(axis='both',which='both')
             ax.legend(loc='upper left')
