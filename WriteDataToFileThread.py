@@ -102,7 +102,6 @@ class RecThread(threading.Thread):
             minor_xtick_step = 10
             xticks = np.arange(0,log['whole_duration']+minor_xtick_step,xtick_step)
             xticks_minor = np.arange(0,log['whole_duration']+minor_xtick_step,minor_xtick_step)
-            # xticks_str = '10sec/div'
         elif log['whole_duration'] < 30*60:
             minor_xtick_step = 1*60
             xticks = np.arange(0,log['whole_duration']+minor_xtick_step,xtick_step)
@@ -111,12 +110,11 @@ class RecThread(threading.Thread):
             minor_xtick_step = 5*60
             xticks = np.arange(0,log['whole_duration']+minor_xtick_step,xtick_step)
             xticks_minor = np.arange(0,log['whole_duration']+minor_xtick_step,minor_xtick_step)
-            # xticks_str = '10sec/div'
         else:
             minor_xtick_step = 10*60
             xticks = np.arange(0,log['whole_duration']+minor_xtick_step,xtick_step)
             xticks_minor = np.arange(0,log['whole_duration']+minor_xtick_step,minor_xtick_step)
-            # xticks_str = '10min/div'
+        print(f"whole_duration={log['whole_duration']}  xtick_step={xtick_step}  minor_xtick_step={minor_xtick_step}  xticks={xticks[[0,-1]]}")
         figw = max(min(1*log['whole_duration']/minor_xtick_step+2,72),16)
         print(f'estimated figW={figw:.1f}')
         if 'ts0' in log.keys():
@@ -146,9 +144,9 @@ class RecThread(threading.Thread):
         axs[0].set_xticks(xticks_minor,minor=True)
         axs[0].set_xticklabels(xticklabels,va='bottom')
         axs[0].set_xticklabels(xticklabels_minor,minor=True)
-        axs[0].set_xlim(xticks[[0,-1]])
+        axs[0].set_xlim(xticks_minor[[0,-1]])
         axs[1].set_xticks(xticks_minor)
-        axs[1].set_xlim(xticks[[0,-1]])
+        axs[1].set_xlim(xticks_minor[[0,-1]])
         for ax in axs:
             ax.grid(axis='both',which='both')
             ax.legend(loc='upper left')
