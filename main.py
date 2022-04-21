@@ -474,7 +474,7 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                             # myzip.extract(zipfn,path=srcdir)
                             myzip.extractall(path=srcdir)
         fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
-                if (fn.endswith('.sxr') or fn.endswith('.sx') and fn not in skip_list)]
+                if ((fn.endswith('.sxr') or fn.endswith('.sx')) and fn not in skip_list)]
         fns.sort(key=lambda x:os.path.basename(x).split('_')[-1])
     else:
         if tfn.endswith('zip'):
@@ -487,7 +487,7 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
         fns = [tfn.replace(".zip",".sx")]
         datainfo['user_srcdir'] = srcdir.split('\\')[-1]
         datainfo['sxfn'] = tfn
-    print()
+    print('final list is ...')
     user_srcdir = os.path.basename(srcdir) #srcdir.split('\\')[-1]
     for fn in fns:
         ts = getTsOfFn(fn,ms=False)     #float(os.path.basename(fn)[:-3])/1000
