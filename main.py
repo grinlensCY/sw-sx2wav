@@ -695,11 +695,16 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                     print('mergeSX: remove',fn,'of',userlist[i])
                     os.remove(fn)
                     os.remove(logfn)
+                
                 if (fn == sxfns[-1]
-                        or (not mustMerge and
-                            (not os.path.exists(sxfns[i+1].replace(".sx",".log"))
-                                and not os.path.exists(sxfns[i+1].replace(".sxr",".log"))))
+                        # or (not mustMerge and
+                        #     (not os.path.exists(sxfns[i+1].replace(".sx",".log"))
+                        #         and not os.path.exists(sxfns[i+1].replace(".sxr",".log"))))
                         or (not mustMerge and 'stop_ts' not in log.keys())):
+                    print((f"fn == sxfns[-1]({fn == sxfns[-1]})\n"
+                        f"or (not mustMerge({not mustMerge}) and "
+                        f'(log does not exists({not os.path.exists(sxfns[i+1].replace(".sx",".log"))} and {not os.path.exists(sxfns[i+1].replace(".sxr",".log"))})\n'
+                        f"or (not mustMerge({not mustMerge}) and no 'stop_ts'({'stop_ts' not in log.keys()}))"))
                     print((f'\n\tmerging {merged_sxfns} \n\t\tinto  {os.path.basename(first_sxfn)}'
                             f'({first_user}: {cum_cnt} files,{cum_duration/1000/60:.2f}min)\n'))
                     with open(first_sxfn, "wb") as f:
@@ -757,7 +762,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220401c')
+    print('version: 20220421a')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
@@ -817,7 +822,7 @@ if __name__ == "__main__":
             thisdir = os.path.dirname(os.path.dirname(fns[0]))
             if not len([path for path in config['dirToloadFile'] if thisdir in path]):
                 config['dirToloadFile'].append(thisdir)
-            if len(config['dirToloadFile']) > 4:
+            if len(config['dirToloadFile']) > 6:
                 del config['dirToloadFile'][0]
             updateConfig(config=config)
     if not config['onlyChkTS']:
