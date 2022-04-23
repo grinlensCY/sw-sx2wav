@@ -19,8 +19,11 @@
         "skipPkgCnt": 10
     },
     "dirToloadFile": [
-        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/FJ_baby/12M_baby_patch_DVT/F5C7B2C681F5_2022_03_29_Gyro_自黏綁帶",
-        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/在家受測者/苗栗黃小姐"
+        "C:/Users/chenyikuo/Downloads/unzip_tmp",
+        "C:/Users/chenyikuo/Downloads/unzip_tmp/fw10f",
+        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/充放電",
+        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/FJ_baby/9m",
+        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/attach"
     ],
     "//dirToloadFile": "G:/My Drive/Code/sx2wav/test_files",
     "dirList_load_S3zip": "",
@@ -36,13 +39,13 @@
     ],
     "dir_upzipS3": "C:/Users/chenyikuo/downloads_S3",
     "ts_loadS3": [
-        20220310,
-        20220401
+        20211217,
+        20221220
     ],
     "ts_range_sx": [],
     "load_all_sx": 10,
     "mergeNearby": 10,
-    "maxMergeInterval_ms": 5000,
+    "maxMergeInterval_ms": 50000,
     "dir_Export": "G:/My Drive/Experiment/compilation/",
     "fj_dir_kw": [],
     "//fj_dir_kw": [
