@@ -475,7 +475,10 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                             myzip.extractall(path=srcdir)
         fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                 if ((fn.endswith('.sxr') or fn.endswith('.sx')) and fn not in skip_list)]
-        fns.sort(key=lambda x:os.path.basename(x).split('_')[-1])
+        if os.path.basename(fns[0]).startswith('log_'):
+            fns.sort(key=lambda x:int(os.path.basename(x).split('_')[1]))
+        else:
+            fns.sort(key=lambda x:os.path.basename(x).split('_')[-1])
     else:
         if tfn.endswith('zip'):
             with ZipFile(tfn) as myzip:
@@ -615,7 +618,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
             rows = csv.reader(csvfile, delimiter=',', skipinitialspace=True)
             for row in rows:
                 basefn = os.path.basename(row[0])
-                tslog[f"{basefn}"] = {'start_ts':row[1],'stop_ts':row[2]}
+                tslog[f"{basefn}"] = {'start_ts':int(row[1]),'stop_ts':int(row[2])}
 
     if input('start merging? Enter:go  Others:quit  '):
         shutil.rmtree(sxpool)
@@ -626,7 +629,10 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
         mustMerge = basefn.startswith('log') or basefn.startswith('dev')
         print(f'\treading {basefn} mustMerge={mustMerge}')
         if tslog != {}:
-            log = tslog[basefn]
+            if basefn in tslog.keys():
+                log = tslog[basefn]
+            else:
+                log = {'start_ts':getTsOfFn(sxfns[i-1])}
         elif os.path.exists(logfn):
             with open(logfn, 'r', newline='',encoding='utf-8-sig') as jf:
                 log = json.loads(jf.read())
@@ -762,7 +768,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220421b')
+    print('version: 20220421c')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
