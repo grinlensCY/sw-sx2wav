@@ -362,7 +362,9 @@ class Engine:
     def getTsOfFn(self,fn,ti=0,ms=True):
         bn = os.path.basename(fn)
         bn_split = bn.split('_')
-        if bn.startswith('log') and len(bn_split)==2:    # log_00000035.sx
+        if bn.startswith('FILE'):
+            return int(bn[4:-3])
+        elif bn.startswith('log') and len(bn_split)==2:    # log_00000035.sx
             return ti
         elif bn.startswith('dev') or bn.startswith('log'):  # dev0_20_1646953956142.sx  log_0_xxxxx.sx
             if ms:
@@ -397,7 +399,9 @@ def hhmmss(sec):
 def getTsOfFn(fn,ti=0,ms=True):
     bn = os.path.basename(fn)
     bn_split = bn.split('_')
-    if bn.startswith('log') and len(bn_split)==2:    # log_00000035.sx
+    if bn.startswith('FILE'):
+        return int(bn[4:-3])
+    elif bn.startswith('log') and len(bn_split)==2:    # log_00000035.sx
         return ti
     elif bn.startswith('dev') or bn.startswith('log'):  # dev0_20_1646953956142.sx  log_0_xxxxx.sx
         if ms:
@@ -614,6 +618,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
     ts_log_fn = f"{os.path.dirname(sxfns[0])}/ts_log.txt"
     tslog = {}
     if os.path.exists(ts_log_fn):
+        print('\nfound ts_log.txt!')
         with open(ts_log_fn, 'r', newline='') as csvfile:
             rows = csv.reader(csvfile, delimiter=',', skipinitialspace=True)
             for row in rows:
@@ -768,7 +773,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220421c')
+    print('version: 20220421d')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
