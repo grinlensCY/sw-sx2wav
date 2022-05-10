@@ -1,0 +1,16 @@
+﻿{
+    "//srcdir": "G://My Drive//Experiment//compilation//誤判//peppaPig-20210603_main01AsEnvMic",
+    "srcdir": {
+        "plt_chargingTrend.py": "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/充放電/SX_20220418_fw110_2/FF098EBE4E76/2022-04-18",
+        "pltHR_benchmark.py": "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/FJ_baby/13M_baby_patch_PVT/EDBDA4BFB679_2022_04_18_自黏綁帶_平貼模式_血氧儀比對/2022-04-17/sxReport/2022-04-17-22-49-37",
+        "attach.py": "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/在家受測者/SunnyHuang/Sunny_test_2022_05_06_09/E4_A1_3A_58_6C_5C/E4A13A586C5C/1970-01-01",
+        "attach_loop.py": "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/在家受測者/SunnyHuang/Sunny_test_2022_05_06_09/E4_A1_3A_58_6C_5C/E4A13A586C5C/1970-01-01",
+        "sortSXinSD.py": "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/在家受測者/SunnyHuang/Sunny_test_2022_05_06_09/E4_A1_3A_58_6C_5C/E4A13A586C5C/1970-01-01"
+    },
+    "attach": {
+        "overWcsv_temp": 10,
+        "overWcsv_acc": 10,
+        "overWcsv_mic": 10
+    },
+    "timeslot": []
+}
