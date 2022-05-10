@@ -308,6 +308,9 @@ class RecThread(threading.Thread):
                                 self.stop()
                             time.sleep(self.waitTime)
                             # break
+                if self.isdualmic:
+                    os.remove(self.filename_new[2])
+                    os.remove(self.filename_new[3])
         elif self.job == 'sysinfo':
             if self.config['onlytst0']:
                 print(f'end {self.job} recording due to onlytst0=',self.config['onlytst0'])
@@ -384,6 +387,7 @@ class RecThread(threading.Thread):
                             self.stop()
                         time.sleep(self.waitTime)
             else:
+                iswritten = False
                 with sf.SoundFile(self.filename_new[0], mode='x',
                                     samplerate=self.sampleRate, channels=self.channels,
                                     subtype=self.subtype_NonAudio) as file0:
@@ -399,6 +403,7 @@ class RecThread(threading.Thread):
                     toffset = 0
                     while not self._stop_event.is_set():
                         if not self.qMulti[0].empty():
+                            iswritten = True
                             msg = ''
                             emptyCnt = 0
                             tmp = self.qMulti[0].get(timeout=0.02)
@@ -466,7 +471,9 @@ class RecThread(threading.Thread):
                                 print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
                                 self.stop()
                             time.sleep(self.waitTime)
-
+                if not iswritten:
+                    os.remove(self.filename_new[0])
+                    os.remove(self.fn_errlog)
         # elif self.job == 'ecg':
             # if not self.config['onlytst0']:
             #     with sf.SoundFile(self.filename_new[0], mode='x',
