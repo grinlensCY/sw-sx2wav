@@ -198,22 +198,49 @@ if not fn:
     sys.exit()
 srcdir = os.path.dirname(fn)
 dayCnt = 0
+lastTs = []
+fnlog = []
 with open(fn, 'r', newline='') as csvfile:
     rows = csv.reader(csvfile, delimiter=',', skipinitialspace=True)
     for row in rows:
         print(row)
         fntmp = row[0].split('/')[-1]
+        fnlog.append(fntmp)
         fn = f"{srcdir}/{fntmp}"
+        
         if fntmp.split('_')[1] == '0':
+            if dayCnt:
+                lastTs.append(lastinfo)
             dayCnt += 1
             dstdir = f"{srcdir}/day{dayCnt}"
             if not os.path.exists(dstdir):
                 os.makedirs(dstdir)
             shutil.copy2(f"{srcdir}/ts_log.txt",dstdir)
+            
         if os.path.exists(fn):
             dstdir = f"{srcdir}/day{dayCnt}"
             shutil.move(fn, dstdir)
             print(f'\tmove {fntmp} to {dstdir}')
+
+        lastinfo = [dayCnt,fntmp.split('_')[1],int(row[2])]
+    lastTs.append(lastinfo)
+leftfns = [fn for fn in os.listdir(srcdir) if fn.endswith('.sx')]
+for fn in leftfns:
+    minTdiff = 1e5
+    day = int(fn.split('_')[1])-1
+    ts = int(fn[:-3].split('_')[2])
+    dayCnt = None
+    for tsinfo in lastTs:
+        tDiff = ts-tsinfo[2]
+        if tDiff>0 and tDiff < 50 and minTdiff > tDiff:
+            minTdiff = tDiff
+            dayCnt = tsinfo[0]
+    if dayCnt is not None:
+        dstdir = f"{srcdir}/day{dayCnt}"
+        shutil.move(f"{srcdir}/{fn}", dstdir)
+        print(f'\tmove {fn} to {dstdir}')
+
+
 
 config['srcdir'][os.path.basename(__file__)] = srcdir
 rwConfig('w')
