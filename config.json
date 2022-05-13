@@ -12,6 +12,7 @@
         "onlylog": 0,
         "onlyMovelog": 0,
         "onlytst0": 0,
+        "onlyChkpkgloss": 0,
         "overwrite": 0,
         "delSX": 0,
         "delmergedSX": 10,
@@ -19,11 +20,12 @@
         "skipPkgCnt": 10
     },
     "dirToloadFile": [
-        "C:/Users/chenyikuo/Downloads/unzip_tmp",
         "C:/Users/chenyikuo/Downloads/unzip_tmp/fw10f",
         "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/充放電",
         "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/FJ_baby/9m",
-        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/attach"
+        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/attach",
+        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/在家受測者/SunnyHuang/ED_BD_A4_BF_B6_79_Station_接收實驗_Sunny",
+        "C:/Users/grinl/Downloads/tmp/3hr/ED_BD_A4_BF_B6_79"
     ],
     "//dirToloadFile": "G:/My Drive/Code/sx2wav/test_files",
     "dirList_load_S3zip": "",
@@ -38,10 +40,7 @@
         "//192.168.50.250/Amazon S3 (babymonitora160f79a3e9c4d3c937bbe8b8fd1622f173604-dev/private/A80PBY~0"
     ],
     "dir_upzipS3": "C:/Users/chenyikuo/downloads_S3",
-    "ts_loadS3": [
-        20211217,
-        20221220
-    ],
+    "ts_loadS3": [],
     "ts_range_sx": [],
     "load_all_sx": 10,
     "mergeNearby": 10,
@@ -65,6 +64,7 @@
     "//onlyMovelog": "only rename and move log to dstdir",
     "onlyMovelog": 0,
     "onlytst0": 0,
+    "onlyChkpkgloss": 0,
     "overwrite": 0,
     "delSX": 0,
     "delmergedSX": 10,

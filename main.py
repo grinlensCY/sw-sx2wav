@@ -90,16 +90,17 @@ class Engine:
                 print((f'self.recThd_audio.stopped() {self.recThd_audio.stopped()} '
                         f'processed={self.recThd_audio.processedT/60:.1f}mins  '
                         f'speed={self.recThd_audio.processedT/(time.time()-t0):.1f}'))
-                isRun |= not self.recThd_acc.stopped()
-                print(isRun,'self.recThd_acc.stopped()', self.recThd_acc.stopped())
-                # isRun |= not self.recThd_ecg.stopped()
-                # print(isRun,'self.recThd_ecg.stopped()', self.recThd_ecg.stopped())
-                isRun |= not self.recThd_gyro.stopped()
-                print(isRun,'self.recThd_gyro.stopped()', self.recThd_gyro.stopped())
-                isRun |= not self.recThd_mag.stopped()
-                print(isRun,'self.recThd_mag.stopped()', self.recThd_mag.stopped())
-                isRun |= not self.recThd_quaternion.stopped()
-                print(isRun,'self.recThd_quaternion.stopped()', self.recThd_quaternion.stopped())
+                if not self.config['onlyChkpkgloss']:
+                    isRun |= not self.recThd_acc.stopped()
+                    print(isRun,'self.recThd_acc.stopped()', self.recThd_acc.stopped())
+                    # isRun |= not self.recThd_ecg.stopped()
+                    # print(isRun,'self.recThd_ecg.stopped()', self.recThd_ecg.stopped())
+                    isRun |= not self.recThd_gyro.stopped()
+                    print(isRun,'self.recThd_gyro.stopped()', self.recThd_gyro.stopped())
+                    isRun |= not self.recThd_mag.stopped()
+                    print(isRun,'self.recThd_mag.stopped()', self.recThd_mag.stopped())
+                    isRun |= not self.recThd_quaternion.stopped()
+                    print(isRun,'self.recThd_quaternion.stopped()', self.recThd_quaternion.stopped())
             isRun |= not self.recThd_sysinfo.stopped()
             print(isRun,'self.recThd_sysinfo.stopped()', self.recThd_sysinfo.stopped())
             if not isRun:
@@ -293,30 +294,31 @@ class Engine:
                                             self.datainfo['mic']['fullscale'],
                                             self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
                 self.recThd_audio.start()
-                self.recThd_acc = RecThread(int(self.datainfo['acc']['sr']),
-                                            4, 0.04, dstfn_prefix,'acc',
-                                            self.datainfo['acc']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
-                self.recThd_acc.start()
-                # self.recThd_ecg = RecThread(self.datainfo['ecg']['sr'],
-                #                             2, 0.01, dstfn_prefix, 'ecg',
-                #                             self.datainfo['ecg']['fullscale'],config,self.ts_Hz)
-                # self.recThd_ecg.start()
-                self.recThd_gyro = RecThread(int(self.datainfo['gyro']['sr']),
-                                            4, 0.04, dstfn_prefix, 'gyro',
-                                            self.datainfo['gyro']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
-                self.recThd_gyro.start()
-                self.recThd_mag = RecThread(int(self.datainfo['mag']['sr']),
-                                            4, 0.04, dstfn_prefix, 'mag',
-                                            self.datainfo['mag']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
-                self.recThd_mag.start()
-                self.recThd_quaternion = RecThread(int(self.datainfo['quaternion']['sr']),
-                                                5, 0.04, dstfn_prefix, 'quaternion',
-                                                self.datainfo['quaternion']['fullscale'],
-                                            self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
-                self.recThd_quaternion.start()
+                if not self.config['onlyChkpkgloss']:
+                    self.recThd_acc = RecThread(int(self.datainfo['acc']['sr']),
+                                                4, 0.04, dstfn_prefix,'acc',
+                                                self.datainfo['acc']['fullscale'],
+                                                self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
+                    self.recThd_acc.start()
+                    # self.recThd_ecg = RecThread(self.datainfo['ecg']['sr'],
+                    #                             2, 0.01, dstfn_prefix, 'ecg',
+                    #                             self.datainfo['ecg']['fullscale'],config,self.ts_Hz)
+                    # self.recThd_ecg.start()
+                    self.recThd_gyro = RecThread(int(self.datainfo['gyro']['sr']),
+                                                4, 0.04, dstfn_prefix, 'gyro',
+                                                self.datainfo['gyro']['fullscale'],
+                                                self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
+                    self.recThd_gyro.start()
+                    self.recThd_mag = RecThread(int(self.datainfo['mag']['sr']),
+                                                4, 0.04, dstfn_prefix, 'mag',
+                                                self.datainfo['mag']['fullscale'],
+                                                self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
+                    self.recThd_mag.start()
+                    self.recThd_quaternion = RecThread(int(self.datainfo['quaternion']['sr']),
+                                                    5, 0.04, dstfn_prefix, 'quaternion',
+                                                    self.datainfo['quaternion']['fullscale'],
+                                                self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
+                    self.recThd_quaternion.start()
             self.recThd_sysinfo = RecThread(1,
                                             3, 0.09, dstfn_prefix, 'sysinfo',
                                             1,recT0=recT0,config=config,ts_Hz=self.ts_Hz)
@@ -330,26 +332,27 @@ class Engine:
                 self.recThd_audio.join(0.5)
                 # print('self.recThd_audio ',self.recThd_audio.is_alive())
                 self.recThd_audio = None
-                self.recThd_acc.stop()
-                self.recThd_acc.join(0.5)
-                # print('self.recThd_acc ',self.recThd_acc.is_alive())
-                self.recThd_acc = None
-                # self.recThd_ecg.stop()
-                # self.recThd_ecg.join(0.5)
-                # # print('self.recThd_ecg ',self.recThd_ecg.is_alive())
-                # self.recThd_ecg = None
-                self.recThd_gyro.stop()
-                self.recThd_gyro.join(0.5)
-                # print('self.recThd_gyro ',self.recThd_gyro.is_alive())
-                self.recThd_gyro = None
-                self.recThd_mag.stop()
-                self.recThd_mag.join(0.5)
-                # print('self.recThd_mag ',self.recThd_mag.is_alive())
-                self.recThd_mag = None
-                self.recThd_quaternion.stop()
-                self.recThd_quaternion.join(0.5)
-                # print('self.recThd_quaternion ',self.recThd_quaternion.is_alive())
-                self.recThd_quaternion = None
+                if not self.config['onlyChkpkgloss']:
+                    self.recThd_acc.stop()
+                    self.recThd_acc.join(0.5)
+                    # print('self.recThd_acc ',self.recThd_acc.is_alive())
+                    self.recThd_acc = None
+                    # self.recThd_ecg.stop()
+                    # self.recThd_ecg.join(0.5)
+                    # # print('self.recThd_ecg ',self.recThd_ecg.is_alive())
+                    # self.recThd_ecg = None
+                    self.recThd_gyro.stop()
+                    self.recThd_gyro.join(0.5)
+                    # print('self.recThd_gyro ',self.recThd_gyro.is_alive())
+                    self.recThd_gyro = None
+                    self.recThd_mag.stop()
+                    self.recThd_mag.join(0.5)
+                    # print('self.recThd_mag ',self.recThd_mag.is_alive())
+                    self.recThd_mag = None
+                    self.recThd_quaternion.stop()
+                    self.recThd_quaternion.join(0.5)
+                    # print('self.recThd_quaternion ',self.recThd_quaternion.is_alive())
+                    self.recThd_quaternion = None
             self.recThd_sysinfo.stop()
             self.recThd_sysinfo.join(0.5)
             self.recThd_sysinfo = None
@@ -773,7 +776,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220421d')
+    print('version: 20220421e')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
