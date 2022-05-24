@@ -89,7 +89,8 @@ class Engine:
                 print('\nisRun',isRun)
                 print((f'self.recThd_audio.stopped() {self.recThd_audio.stopped()} '
                         f'processed={self.recThd_audio.processedT/60:.1f}mins  '
-                        f'speed={self.recThd_audio.processedT/(time.time()-t0):.1f}'))
+                        f'speed={self.recThd_audio.processedT/(time.time()-t0):.1f}  '
+                        f'progress={self.recThd_audio.processedT/self.duration:.1%}'))
                 if not self.config['onlyChkpkgloss']:
                     isRun |= not self.recThd_acc.stopped()
                     print(isRun,'self.recThd_acc.stopped()', self.recThd_acc.stopped())
@@ -159,6 +160,7 @@ class Engine:
         return dstdir,wavfnkw_ts,userdir,dstdir2,userdir2
 
     def chk_files_format(self,sx_fn='',cnt=0, userdir_kw='', thisSXdict={}):
+        self.duration = thisSXdict['duration']
         self.srcdir = os.path.dirname(sx_fn)
         ts = self.getTsOfFn(sx_fn,ms=False)
         self.flag_ble_addr.clear()
@@ -782,7 +784,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220421e')
+    print('version: 20220421f')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
