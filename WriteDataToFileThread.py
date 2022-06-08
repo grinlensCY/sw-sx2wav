@@ -45,6 +45,7 @@ class RecThread(threading.Thread):
         except Exception as e:
             print(f'{self.job}: {e}')
             time.sleep(0.01)
+            self.fn_errlog = self.fn_errlog.replace('.txt','.log')
             print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
         if job == 'mic':
             self.filename_new.append(f'{self.filename_prefix}-audio-main01.wav')
