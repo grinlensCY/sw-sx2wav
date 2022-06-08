@@ -87,10 +87,13 @@ class Engine:
             if not self.config['onlylog']:
                 isRun |= not self.recThd_audio.stopped()
                 print('\nisRun',isRun)
+                elapsedT = time.time()-t0
+                speed = self.recThd_audio.processedT/elapsedT
                 print((f'self.recThd_audio.stopped() {self.recThd_audio.stopped()} '
                         f'processed={self.recThd_audio.processedT/60:.1f}mins  '
-                        f'speed={self.recThd_audio.processedT/(time.time()-t0):.1f}  '
-                        f'progress={self.recThd_audio.processedT/self.duration:.1%}'))
+                        f'speed={speed:.1f}  '
+                        f'progress={self.recThd_audio.processedT/self.duration:.1%}  '
+                        f'processing Time_remaining= {(self.duration-self.recThd_audio.processedT)/speed/60:.1f}'))
                 if not self.config['onlyChkpkgloss']:
                     isRun |= not self.recThd_acc.stopped()
                     print(isRun,'self.recThd_acc.stopped()', self.recThd_acc.stopped())
@@ -784,7 +787,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220421f')
+    print('version: 20220421g')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
