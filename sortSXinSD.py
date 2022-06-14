@@ -198,48 +198,55 @@ if not fn:
     sys.exit()
 srcdir = os.path.dirname(fn)
 dayCnt = 0
-lastTs = []
-fnlog = []
 with open(fn, 'r', newline='') as csvfile:
     rows = csv.reader(csvfile, delimiter=',', skipinitialspace=True)
+    last_day_list = []
+    last_num_list = []
+    last_ts_list = []
+    # lastfn = ''
+    last_num = None
     for row in rows:
         print(row)
         fntmp = row[0].split('/')[-1]
-        fnlog.append(fntmp)
         fn = f"{srcdir}/{fntmp}"
-        
         if fntmp.split('_')[1] == '0':
-            if dayCnt:
-                lastTs.append(lastinfo)
+            if last_num is not None:
+                last_day_list.append(f"{srcdir}/day{dayCnt}")
+                last_num_list.append(last_num)
+                last_ts_list.append(last_ts)
             dayCnt += 1
             dstdir = f"{srcdir}/day{dayCnt}"
             if not os.path.exists(dstdir):
                 os.makedirs(dstdir)
             shutil.copy2(f"{srcdir}/ts_log.txt",dstdir)
-            
         if os.path.exists(fn):
             dstdir = f"{srcdir}/day{dayCnt}"
             shutil.move(fn, dstdir)
             print(f'\tmove {fntmp} to {dstdir}')
-
-        lastinfo = [dayCnt,fntmp.split('_')[1],int(row[2])]
-    lastTs.append(lastinfo)
-leftfns = [fn for fn in os.listdir(srcdir) if fn.endswith('.sx')]
-for fn in leftfns:
-    minTdiff = 1e5
-    day = int(fn.split('_')[1])-1
-    ts = int(fn[:-3].split('_')[2])
-    dayCnt = None
-    for tsinfo in lastTs:
-        tDiff = ts-tsinfo[2]
-        if tDiff>0 and tDiff < 50 and minTdiff > tDiff:
-            minTdiff = tDiff
-            dayCnt = tsinfo[0]
-    if dayCnt is not None:
-        dstdir = f"{srcdir}/day{dayCnt}"
-        shutil.move(f"{srcdir}/{fn}", dstdir)
-        print(f'\tmove {fn} to {dstdir}')
-
+        # lastfn = fn
+        last_num = int(fntmp.split('_')[1])
+        last_ts = int(row[-1])
+    last_day_list.append(f"{srcdir}/day{dayCnt}")
+    last_num_list.append(last_num)
+    last_ts_list.append(last_ts)
+tsDiff_dict = {}
+for fn in os.listdir(srcdir):
+    if fn.startswith('log') and fn.endswith('.sx'):
+        tsDiff_dict[f"{srcdir}/{fn}"] = {}
+        for i in range(len(last_day_list)):
+            num = int(fn.split('_')[1])
+            ts = int(fn.split('_')[2][:-3])
+            if num == last_num_list[i]+1 and ts > last_ts_list[i]:
+                tsDiff_dict[f"{srcdir}/{fn}"][f"{last_day_list[i]}"]= ts - last_ts_list[i]
+for fn in tsDiff_dict.keys():
+    minTsDiff = 1e9
+    dstdir = ''
+    for lastD in tsDiff_dict[fn].keys():
+        if tsDiff_dict[fn][lastD] < minTsDiff:
+            dstdir = lastD
+    if dstdir:
+        shutil.move(fn, dstdir)
+        print(f'\tmove {fntmp} to {dstdir}')
 
 
 config['srcdir'][os.path.basename(__file__)] = srcdir
