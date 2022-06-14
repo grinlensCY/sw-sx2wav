@@ -847,7 +847,7 @@ if __name__ == "__main__":
             thisdir = os.path.dirname(os.path.dirname(fns[0]))
             if not len([path for path in config['dirToloadFile'] if thisdir in path]):
                 config['dirToloadFile'].append(thisdir)
-            if len(config['dirToloadFile']) > 6:
+            if len(config['dirToloadFile']) > 9:
                 del config['dirToloadFile'][0]
             updateConfig(config=config)
     if not config['onlyChkTS']:
@@ -855,7 +855,7 @@ if __name__ == "__main__":
         if config['mergeNearby'] and len(fns)>1:
             fns,usersrcdirs,sxpool = mergeSX(fns,usersrcdirs,last_merged_dict,sxdict)
         [print('going to converting',fn) for fn in fns]
-        if input('Enter:go  Others:quit '):
+        if  config['prompt_convert'] and input('Enter:go  Others:quit '):
             shutil.rmtree(sxpool)
             sys.exit()
         stop_flag = threading.Event()

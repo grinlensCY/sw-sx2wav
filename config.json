@@ -17,15 +17,16 @@
         "delSX": 0,
         "delmergedSX": 10,
         "moveSX": 0,
-        "skipPkgCnt": 10
+        "skipPkgCnt": 10,
+        "prompt_convert": 10
     },
     "dirToloadFile": [
-        "C:/Users/chenyikuo/Downloads/unzip_tmp/fw10f",
-        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/充放電",
-        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/FJ_baby/9m",
-        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/attach",
-        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/在家受測者/SunnyHuang/ED_BD_A4_BF_B6_79_Station_接收實驗_Sunny",
-        "C:/Users/grinl/Downloads/tmp/3hr/ED_BD_A4_BF_B6_79"
+        "C:/Users/grinl/Downloads/tmp/32G/3hr/ED_BD_A4_BF_B6_79",
+        "C:/Users/grinl/Downloads/tmp/32G/5hr",
+        "G:/My Drive/Experiment/compilation/attach",
+        "C:/Users/chenyikuo/Downloads/tmp",
+        "C:/Users/chenyikuo/Downloads/tmp/F5_C7_B2_C6_81_F5",
+        "C:/Users/chenyikuo/Downloads/tmp/F5_C7_B2_C6_81_F5_full"
     ],
     "//dirToloadFile": "G:/My Drive/Code/sx2wav/test_files",
     "dirList_load_S3zip": "",
@@ -69,5 +70,6 @@
     "delSX": 0,
     "delmergedSX": 10,
     "moveSX": 0,
-    "skipPkgCnt": 10
+    "skipPkgCnt": 10,
+    "prompt_convert": 0
 }
