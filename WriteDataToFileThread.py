@@ -259,6 +259,23 @@ class RecThread(threading.Thread):
                                         fileList[-1].write(buffer_ts)
                                         cnt = 0
                                 
+                            tstmp = tmp[0] + toffset-t0
+                            tlast5 = np.r_[tlast5, tstmp]
+                            if tlast5.size > 5:
+                                tlast5 = tlast5[-5:]
+                            buffer_ts[cnt] = (tstmp) / self.ts_Hz
+                            try:
+                                buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = micdata
+                            except:
+                                lenDiff = seglen - micdata.shape[1]
+                                print(f"array dimension mismatchs! lenDiff={lenDiff}")
+                                ts_sec = tstmp/self.ts_Hz
+                                msg += (f'\narray dimension mismatchs! lenDiff={lenDiff}  tstmp={ts_sec:.3f} = '
+                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+ts_sec))}')
+                                if lenDiff < 0:
+                                    buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = micdata[:,:64]
+                                elif lenDiff > 0:
+                                    buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = np.hstack((micdata,np.zeros((2,lenDiff))))
                             if len(msg):
                                 try:
                                     print(msg, file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
@@ -266,12 +283,6 @@ class RecThread(threading.Thread):
                                     print(f'{self.job}: {e}')
                                     time.sleep(0.01)
                                     print(msg, file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
-                            tstmp = tmp[0] + toffset-t0
-                            tlast5 = np.r_[tlast5, tstmp]
-                            if tlast5.size > 5:
-                                tlast5 = tlast5[-5:]
-                            buffer_ts[cnt] = (tstmp) / self.ts_Hz
-                            buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = micdata
                             cnt += 1
                             self.processedT += 0.016
                             if cnt == seg_cnt:
