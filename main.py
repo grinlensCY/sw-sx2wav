@@ -1,6 +1,7 @@
 import os,threading,time,json,shutil,csv
 import shutil
 import file_driver as FD
+import signal
 from package_handler import PackageHandler
 from WriteDataToFileThread import RecThread
 import protocol as PRO
@@ -787,7 +788,14 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
 
 if __name__ == "__main__":
     import sys
-    print('version: 20220421g')
+
+    def signal_handler(sig, frame):
+        global engine
+        engine.stop()
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    print('version: 20220616a')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
