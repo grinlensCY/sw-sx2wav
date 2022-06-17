@@ -85,12 +85,13 @@ class Engine:
             if self.data_retriever.thd_run_flag is not None:  print(self.strPkgSpd)
             # print(f'chkRecThd: elapsed time={time.time()-t0:.2f}sec')
             isRun = False
-            if not self.config['onlylog']:
+            if self.recThd_audio is not None and not self.config['onlylog']:
                 isRun |= not self.recThd_audio.stopped()
                 print('\nisRun',isRun)
                 elapsedT = time.time()-t0
                 speed = self.recThd_audio.processedT/elapsedT
                 print((f'self.recThd_audio.stopped() {self.recThd_audio.stopped()} '
+                        f'elapsed time={elapsedT/60:.1f}mins  '
                         f'processed={self.recThd_audio.processedT/60:.1f}mins  '
                         f'speed={speed:.1f}  '
                         f'progress={self.recThd_audio.processedT/self.duration:.1%}  '
@@ -338,6 +339,7 @@ class Engine:
             self.thd_rec_flag.set()
             return True
         else:
+            print('stop rec')
             self.thd_rec_flag.clear()
             if not self.config['onlylog']:
                 self.recThd_audio.stop()
@@ -454,7 +456,7 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
         ts_range[1] = ts_range[1] if config['ts_range_sx'][-1] == -1 else min(ts_range[1],config['ts_range_sx'][-1])
     if loadall:
         fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
-                if fn.endswith('.sxr') or fn.endswith('.sx') or fn.endswith('.zip')]
+                if fn.endswith('.sxr') or fn.endswith('.sx') or (fn.endswith('.zip') and len(fn)>13)]
         skip_list = []
         # if not onlyChkTS:
         for fn in fns_list:
@@ -885,7 +887,7 @@ if __name__ == "__main__":
             bleaddr,dstdir,userdir,isdualmic,dstdir2,userdir2,wavfnkw_ts = engine.chk_files_format(sx_fn=fn,
                                                             cnt=i+1,userdir_kw=userdirkw,thisSXdict=thisdict)
             while not stop_flag.wait(2.5):
-                print(f'is writing! elapsed time: {time.time()-t0:.1f}sec')
+                print(f'is writing!')    # elapsed time: {time.time()-t0:.1f}sec')
             if bleaddr is None or not dstdir:
                 continue
             ts = getTsOfFn(fn,ms=False)     #float(os.path.basename(fn)[:-3])/1000
@@ -923,7 +925,7 @@ if __name__ == "__main__":
             if config['delSX']:
                 os.remove(fn)
                 print('remove sx',os.path.basename(fn))
-            elif (config['moveSX'] and config['dirList_load_S3zip']) and bleaddr:
+            elif config['moveSX']:   #(config['moveSX'] and config['dirList_load_S3zip']) and bleaddr:
                 sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
                 if not os.path.exists(sx_dstfn):
                     print('move sx to',sx_dstfn)
