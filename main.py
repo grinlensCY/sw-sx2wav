@@ -863,8 +863,9 @@ if __name__ == "__main__":
         if config['mergeNearby'] and len(fns)>1:
             fns,usersrcdirs,sxpool = mergeSX(fns,usersrcdirs,last_merged_dict,sxdict)
         [print('going to converting',fn) for fn in fns]
-        if  config['prompt_convert'] and input('Enter:go  Others:quit '):
-            shutil.rmtree(sxpool)
+        if config['prompt_convert'] and input('Enter:go  Others:quit '):
+            if config['delmergedSX']:
+                shutil.rmtree(sxpool)
             sys.exit()
         stop_flag = threading.Event()
         engine = Engine(datainfo,config,stopped_flag=stop_flag)
