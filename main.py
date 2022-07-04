@@ -90,12 +90,12 @@ class Engine:
                 print('\nisRun',isRun)
                 elapsedT = time.time()-t0
                 speed = self.recThd_audio.processedT/elapsedT
-                print((f'self.recThd_audio.stopped() {self.recThd_audio.stopped()} '
+                print((f'self.recThd_audio.stopped() {self.recThd_audio.stopped()}\n'
                         f'elapsed time={elapsedT/60:.1f}mins  '
                         f'processed={self.recThd_audio.processedT/60:.1f}mins  '
                         f'speed={speed:.1f}  '
                         f'progress={self.recThd_audio.processedT/self.duration:.1%}  '
-                        f'processing Time_remaining= {(self.duration-self.recThd_audio.processedT)/speed/60:.1f}'))
+                        f'processing Time_remaining= {(self.duration-self.recThd_audio.processedT)/speed/60:.1f}mins'))
                 if not self.config['onlyChkpkgloss']:
                     isRun |= not self.recThd_acc.stopped()
                     print(isRun,'self.recThd_acc.stopped()', self.recThd_acc.stopped())
@@ -459,7 +459,8 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
             ts_range[1] = (config["ts_loadS3"][1]+1-config["ts_loadS3"][0])*60*60*24*1000+ts_range[0]
     if len(config['ts_range_sx']):
         ts_range[0] = ts_range[0] if config['ts_range_sx'][0] == -1 else max(ts_range[0],config['ts_range_sx'][0])
-        ts_range[1] = ts_range[1] if config['ts_range_sx'][-1] == -1 else min(ts_range[1],config['ts_range_sx'][-1])
+        ts_range[1] = time.time()*1000 if config['ts_range_sx'][-1] == -1 or not ts_range[1] else min(ts_range[1],config['ts_range_sx'][-1])
+    print('updated ts_range',ts_range)
     if loadall:
         fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                 if fn.endswith('.sxr') or fn.endswith('.sx') or (fn.endswith('.zip') and len(fn)>13)]
@@ -478,7 +479,7 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                 msg = (f'{basefn}  recording start at:{recTime}  '
                         f'file size:{os.path.getsize(fn)}=>{hhmmss(fsize/20000)}')
             if fsize < 1600:     # < 5sec
-                msg += f"==>duration < 5sec==>quit!"
+                msg += f"  ==>duration < 5sec==>quit!"
                 print(msg)
                 skip_list.append(basefn)
                 continue
@@ -486,7 +487,7 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
             if (ts_range[0] != 0 and ts_range[1] != 0) and recTime != 'SD_card_unknown':
                 # fnidx = basefn.find('.')
                 # ts = int(basefn[:fnidx])
-                ts_range[1] = max(ts, ts_range[1])
+                # ts_range[1] = max(ts, ts_range[1])
                 ts_range_str = [time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts_range[0]/1000)),
                                 time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts_range[1]/1000))]
                 if ts*1000 < ts_range[0] or ts*1000 > ts_range[1]:
@@ -629,12 +630,12 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
     cum_cnt = 0
     cum_duration = 0
     sxpool = os.path.dirname(sxfns[0])+'/merged' if not config['onlytst0'] else os.path.dirname(sxfns[0])
-    mergelog_fn = f'{sxpool}/merge.log'
-    if os.path.exists(mergelog_fn):
-        with open(mergelog_fn,'r',newline='',encoding='utf-8-sig') as jf:
-            mergelog = json.loads(jf.read())
-    else:
-        mergelog = {}
+    # mergelog_fn = f'{sxpool}/merge.log'
+    # if os.path.exists(mergelog_fn):
+    #     with open(mergelog_fn,'r',newline='',encoding='utf-8-sig') as jf:
+    #         mergelog = json.loads(jf.read())
+    # else:
+    #     mergelog = {}
     if not os.path.exists(sxpool):
         os.makedirs(sxpool)
 
@@ -676,7 +677,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
         # if basefn in mergelog and mergelog[basefn]:
         #     continue
         # else:
-        mergelog[basefn] = False
+        # mergelog[basefn] = False
         with open(fn, 'rb') as f:
             buf = f.read()
 
@@ -747,8 +748,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                         json.dump(cum_logdata, jf, ensure_ascii=False)
                     sx_dict[first_sxbasefn]['duration'] = cum_duration/1000
                     merged_sxfns.append(first_sxbasefn)
-                    for fn in merged_sxfns:
-                        mergelog[fn] = True
+                    # for fn in merged_sxfns:
+                    #     mergelog[fn] = True
             else:
                 if cum_cnt > 1 and not config['onlytst0']:
                     print((f'merging {merged_sxfns} into\n\t{os.path.basename(first_sxfn)}'
@@ -760,8 +761,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                     with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='', encoding='utf-8-sig') as jf:
                         json.dump(cum_logdata, jf, ensure_ascii=False)
                 merged_sxfns.append(first_sxbasefn)
-                for sfn in merged_sxfns:
-                    mergelog[sfn] = True
+                # for sfn in merged_sxfns:
+                #     mergelog[sfn] = True
                 merged_sxfns = []
                 cum_duration = 0
                 # == another first_sxfn  
@@ -789,8 +790,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                         f"cum_duration={cum_duration/1000:.1f}"))
                 last_merged_dict[first_user] = [basefn]
         last_stop_ts = log['stop_ts']
-        with open(mergelog_fn,'w',newline='', encoding='utf-8-sig') as jf:
-            json.dump(mergelog, jf, indent=4, ensure_ascii=False)
+        # with open(mergelog_fn,'w',newline='', encoding='utf-8-sig') as jf:
+        #     json.dump(mergelog, jf, indent=4, ensure_ascii=False)
     return new_sxfns,new_userlist,sxpool
     
 
@@ -803,7 +804,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20220616a')
+    print('version: 20220621b')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
@@ -871,12 +872,23 @@ if __name__ == "__main__":
         if config['mergeNearby'] and len(fns)>1:
             fns,usersrcdirs,sxpool = mergeSX(fns,usersrcdirs,last_merged_dict,sxdict)
         [print('going to converting',fn) for fn in fns]
+        stop_flag = threading.Event()
+        engine = Engine(datainfo,config,stopped_flag=stop_flag)
         if config['prompt_convert'] and input('Enter:go  Others:quit '):
+            for fn in fns:
+                dstdir,wavfnkw_ts,userdir,dstdir2,userdir2 = engine.getDstdir(fn,'')
+                if config['moveSX']:   #(config['moveSX'] and config['dirList_load_S3zip']) and bleaddr:
+                    sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
+                    if not os.path.exists(sx_dstfn):
+                        print('move sx to',sx_dstfn)
+                        shutil.move(fn,sx_dstfn)
+                    elif fn != sx_dstfn:
+                        print(sx_dstfn,'exists! remove src!')
+                        os.remove(fn)
             if config['delmergedSX']:
                 shutil.rmtree(sxpool)
             sys.exit()
-        stop_flag = threading.Event()
-        engine = Engine(datainfo,config,stopped_flag=stop_flag)
+        
         t0 = time.time()
         for i,fn in enumerate(fns):
             if os.path.getsize(fn)/20000 < 20:
