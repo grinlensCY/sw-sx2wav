@@ -141,20 +141,26 @@ class Engine:
 
         if not dstdir:  # if can't find any folder matching the ble address or no assigned dir_Export
             str_bleaddr_2 = ""
-            for i,s in enumerate(self.bleaddr):
-                if i%2: continue
-                str_bleaddr_2 += self.bleaddr[i:i+2]+'_' if i!=10 else self.bleaddr[i:i+2]
-            if self.bleaddr in self.srcdir or str_bleaddr_2 in self.srcdir:
-                # if int(str_date[:4]) < 2020:
-                #     dstdir = f"{self.srcdir}"
-                dstdir = (f"{self.srcdir}/"
-                        f'{str_date}')
-                userdir = f"{self.srcdir}/"
-            else:
-                dstdir = (f"{self.srcdir}/"
-                            f'{self.bleaddr}/'
+            if self.bleaddr:
+                for i,s in enumerate(self.bleaddr):
+                    if i%2: continue
+                    str_bleaddr_2 += self.bleaddr[i:i+2]+'_' if i!=10 else self.bleaddr[i:i+2]
+                if self.bleaddr in self.srcdir or str_bleaddr_2 in self.srcdir:
+                    # if int(str_date[:4]) < 2020:
+                    #     dstdir = f"{self.srcdir}"
+                    dstdir = (f"{self.srcdir}/"
                             f'{str_date}')
-                userdir = f"{self.srcdir}/{self.bleaddr}/"
+                    userdir = f"{self.srcdir}/"
+                else:
+                    dstdir = (f"{self.srcdir}/"
+                                f'{self.bleaddr}/'
+                                f'{str_date}')
+                    userdir = f"{self.srcdir}/{self.bleaddr}/"
+            else:
+                srcdir = os.path.dirname(sx_fn)
+                dstdir = (f"{srcdir}/"
+                            f'{str_date}')
+                userdir = f"{srcdir}/"
         dstdir = dstdir.replace('/merged','')
         userdir = userdir.replace('/merged','')
         print(f'setRec: dstdir={dstdir}\nuserdir={userdir}')
