@@ -44,8 +44,12 @@ class PackageHandler:
         curr_ts=time.time()
         diff_ts=curr_ts-self.pre_ts
         if(diff_ts>3):
-            msg = (f'\nelapsed time: {(curr_ts-self.t0)/60:.1f}mins  processed:{self.cumm_accpkgCnt*self.accpkg_step_sec/60:.1f}mins  '
-                    f'speed=processed/elapsed={self.cumm_accpkgCnt*self.accpkg_step_sec/(curr_ts-self.t0):.1f}\n')
+            elapsedT = curr_ts-self.t0
+            processed = self.cumm_accpkgCnt*self.accpkg_step_sec
+            speed = processed/elapsedT
+            msg = (f'\nelapsed time: {elapsedT/60:.1f}mins  processed:{processed/60:.1f}mins  '
+                    f'speed=processed/elapsed={speed:.1f}  '
+                    f'remains={(self.engine.duration-processed)/speed}\n')
             msg+="imu: {0:2.2f},{1:2.2f},{2:2.2f},{3:2.2f}; ".format(self.acc_pkg_cnt/diff_ts,self.gyro_pkg_cnt/diff_ts,self.mag_pkg_cnt/diff_ts,self.quat_pkg_cnt/diff_ts)
             msg+="ecg: {0:2.2f},{1:2.2f},{2:2.2f}; ".format(self.ecg_sq_pkg_cnt/diff_ts,self.ecg_hr_pkg_cnt/diff_ts,self.ecg_raw_pkg_cnt/diff_ts)
             msg+="mic: {0:2.1f}pkg/sec".format(self.mic_pkg_cnt/diff_ts)

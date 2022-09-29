@@ -495,12 +495,16 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                     skip_list.append(basefn)
                     continue
             if not config['onlytst0'] and fn.endswith('zip'):
-                with ZipFile(fn) as myzip:
-                    for zipfn in myzip.namelist():
-                        if zipfn.endswith('sx') and not os.path.exists(f'{srcdir}\{zipfn.replace("zip","sx")}'):
-                            print('going to upzip',zipfn)
-                            # myzip.extract(zipfn,path=srcdir)
-                            myzip.extractall(path=srcdir)
+                try:
+                    with ZipFile(fn) as myzip:
+                        for zipfn in myzip.namelist():
+                            if zipfn.endswith('sx') and not os.path.exists(f'{srcdir}\{zipfn.replace("zip","sx")}'):
+                                print('going to upzip',zipfn)
+                                # myzip.extract(zipfn,path=srcdir)
+                                myzip.extractall(path=srcdir)
+                except:
+                    print('error in unzip --> skipe')
+                    continue
         fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                 if ((fn.endswith('.sxr') or fn.endswith('.sx')) and fn not in skip_list)]
         if os.path.basename(fns[0]).startswith('log_'):
@@ -810,7 +814,7 @@ if __name__ == "__main__":
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
             if key in config['default'].keys() and config[key] != config['default'][key]:
                 print(f"{key} {config[key]} ===> not default={config['default'][key]}")
-                time.sleep(3)
+                time.sleep(2)
             else:
                 print(f"{key} {config[key]}")
         elif key.startswith("dirList_load_S3zip"):
@@ -862,9 +866,9 @@ if __name__ == "__main__":
         usersrcdirs = [os.path.basename(os.path.dirname(fn)) for fn in fns]
         if len(fns):
             thisdir = os.path.dirname(os.path.dirname(fns[0]))
-            if not len([path for path in config['dirToloadFile'] if thisdir in path]):
+            if not len([path for path in config['dirToloadFile'] if thisdir in path]) and 'compilation/IRB' not in thisdir:
                 config['dirToloadFile'].append(thisdir)
-            if len(config['dirToloadFile']) > 9:
+            if len(config['dirToloadFile']) > 10:
                 del config['dirToloadFile'][0]
             updateConfig(config=config)
     if not config['onlyChkTS']:

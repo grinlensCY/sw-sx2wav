@@ -72,4 +72,6 @@
     "moveSX": 0,
     "skipPkgCnt": 10,
     "prompt_convert": 0
+    "key": "",
+    "iv": ""
 }
