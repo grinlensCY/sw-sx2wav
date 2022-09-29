@@ -182,7 +182,7 @@ class Engine:
         if self.srcdir and (sx_fn.endswith('sx') or sx_fn.endswith('sxr')) :
             drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
-            self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'])
+            self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.config['key'],iv=self.config['iv'])
             self.data_retriever.set_sys_info_handler(pkg_handler)
             self.data_retriever.set_mic_data_handler(pkg_handler)
             self.data_retriever.set_imu_data_handler(pkg_handler)
@@ -206,7 +206,7 @@ class Engine:
                 cnt += 1
                 print('wait for receiving ble addre',cnt)
                 if cnt > 10:
-                    input(f'ble addr of {os.path.basename(sx_fn)} is unknown!')
+                    input(f'ble addr of {os.path.basename(sx_fn)} is unknown! any key to go on')
                     print(f'ble addr of {os.path.basename(sx_fn)} is unknown!'
                           ,file=open('log.txt','a',newline='', encoding='utf-8-sig'))
                     break
@@ -279,7 +279,7 @@ class Engine:
         if self.srcdir and (sx_fn.endswith('sx') or sx_fn.endswith('sxr')):
             drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
-            self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'])
+            self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.config['key'],iv=self.config['iv'])
             self.data_retriever.set_sys_info_handler(pkg_handler)
             self.data_retriever.set_mic_data_handler(pkg_handler)
             self.data_retriever.set_imu_data_handler(pkg_handler)
@@ -808,7 +808,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20220621b')
+    print('version: 20220929a')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):

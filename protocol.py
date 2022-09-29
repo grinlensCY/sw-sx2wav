@@ -99,7 +99,7 @@ class Protocol:
     int_to_status_map={}
     int_to_act_map={}
 
-    def __init__(self,drv,name,skipPkgCnt): #skipPkgCnt only for sx2wav/sxReport
+    def __init__(self,drv,name,skipPkgCnt,key='',iv=''): #skipPkgCnt only for sx2wav/sxReport
         self.driver=drv
 
         if(type(drv) is FD.Driver and not drv.isSXR):
@@ -138,8 +138,11 @@ class Protocol:
         static uint8_t protocol_iv_key[16] = {'S', 'i', 'r', 'i', 'u', 'X', 'e', 'n', 
                                             's', 'e', '2', '1', '0', '0', 'F', 'w'};
         '''
-        self.key='SiriuXense2100Fw'.encode('ASCII')
-        self.iv= 'akWLytV$N-_X:2zK'.encode('ASCII')
+        key = key if key else 'SiriuXense2100Fw'
+        iv = iv if iv else 'akWLytV$N-_X:2zK'
+        self.key=key.encode('ASCII')
+        self.iv= iv.encode('ASCII')
+        print(f"protocol: key={key}  iv={iv}")
         self.cipher = Cipher(algorithms.AES(self.key), modes.CBC(self.iv),backend=default_backend())
 
         self.int_to_pose_map[0]='None'
