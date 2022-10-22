@@ -43,6 +43,8 @@ class Engine:
         self.srcdir = ''
         self.thd_ChkRecThd = None
 
+        self.keyfn = ''
+
     def start(self):
         print('engine start')
         self.data_retriever.start()
@@ -179,10 +181,20 @@ class Engine:
         print('chk_files_format sx_fn: ', sx_fn)
         # fnstr = sx_fn.split("/")[-2:] if len(sx_fn.split("/"))>1 else sx_fn.split("\\")[-2:]
         # self.input = '_'.join(fnstr)
-        if self.srcdir and (sx_fn.endswith('sx') or sx_fn.endswith('sxr')) :
+        if self.srcdir and (sx_fn.endswith('sx') or sx_fn.endswith('sxr')):
+            self.keyfn = f"{sx_fn[:-4]}_keyiv.txt" if '.sxr' in sx_fn else ''
+            if os.path.exists(self.keyfn):
+                print(f"{self.keyfn} exists!")
+                with open(self.keyfn,'r') as f:
+                    tmp = f.readline()
+                self.key = tmp.split(',')[0]
+                self.iv = tmp.split(',')[1]
+            else:
+                self.key = self.config['key']
+                self.iv = self.config['iv']
             drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
-            self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.config['key'],iv=self.config['iv'])
+            self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
             self.data_retriever.set_sys_info_handler(pkg_handler)
             self.data_retriever.set_mic_data_handler(pkg_handler)
             self.data_retriever.set_imu_data_handler(pkg_handler)
@@ -279,12 +291,18 @@ class Engine:
         if self.srcdir and (sx_fn.endswith('sx') or sx_fn.endswith('sxr')):
             drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
-            self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.config['key'],iv=self.config['iv'])
+            self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
             self.data_retriever.set_sys_info_handler(pkg_handler)
             self.data_retriever.set_mic_data_handler(pkg_handler)
             self.data_retriever.set_imu_data_handler(pkg_handler)
             self.data_retriever.set_ecg_data_handler(pkg_handler)
             self.data_retriever.set_endingTX_callback(self.endingTX_callback)
+            if not os.path.exists(self.keyfn) and self.config['key']:
+                with open(self.keyfn,'w',newline='') as f:
+                    f.write(f"{self.config['key']},{self.config['iv']}")
+                print('write key/iv in',self.keyfn)
+            # sys.exit()
+
         go = self.setRec(dstdir,wavfnkw_ts)
         if go:
             print('going to start Engine again for recording!')
@@ -626,6 +644,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
     last_stop_ts = 0
     first_sxfn = None
     first_user = None
+    first_sx_keyfn = None
     cum_sxData = None
     cum_logdata = None
     new_sxfns = []
@@ -689,6 +708,9 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
             first_sxfn = f'{sxpool}/{basefn}'
             if not config['onlytst0']:
                 shutil.copy2(fn,first_sxfn)
+                keyfn = f"{fn[:-4]}_keyiv.txt" if basefn.endswith('sxr') else ""
+                if os.path.exists(keyfn):
+                    shutil.copy2(keyfn, f"{first_sxfn[:-4]}_keyiv.txt")
             first_sxbasefn = basefn
             first_user = userlist[i]
             cum_sxData = buf
@@ -774,6 +796,9 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 first_sxfn = f'{sxpool}/{basefn}'
                 if not config['onlytst0']:
                     shutil.copy2(fn,first_sxfn)
+                    keyfn = f"{fn[:-4]}_keyiv.txt" if basefn.endswith('sxr') else ""
+                    if os.path.exists(keyfn):
+                        shutil.copy2(keyfn, f"{first_sxfn[:-4]}_keyiv.txt")
                 first_sxbasefn = os.path.basename(fn)
                 first_user = userlist[i]
                 new_sxfns.append(first_sxfn)
@@ -808,7 +833,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20220929a')
+    print('version: 20221022a')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
@@ -955,6 +980,10 @@ if __name__ == "__main__":
                 elif fn != sx_dstfn:
                     print(sx_dstfn,'exists! remove src!')
                     os.remove(fn)
+                keyfn = f"{dstdir}/{os.path.basename(engine.keyfn)}"
+                if engine.keyfn and not os.path.exists(keyfn):
+                    print(f"move keyfn to {dstdir}")
+                    shutil.copy2(engine.keyfn, dstdir)
             if (config["dirList_load_S3zip"]
                     and len(sxdict)
                     and userdirkw in last_merged_dict and os.path.basename(fn) not in last_merged_dict[userdirkw]
