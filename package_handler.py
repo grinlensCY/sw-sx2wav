@@ -46,7 +46,7 @@ class PackageHandler:
         if(diff_ts>3):
             elapsedT = curr_ts-self.t0
             processed = self.cumm_accpkgCnt*self.accpkg_step_sec
-            speed = processed/elapsedT
+            speed = processed/elapsedT+0.001
             msg = (f'\nelapsed time: {elapsedT/60:.1f}mins  processed:{processed/60:.1f}mins  '
                     f'speed=processed/elapsed={speed:.1f}  '
                     f'remains={(self.engine.duration-processed)/speed}\n')
@@ -145,11 +145,23 @@ class PackageHandler:
                 self.engine.datainfo['mic']['sr'] = 2000
                 print('multimic: not 4kHz, pkg size=', len(dat[1]),'bleaddr=',self.bleaddr)
             self.engine.flag_mic_sr_checked.set()
-        if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
-            self.engine.flag_checked_fileformat.set()
-        elif self.engine.flag_mic_sr_checked.is_set():
-            print('\n\tonly flag_mic_sr_checked\n')
-            self.engine.flag_checked_fileformat.set()
+        # if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
+        #     self.engine.flag_checked_fileformat.set()
+        # elif self.engine.flag_mic_sr_checked.is_set():
+        #     print('\n\tonly flag_mic_sr_checked\n')
+        #     self.engine.flag_checked_fileformat.set()
+        
+        if not self.engine.flag_checked_fileformat.is_set():
+            if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
+                self.engine.flag_checked_fileformat.set()
+            elif self.engine.flag_mic_sr_checked.is_set():
+                if not self.cumm_accpkgCnt:
+                    self.waitingImuCnt += 1
+                else:
+                    self.waitingImuCnt = 0
+                if self.waitingImuCnt > 100:
+                    print(f'\n\tonly flag_mic_sr_checked  cumm_accpkgCnt={self.cumm_accpkgCnt}  waitingImuCnt={self.waitingImuCnt}\n')
+                    self.engine.flag_checked_fileformat.set()
         # q.put_nowait(dat)
 
         self.mic_pkg_cnt+=1
