@@ -5,7 +5,7 @@
         "ts_range_sx": [],
         "load_all_sx": 10,
         "mergeNearby": 10,
-        "maxMergeInterval_ms": 5000,
+        "maxMergeInterval_ms": 50000,
         "onlySelectedBle": "",
         "onlyChkTS": 0,
         "onlyChkFormat": 0,
@@ -21,12 +21,16 @@
         "prompt_convert": 10
     },
     "dirToloadFile": [
-        "C:/Users/grinl/Downloads/tmp/32G/3hr/ED_BD_A4_BF_B6_79",
-        "C:/Users/grinl/Downloads/tmp/32G/5hr",
-        "G:/My Drive/Experiment/compilation/attach",
-        "C:/Users/chenyikuo/Downloads/tmp",
-        "C:/Users/chenyikuo/Downloads/tmp/F5_C7_B2_C6_81_F5",
-        "C:/Users/chenyikuo/Downloads/tmp/F5_C7_B2_C6_81_F5_full"
+        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/attach",
+        "C:/Users/chenyikuo/Downloads/tmp/motion",
+        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/FJ_baby/17M_baby_patch_MP",
+        "C:/Users/chenyikuo/Downloads/tmp/motion/DB11A505B167",
+        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/在家受測者/cyk/6y1m",
+        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/在家受測者/Ninaliao",
+        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/心音/誤判",
+        "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/FJ_baby/18M_baby_Product",
+        "G:/My Drive/Code/RocketBaby_no_gui_recording/record/test",
+        "C:/Users/chenyikuo/Downloads/tmp/RASPpi"
     ],
     "//dirToloadFile": "G:/My Drive/Code/sx2wav/test_files",
     "dirList_load_S3zip": "",
@@ -71,7 +75,7 @@
     "delmergedSX": 10,
     "moveSX": 0,
     "skipPkgCnt": 10,
-    "prompt_convert": 0
+    "prompt_convert": 0,
     "key": "",
     "iv": ""
 }
