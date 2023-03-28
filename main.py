@@ -190,8 +190,10 @@ class Engine:
                 self.key = tmp.split(',')[0]
                 self.iv = tmp.split(',')[1]
             else:
+                print(f"{self.keyfn} does NOT exist!")
                 self.key = self.config['key']
                 self.iv = self.config['iv']
+                self.keyfn = None
             drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
             self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
@@ -228,7 +230,7 @@ class Engine:
                     f'BLE addr:{pkg_handler.bleaddr} ')
             if not self.flag_imu_sr_checked.is_set():
                 self.config['onlylog'] = 10
-                print('\nimu_sr is confirmed ==> force to be onlylog mode!\n')
+                print('\nimu_sr is NOT confirmed ==> force to be onlylog mode!\n')
             else:            
                 print(f'acc sr:{self.datainfo["acc"]["sr"]} '
                         f'gyro sr:{self.datainfo["gyro"]["sr"]}')
@@ -297,7 +299,7 @@ class Engine:
             self.data_retriever.set_imu_data_handler(pkg_handler)
             self.data_retriever.set_ecg_data_handler(pkg_handler)
             self.data_retriever.set_endingTX_callback(self.endingTX_callback)
-            if not os.path.exists(self.keyfn) and self.config['key']:
+            if self.keyfn and not os.path.exists(self.keyfn) and self.config['key']:
                 with open(self.keyfn,'w',newline='') as f:
                     f.write(f"{self.config['key']},{self.config['iv']}")
                 print('write key/iv in',self.keyfn)
@@ -833,7 +835,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20221022a')
+    print('version: 20221211a')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
@@ -980,7 +982,7 @@ if __name__ == "__main__":
                 elif fn != sx_dstfn:
                     print(sx_dstfn,'exists! remove src!')
                     os.remove(fn)
-                keyfn = f"{dstdir}/{os.path.basename(engine.keyfn)}"
+                keyfn = f"{dstdir}/{os.path.basename(engine.keyfn)}" if engine.keyfn else ''
                 if engine.keyfn and not os.path.exists(keyfn):
                     print(f"move keyfn to {dstdir}")
                     shutil.copy2(engine.keyfn, dstdir)
