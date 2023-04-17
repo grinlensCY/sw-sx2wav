@@ -4,7 +4,9 @@ import file_driver as FD
 import signal
 from package_handler import PackageHandler
 from WriteDataToFileThread import RecThread
+from WriteDataToFileThread6ch import RecThread as RecThread6ch
 import protocol as PRO
+import protocol_6ch as PRO6ch
 import tkinter as tk
 from tkinter import filedialog
 from zipfile import ZipFile
@@ -196,7 +198,10 @@ class Engine:
                 self.keyfn = None
             drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
-            self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
+            # self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
+            self.data_retriever = (PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
+                                    if not self.config['6ch']
+                                    else PRO6ch.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv))
             self.data_retriever.set_sys_info_handler(pkg_handler)
             self.data_retriever.set_mic_data_handler(pkg_handler)
             self.data_retriever.set_imu_data_handler(pkg_handler)
@@ -293,7 +298,10 @@ class Engine:
         if self.srcdir and (sx_fn.endswith('sx') or sx_fn.endswith('sxr')):
             drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
-            self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
+            # self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
+            self.data_retriever = (PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
+                                    if not self.config['6ch']
+                                    else PRO6ch.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv))
             self.data_retriever.set_sys_info_handler(pkg_handler)
             self.data_retriever.set_mic_data_handler(pkg_handler)
             self.data_retriever.set_imu_data_handler(pkg_handler)
@@ -314,21 +322,35 @@ class Engine:
         if not self.thd_rec_flag.is_set():
             dstfn_prefix = f'{dstdir}/{wavfnkw_ts}'
             recT0 = time.mktime(time.strptime(wavfnkw_ts,"%Y-%m-%d-%H-%M-%S"))
-            if os.path.exists(os.path.dirname(dstdir)):
-                existfns = [fn for fn in os.listdir(os.path.dirname(dstdir)) if wavfnkw_ts in fn]
+            # if os.path.exists(os.path.dirname(dstdir)):
+            if os.path.exists(dstdir):
+                existfns = [fn for fn in os.listdir(dstdir) if wavfnkw_ts in fn]
             else:
                 existfns = ''
                 os.makedirs(os.path.dirname(dstdir))
+
+            print(f"setRec: wavfnkw_ts={wavfnkw_ts}")
+            print(f"setRec: dstdir={dstdir}")
+            print(f"setRec: existfns={existfns}")
+            # existfns = [fn for fn in os.listdir(os.path.dirname(dstdir)) if wavfnkw_ts in fn]
+            print(f"setRec: dstfn_prefix={dstfn_prefix}")
             if len(existfns):
-                print(f'{dstfn_prefix} has existed!')
+                print(f'{existfns[0]} exists!')
                 # if self.config['overwrite']:
                 print('going to overwrite it!')
+                [os.remove(f"{dstdir}/{fn}") for fn in existfns if fn.endswith('.wav')]
+
                 # else:
                 #     print('going to skip it!')
                 #     self.stop()
                 #     return False
             if not self.config['onlylog']:
-                self.recThd_audio = RecThread(self.datainfo['mic']['sr'],
+                if self.config['6ch']:
+                    self.recThd_audio = RecThread6ch(self.datainfo['mic']['sr'],
+                                            1, 0.04, dstfn_prefix, 'mic',
+                                            self.datainfo['mic']['fullscale'],recT0,self.config,self.ts_Hz)
+                else:
+                    self.recThd_audio = RecThread(self.datainfo['mic']['sr'],
                                             1, 0.04, dstfn_prefix, 'mic',
                                             self.datainfo['mic']['fullscale'],
                                             self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
@@ -490,14 +512,15 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
             ts = getTsOfFn(fn,ms=False)
             fsize = os.path.getsize(fn)
             basefn = os.path.basename(fn)
+            fsizepermin = 38500 if config['6ch'] else 20000
             if ts:
                 recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
                 msg = (f'{basefn}  recording start at:{recTime}  '
-                        f'file size:{os.path.getsize(fn)}=>{hhmmss(fsize/20000)}')
+                        f'file size:{os.path.getsize(fn)}=>{hhmmss(fsize/fsizepermin)}')
             else:
                 recTime = 'SD_card_unknown'
                 msg = (f'{basefn}  recording start at:{recTime}  '
-                        f'file size:{os.path.getsize(fn)}=>{hhmmss(fsize/20000)}')
+                        f'file size:{os.path.getsize(fn)}=>{hhmmss(fsize/fsizepermin)}')
             if fsize < 1600:     # < 5sec
                 msg += f"  ==>duration < 5sec==>quit!"
                 print(msg)
@@ -835,7 +858,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20221211a')
+    print('version: 20230417a')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):

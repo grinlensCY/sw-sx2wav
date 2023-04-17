@@ -138,8 +138,8 @@ class Protocol:
         static uint8_t protocol_iv_key[16] = {'S', 'i', 'r', 'i', 'u', 'X', 'e', 'n', 
                                             's', 'e', '2', '1', '0', '0', 'F', 'w'};
         '''
-        key = key if key else 'sW9Fu9Qu472WpUXp'    #'SiriuXense2100Fw'
-        iv = iv if iv else 'FRZX6XfX6xZkZeEZ'   #'akWLytV$N-_X:2zK'
+        key = key if key else 'SiriuXense2100Fw'
+        iv = iv if iv else 'akWLytV$N-_X:2zK'
         self.key=key.encode('ASCII')
         self.iv= iv.encode('ASCII')
         print(f"protocol: key={key}  iv={iv}")
@@ -167,6 +167,15 @@ class Protocol:
 
         # self.q_mic=queue.Queue()    # for QML,sxReport
         self.name = name
+
+        # for saving sxr
+        self.flag_rec = threading.Event()
+        self.flag_rec_buf = threading.Event()
+        self.flag_clr_q_rec = threading.Event()
+        self.sxfn = ''
+        self.q_rec=queue.Queue()
+        self.recThd = None
+        self.savBuf = bytearray()
 
     def __encrypt_content(self,pkg):
         encryptor  = self.cipher.encryptor()
@@ -602,25 +611,33 @@ class Protocol:
     def __prase_mic_pkg(self,pkg):
         ba=pkg[2]
         len_ba=len(ba)
-        batch_cnt=int(len_ba/8)
+        batch_cnt=int(len_ba/16)
 
         mic0=[]
         mic1=[]
         mic2=[]
-        mic3=[]
+        # mic3=[]   沒訊號
+        # mic4=[]   沒訊號
+        mic5=[]
+        mic6=[]
+        mic7=[]
 
         offset=0
         for _ in range(batch_cnt):
-            val=struct.unpack('<hhhh',ba[offset:(offset+8)])
-            offset+=8
+            val=struct.unpack('<hhhhhhhh',ba[offset:(offset+16)])
+            offset+=16
 
             mic0.append(val[0])
             mic1.append(val[1])
             mic2.append(val[2])
-            mic3.append(val[3])
+            # mic3.append(val[3])
+            # mic4.append(val[4])
+            mic5.append(val[7])     # 為了方便對應上下位置，5,7對調
+            mic6.append(val[6])
+            mic7.append(val[5])     # 為了方便對應上下位置，5,7對調
 
         ts=pkg[1]
-        return (ts,mic0,mic1,mic2,mic3)
+        return (ts,mic0,mic1,mic2,mic5,mic6,mic7)
 
     def __prase_ecg_hr_pkg(self,pkg):
         ba=pkg[2]
@@ -728,7 +745,7 @@ class Protocol:
             elif(pkg_type==self.MSG_TYPE_DUAL_MIC and self.mic_data_handler is not None):
                 pkg=self.__prase_dual_mic_pkg(pkg)
                 if(pkg is not None):
-                    self.mic_data_handler.handle_dual_mic_pkg(pkg)
+                    self.mic_data_handler.handle_dual_mic_pkg(pkg, self.q_mic)
 
             elif(pkg_type==self.MSG_TYPE_MIC and self.mic_data_handler is not None):
                 pkg=self.__prase_mic_pkg(pkg)

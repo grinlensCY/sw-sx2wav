@@ -18,7 +18,8 @@
         "delmergedSX": 10,
         "moveSX": 0,
         "skipPkgCnt": 10,
-        "prompt_convert": 10
+        "prompt_convert": 10,
+        "6ch": 0
     },
     "dirToloadFile": [
         "P:/Backups/Google - Chenyi Kuo/Google Drive/Experiment/compilation/attach",
@@ -77,5 +78,6 @@
     "skipPkgCnt": 10,
     "prompt_convert": 0,
     "key": "",
-    "iv": ""
+    "iv": "",
+    "6ch": 10
 }

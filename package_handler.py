@@ -136,20 +136,32 @@ class PackageHandler:
     def handle_mic_pkg(self,dat):
         if not self.engine.flag_mic_sr_checked.is_set():
             self.engine.flag_dualmic.clear()
-            if len(dat[1]) == 64:
+            # if len(dat[1]) == 64:
+            #     self.engine.flag_4kHz.set()
+            #     self.engine.datainfo['mic']['sr'] = 4000
+            #     print('multimic: 4kHz, pkg size=', len(dat[1]),'bleaddr=',self.bleaddr)
+            # else:
+            #     self.engine.flag_4kHz.clear()
+            #     self.engine.datainfo['mic']['sr'] = 2000
+            #     print('multimic: not 4kHz, pkg size=', len(dat[1]),'bleaddr=',self.bleaddr)
+            # self.engine.flag_mic_sr_checked.set()
+            pkglen = len(dat[1])
+            if pkglen == 64 and self.engine.datainfo['mic']['sr'] != 4000:
                 self.engine.flag_4kHz.set()
                 self.engine.datainfo['mic']['sr'] = 4000
-                print('multimic: 4kHz, pkg size=', len(dat[1]),'bleaddr=',self.bleaddr)
-            else:
+                # self.engine.set_audio_sr(4000,pkglen)
+            elif pkglen == 32 and self.engine.datainfo['mic']['sr'] != 2000:
                 self.engine.flag_4kHz.clear()
                 self.engine.datainfo['mic']['sr'] = 2000
-                print('multimic: not 4kHz, pkg size=', len(dat[1]),'bleaddr=',self.bleaddr)
+                # self.engine.set_audio_sr(2000,pkglen)
+            elif pkglen == 16 and self.engine.config['6ch']:
+                self.engine.flag_4kHz.clear()
+                self.engine.datainfo['mic']['sr'] = 2000
+                # self.engine.set_audio_sr(2000,pkglen)
+            # else:
+            #     self.engine.set_audio_sr(self.engine.datainfo['mic']['sr'],pkglen)  # to update tsHz
             self.engine.flag_mic_sr_checked.set()
-        # if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
-        #     self.engine.flag_checked_fileformat.set()
-        # elif self.engine.flag_mic_sr_checked.is_set():
-        #     print('\n\tonly flag_mic_sr_checked\n')
-        #     self.engine.flag_checked_fileformat.set()
+            print('\nPackageHandler: mic sr/pkglen was confirmed!',self.engine.datainfo['mic']['sr'],'Hz /',pkglen,'bleaddr=',self.bleaddr)
         
         if not self.engine.flag_checked_fileformat.is_set():
             if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
