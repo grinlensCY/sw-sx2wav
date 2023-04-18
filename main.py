@@ -917,8 +917,9 @@ if __name__ == "__main__":
         if len(fns):
             thisdir = os.path.dirname(os.path.dirname(fns[0]))
             if not len([path for path in config['dirToloadFile'] if thisdir in path]) and 'compilation/IRB' not in thisdir:
-                config['dirToloadFile'].append(thisdir)
-            if len(config['dirToloadFile']) > 10:
+                if not input(f"append {thisdir} to dirToloadFile?  "):
+                    config['dirToloadFile'].append(thisdir)
+            if len(config['dirToloadFile']) > 16:
                 del config['dirToloadFile'][0]
             updateConfig(config=config)
     if not config['onlyChkTS']:
