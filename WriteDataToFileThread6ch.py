@@ -40,11 +40,11 @@ class RecThread(threading.Thread):
         self.err = {'reset_ts':[], 'pkgloss_ts':[], 'pkgloss_duration':[]}
         self.fn_errJson = f'{self.filename_prefix}-errlog_{job}.json'
         try:
-            print(f'start recording at {self.filename_prefix}', file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
+            print(f'start recording at {self.filename_prefix}', file=open(self.fn_errlog,'w',newline='', encoding='utf-8-sig'))
         except Exception as e:
             print(f'{self.job}: {e}')
             time.sleep(0.01)
-            print(f'start recording at {self.filename_prefix}', file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
+            print(f'start recording at {self.filename_prefix}', file=open(self.fn_errlog,'w',newline='', encoding='utf-8-sig'))
         if job == 'mic':
             self.filename_new.append(f'{self.filename_prefix}-audio-main01.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-main02.wav')
@@ -169,7 +169,7 @@ class RecThread(threading.Thread):
             else:
                 self.processedT = 0
                 sr_PatchTS = int(1/0.008)
-                ts_diff_target = 0.008 * self.ts_Hz
+                ts_diff_target = 0.016 * self.ts_Hz
                 max_ts_diff = ts_diff_target*1.4
                 with sf.SoundFile(self.filename_new[0], mode='x',
                                     samplerate=self.sampleRate, channels=self.channels,
@@ -231,7 +231,7 @@ class RecThread(threading.Thread):
                                 ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
                                 msg += (f'\nmic pkgloss at {ts_sec:.3f} {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+ts_sec))}')
                                 msg += (f'\t{tstmp}({ts_sec:.3f}) - {tlast5[-1]}({tlast5[-1]/self.ts_Hz:.3f})'
-                                        f' = {tstmp - tlast5[-1]}={empty_sec:.2f}sec > {max_ts_diff}')
+                                        f' = {tstmp - tlast5[-1]}={empty_sec:.4f}sec > {max_ts_diff}')
                                 add_cnt = 1
                                 self.err['pkgloss_ts'].append(ts_sec)
                                 self.err['pkgloss_duration'].append(empty_sec)
