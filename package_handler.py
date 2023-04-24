@@ -73,7 +73,7 @@ class PackageHandler:
         ''' 
         [0]timestamp,               [1]firmware ver,    [2]hardware ver,    [3]battery level(%),
         [4]temperature(degreeC),    [5]ble addr,        [6]charging    ,    [7]Bat vol(mV),
-        [8]imu_temperature(degC)
+        [8]imu_temperature(degC),   [9]bat_vol_offset(mV)
         '''
         self.is_usb_pwr=dat[6]
         self.engine.sysinfo = []

@@ -551,7 +551,7 @@ class Protocol:
     def __prase_sys_info_pkg(self,pkg):
         ba=pkg[2]
         data_len=len(ba)
-        if(data_len != 14 and data_len!=13 and data_len!=18):
+        if(data_len != 14 and data_len!=13 and data_len!=18 and data_len!=20):
             return None
 
         ts=pkg[1]
@@ -566,6 +566,7 @@ class Protocol:
         has_ext_pwr=None
         imu_tmp=None
         bat_vol=None
+        bat_vol_offset=None
 
         if(data_len==14):
             has_ext_pwr=ba[13]>0
@@ -576,8 +577,16 @@ class Protocol:
 
             bat_vol=bat_vol/1000.0
             imu_tmp=imu_tmp/100.0
+        elif(data_len==20):
+            has_ext_pwr=ba[13]>0
+            bat_vol=ba[15]<<8 | ba[14]
+            imu_tmp=ba[17]<<8 | ba[16]
+            bat_vol_offset=ba[19]<<8 | ba[18]
 
-        return (ts,fw_ver,hw_ver,battery_level,temperature,ble_addr,has_ext_pwr,bat_vol,imu_tmp)
+            bat_vol=bat_vol/1000.0
+            imu_tmp=imu_tmp/100.0
+
+        return (ts,fw_ver,hw_ver,battery_level,temperature,ble_addr,has_ext_pwr,bat_vol,imu_tmp,bat_vol_offset)
 
     def __prase_dual_mic_pkg(self,pkg):
         ba=pkg[2]

@@ -327,7 +327,7 @@ class RecThread(threading.Thread):
                 with open(self.filename_new[0], 'a', newline='') as csvfile:
                     writer = csv.writer(csvfile, delimiter='\t')
                     # writer.writerow(['time','bat(%)','temperature(degC)','bat(mV)'])
-                    writer.writerow(['time','fwVer','hwVer','bat(%)','temperature(degC)','ble','charging','bat(mV)','imuTemp(degC)'])
+                    writer.writerow(['time','fwVer','hwVer','bat(%)','temperature(degC)','ble','charging','bat(mV)','imuTemp(degC)','bat_vol_offset(mV)'])
                     while not self._stop_event.is_set():
                         msg = ''
                         hasData = False
