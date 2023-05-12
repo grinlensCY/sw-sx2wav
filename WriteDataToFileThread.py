@@ -126,10 +126,11 @@ class RecThread(threading.Thread):
                                 for sec in xticks]
         xticklabels_minor = [f'{time.strftime("%H:%M:%S",time.localtime(time_ts+sec))}'
                                         for sec in xticks_minor]
+        duration_str = f'{time.strftime("%b/%d %H:%M:%S",time.localtime(time_ts))} ~ {time.strftime("%b/%d %H:%M:%S",time.localtime(time_ts+log["whole_duration"]))}'
         fig, axs = plt.subplots(2,1,figsize=(figw,6))
         print(fn)
         path_str = fn.split('\\')[-6:]
-        plt.suptitle(f"trend chart of empty_duration\n{path_str}", fontproperties=chinese_font)
+        plt.suptitle(f"trend chart of empty_duration\n{path_str}\n{duration_str}", fontproperties=chinese_font)
         axs[0].plot(log['pkgloss_ts'],log['pkgloss_duration'],marker='o',ls='',label='pkgloss_duration(sec)')
         if len(log['reset_ts']):
             axs[0].plot(log['reset_ts'],np.ones(len(log['reset_ts'])),marker='o',ls='',label='reset_ts')
