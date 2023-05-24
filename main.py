@@ -512,7 +512,7 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
             ts = getTsOfFn(fn,ms=False)
             fsize = os.path.getsize(fn)
             basefn = os.path.basename(fn)
-            fsizepermin = 38500 if config['6ch'] else 20000
+            fsizepermin = 38000 if config['6ch'] else 20000
             if ts:
                 recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
                 msg = (f'{basefn}  recording start at:{recTime}  '
@@ -858,15 +858,15 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20230417a')
+    print('version: 20230524a')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
             if key in config['default'].keys() and config[key] != config['default'][key]:
                 print(f"{key} {config[key]} ===> not default={config['default'][key]}")
                 time.sleep(2)
-            else:
-                print(f"{key} {config[key]}")
+            # else:
+            #     print(f"{key} {config[key]}")
         elif key.startswith("dirList_load_S3zip"):
             for item in config[key]:
                 print(item)
@@ -929,10 +929,10 @@ if __name__ == "__main__":
         [print('going to converting',fn) for fn in fns]
         stop_flag = threading.Event()
         engine = Engine(datainfo,config,stopped_flag=stop_flag)
-        if config['prompt_convert'] and input('Enter:go  Others:quit '):
+        if config['onlyMerge'] or (config['prompt_convert'] and input('Enter:go  Others:quit ')):
             for fn in fns:
                 dstdir,wavfnkw_ts,userdir,dstdir2,userdir2 = engine.getDstdir(fn,'')
-                if config['moveSX']:   #(config['moveSX'] and config['dirList_load_S3zip']) and bleaddr:
+                if config['moveSX'] or config['onlyMerge']:
                     sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
                     if not os.path.exists(sx_dstfn):
                         print('move sx to',sx_dstfn)
@@ -998,7 +998,7 @@ if __name__ == "__main__":
             if config['delSX']:
                 os.remove(fn)
                 print('remove sx',os.path.basename(fn))
-            elif config['moveSX']:   #(config['moveSX'] and config['dirList_load_S3zip']) and bleaddr:
+            elif config['moveSX']:
                 sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
                 if not os.path.exists(sx_dstfn):
                     print('move sx to',sx_dstfn)
