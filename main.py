@@ -554,6 +554,10 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
             fns.sort(key=lambda x:int(os.path.basename(x).split('_')[1]))
         else:
             fns.sort(key=lambda x:os.path.basename(x).split('_')[-1])
+        if config['delzip']:
+            for fn in fns_list:
+                if fn.endswith('.zip'):
+                    os.remove(fn)
     else:
         if tfn.endswith('zip'):
             with ZipFile(tfn) as myzip:
@@ -780,7 +784,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 if config['delSX'] and not config['dirList_load_S3zip']:
                     print('mergeSX: remove',fn,'of',userlist[i])
                     os.remove(fn)
-                    os.remove(logfn)
+                    if os.path.exists(fn):
+                        os.remove(logfn)
                 
                 if (fn == sxfns[-1]
                         # or (not mustMerge and
@@ -858,7 +863,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20230524a')
+    print('version: 20230526a')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
