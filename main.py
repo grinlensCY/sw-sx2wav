@@ -759,6 +759,12 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
             #     shutil.copy2(first_sxfn,first_sxfn.replace(".sx","_orig.sx"))
             # shutil.copy2(logfn,logfn.replace(".log","_orig.log"))
             last_merged_dict[first_user] = [basefn]
+
+            if config['delSX'] and not config['dirList_load_S3zip']:
+                    print('mergeSX: remove',fn,'of',userlist[i])
+                    os.remove(fn)
+                    if os.path.exists(logfn):
+                        os.remove(logfn)
         else:
             interval = log['start_ts'] - last_stop_ts
             print(f"\t\t\tinterval = {interval/1000:.1f}sec")
@@ -784,18 +790,10 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 if config['delSX'] and not config['dirList_load_S3zip']:
                     print('mergeSX: remove',fn,'of',userlist[i])
                     os.remove(fn)
-                    if os.path.exists(fn):
+                    if os.path.exists(logfn):
                         os.remove(logfn)
-                
                 if (fn == sxfns[-1]
-                        # or (not mustMerge and
-                        #     (not os.path.exists(sxfns[i+1].replace(".sx",".log"))
-                        #         and not os.path.exists(sxfns[i+1].replace(".sxr",".log"))))
                         or (not mustMerge and 'stop_ts' not in log.keys())):
-                    # print((f"fn == sxfns[-1]({fn == sxfns[-1]})\n"
-                    #     f"or (not mustMerge({not mustMerge}) and "
-                    #     f'(log does not exists({not os.path.exists(sxfns[i+1].replace(".sx",".log"))} and {not os.path.exists(sxfns[i+1].replace(".sxr",".log"))})\n'
-                    #     f"or (not mustMerge({not mustMerge}) and no 'stop_ts'({'stop_ts' not in log.keys()}))"))
                     print((f'\n\tmerging {merged_sxfns} \n\t\tinto  {os.path.basename(first_sxfn)}'
                             f'({first_user}: {cum_cnt} files,{cum_duration/1000/60:.2f}min)\n'))
                     with open(first_sxfn, "wb") as f:
@@ -804,8 +802,6 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                         json.dump(cum_logdata, jf, ensure_ascii=False)
                     sx_dict[first_sxbasefn]['duration'] = cum_duration/1000
                     merged_sxfns.append(first_sxbasefn)
-                    # for fn in merged_sxfns:
-                    #     mergelog[fn] = True
             else:
                 if cum_cnt > 1 and not config['onlytst0']:
                     print((f'merging {merged_sxfns} into\n\t{os.path.basename(first_sxfn)}'
@@ -851,6 +847,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
         last_stop_ts = log['stop_ts']
         # with open(mergelog_fn,'w',newline='', encoding='utf-8-sig') as jf:
         #     json.dump(mergelog, jf, indent=4, ensure_ascii=False)
+        print(f"going to converting {len(merged_sxfns)} merged files!")
     return new_sxfns,new_userlist,sxpool
     
 
@@ -1000,10 +997,7 @@ if __name__ == "__main__":
             with open(wavdictfn, 'w', newline='', encoding='utf-8-sig') as wavjson:
                 json.dump(wavdict, wavjson, indent=4, ensure_ascii=False)
 
-            if config['delSX']:
-                os.remove(fn)
-                print('remove sx',os.path.basename(fn))
-            elif config['moveSX']:
+            if config['moveSX']:
                 sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
                 if not os.path.exists(sx_dstfn):
                     print('move sx to',sx_dstfn)
@@ -1015,6 +1009,11 @@ if __name__ == "__main__":
                 if engine.keyfn and not os.path.exists(keyfn):
                     print(f"move keyfn to {dstdir}")
                     shutil.copy2(engine.keyfn, dstdir)
+
+            if config['delSX'] and os.path.exists(fn):
+                os.remove(fn)
+                print('remove sx',os.path.basename(fn))
+
             if (config["dirList_load_S3zip"]
                     and len(sxdict)
                     and userdirkw in last_merged_dict and os.path.basename(fn) not in last_merged_dict[userdirkw]
