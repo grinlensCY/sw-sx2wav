@@ -866,7 +866,7 @@ if __name__ == "__main__":
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
             if key in config['default'].keys() and config[key] != config['default'][key]:
                 print(f"{key} {config[key]} ===> not default={config['default'][key]}")
-                time.sleep(2)
+                # time.sleep(2)
             # else:
             #     print(f"{key} {config[key]}")
         elif key.startswith("dirList_load_S3zip"):
