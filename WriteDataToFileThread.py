@@ -319,6 +319,7 @@ class RecThread(threading.Thread):
                     os.remove(self.filename_new[2])
                     os.remove(self.filename_new[3])
         elif self.job == 'sysinfo':
+            buf = []
             if self.config['onlytst0']:
                 print(f'end {self.job} recording due to onlytst0=',self.config['onlytst0'])
                 self.stop()
@@ -361,8 +362,12 @@ class RecThread(threading.Thread):
                             tmp[0] = tstmp/self.ts_Hz
                             tmp[1] = hex(tmp[1])
                             tmp[2] = hex(tmp[2])
+                            buf.append(tmp)
                             # print('sysinfo rec',tmp)
-                            writer.writerow(tmp)
+                            if len(buf) > 20:
+                                writer.writerows(buf)
+                                buf = []
+                            # writer.writerow(tmp)
                             hasData |= True
                         except:
                             # print(f'{self.job}: timeout while getting data')
