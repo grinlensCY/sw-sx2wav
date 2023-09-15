@@ -473,6 +473,11 @@ def getTsOfFn(fn,ti=0,ms=True):
             return float(bn_split[-1][:-3])
         else:
             return float(bn_split[-1][:-3])/1000
+    elif bn.endswith('.zip') and len(bn) > 20:  # DA_EE_30_CB_E4_8C-1694675778197.zip  by rawdata_recorder APP
+        if ms:
+            return float(bn.split('-')[-1][:-4])
+        else:
+            return float(bn.split('-')[-1][:-4])/1000
     else:   # 1646693225364.sx or .sxr
         idx = len(bn.split('.')[-1])+1
         if ms:
@@ -860,7 +865,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20230526a')
+    print('version: 20230915a')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
