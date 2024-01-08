@@ -11,6 +11,8 @@ import tkinter as tk
 from tkinter import filedialog
 from zipfile import ZipFile
 
+from serialdb import SerialDB
+
 class Engine:
     def __init__(self,datainfo=None, config=None, stopped_flag=None):
         self.datainfo = datainfo
@@ -186,16 +188,25 @@ class Engine:
         if self.srcdir and (sx_fn.endswith('sx') or sx_fn.endswith('sxr')):
             self.keyfn = f"{sx_fn[:-4]}_keyiv.txt" if '.sxr' in sx_fn else ''
             if os.path.exists(self.keyfn):
-                print(f"{self.keyfn} exists!")
+                print(f"keyiv file:{self.keyfn} exists!")
                 with open(self.keyfn,'r') as f:
                     tmp = f.readline()
                 self.key = tmp.split(',')[0]
                 self.iv = tmp.split(',')[1]
             else:
-                print(f"{self.keyfn} does NOT exist!")
+                print(f"keyiv file:{self.keyfn} does NOT exist!")
                 self.key = self.config['key']
                 self.iv = self.config['iv']
                 self.keyfn = None
+                if not self.key:
+                    ble = input('keyin BLEmac in XX:XX:XX:XX:XX:XX or XX.....XX Enter:default key  others:mac :')
+                    if ble:
+                        db = SerialDB('./db/dut_20231213.db')
+                        res = db.get_key_qrcode(ble=ble)
+                        if res:
+                            tmp = res.split(',')
+                            self.key = tmp[1]
+                            self.iv = tmp[2]
             drv = FD.Driver(sx_fn)
             pkg_handler = PackageHandler(self)
             # self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
@@ -865,7 +876,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20230915a')
+    print('version: 20240108a')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
