@@ -198,8 +198,8 @@ class Engine:
                 self.key = self.config['key']
                 self.iv = self.config['iv']
                 self.keyfn = None
-                if not self.key:
-                    ble = input('keyin BLEmac in XX:XX:XX:XX:XX:XX or XX.....XX Enter:default key  others:mac :')
+                if not self.key and sx_fn.endswith('sxr'):
+                    ble = input('sxr needs key! keyin BLEmac in XX:XX:XX:XX:XX:XX or XX.....XX Enter:default key  others:mac :')
                     if ble:
                         db = SerialDB('./db/dut_20231213.db')
                         res = db.get_key_qrcode(ble=ble)
