@@ -25,6 +25,12 @@ class SimpleSysInfoHandler:
         #print('get sys info')
         pass
 
+class SimpleStateInfoHandler:
+    def handle_state_info_pkg(self,dat):
+        logts = time.strftime("%Y%b%d-%H-%M-%S", time.localtime())
+        print('get state info',logts,dat)
+        return logts,dat
+
 class SimpleMicDataHandler:
     def handle_mic_pkg(self,dat):
         #print('get mic')
@@ -32,6 +38,12 @@ class SimpleMicDataHandler:
     def handle_dual_mic_pkg(self,dat):
         #print('get dual mic')
         pass
+
+class SimpleOddSndDataHandler:
+    def handle_odd_snd_data_pkg(self,dat):
+        #sprint('get odd snd data')
+        pass
+
 
 class SimpleEcgDataHandler:
     def handle_ecg_raw_pkg(self,dat):
@@ -69,6 +81,7 @@ class Protocol:
     PKG_FRAME_FINISH_BYTE           =0xf0
 
     MSG_TYPE_DUAL_MIC               =0xD0
+    MSG_TYPE_ODD_SND_DATA           =0xD9
     MSG_TYPE_MIC                    =0xDA
     MSG_TYPE_QUAT                   =0xDB
     MSG_TYPE_ACC                    =0xDC
@@ -80,11 +93,13 @@ class Protocol:
 
     MSG_TYPE_SYS_INFO               =0xF0
     MSG_TYPE_ALG_RES                =0xFA
+    MSG_TYPE_STATE_INFO             =0xF1
 
     CMD_TYPE_CHANGE_PW              =0xC0
     CMD_TYPE_CHANGE_GAIN            =0xC1
     CMD_TYPE_SENSOR_CONTROL         =0xC2
 
+    CMD_TYPE_CONFIG_SHIPPING_MODE    =0xCA
     CMD_TYPE_TX_POWER                =0xCE
     CMD_TYPE_ECHO                    =0xCF
 
@@ -94,6 +109,9 @@ class Protocol:
     ALG_TYPE_SND_HR                 =0x12
     ALG_TYPE_BOWEL                  =0x21
     ALG_TYPE_POSTURE                =0x31
+    #20231213 new cmd
+    CMD_TYPE_OUTPUT_CTRL             =0x00
+    CMD_TYPE_PKG_REQUIRE             =0x01
 
     int_to_pose_map={}
     int_to_status_map={}
@@ -123,7 +141,9 @@ class Protocol:
 
         self.set_alg_res_handler(SimpleAlgResHandler())
         self.set_sys_info_handler(SimpleSysInfoHandler())
+        self.set_state_info_handler(SimpleStateInfoHandler())
         self.set_mic_data_handler(SimpleMicDataHandler())
+        self.set_odd_snd_data_handler(SimpleOddSndDataHandler())
         self.set_ecg_data_handler(SimpleEcgDataHandler())
         self.set_imu_data_handler(SimpleImuDataHandler())
 
@@ -199,9 +219,15 @@ class Protocol:
     def set_sys_info_handler(self,h):
         self.sys_info_handler=h
 
+    def set_state_info_handler(self,h):
+        self.state_info_handler=h
+
     def set_mic_data_handler(self,h):
         self.mic_data_handler=h
 
+    def set_odd_snd_data_handler(self,h):
+        self.odd_snd_data_handler=h
+        
     def set_ecg_data_handler(self,h):
         self.ecg_data_handler=h
 
@@ -256,6 +282,38 @@ class Protocol:
                     self.iv= iv
                     self.cipher = Cipher(algorithms.AES(self.key), modes.CBC(self.iv),backend=default_backend())
                     return True
+                
+    def output_control(self,req_mic,req_imu,req_alg,req_sys):
+        ba=bytearray()
+        ba.append(self.CMD_TYPE_OUTPUT_CTRL)
+        ba.append(1 if req_mic else 0)
+        ba.append(1 if req_imu else 0)
+        ba.append(1 if req_alg else 0)
+        ba.append(1 if req_sys else 0)
+
+        self.write(ba)
+
+    def require_package(self,req_odd_snd,is_req_state):
+        ba=bytearray()
+        ba.append(self.CMD_TYPE_PKG_REQUIRE)
+        ba.append(req_odd_snd)
+        ba.append(1 if is_req_state else 0)
+
+        self.write(ba)
+                    
+    def enable_shipping_mode(self):
+        ba=bytearray()
+        ba.append(self.CMD_TYPE_CONFIG_SHIPPING_MODE)
+        ba.append(1)
+
+        self.write(ba)
+            
+    def disable_shipping_mode(self):
+        ba=bytearray()
+        ba.append(self.CMD_TYPE_CONFIG_SHIPPING_MODE)
+        ba.append(0)
+
+        self.write(ba)
 
     def set_mic_gain(self,ch1,ch2,ch3,ch4):
         ba=bytearray()
@@ -588,6 +646,37 @@ class Protocol:
 
         return (ts,fw_ver,hw_ver,battery_level,temperature,ble_addr,has_ext_pwr,bat_vol,imu_tmp,bat_vol_offset)
 
+    def __prase_state_info_pkg(self,pkg):
+        ba=pkg[2]
+
+        data_len=len(ba)
+
+        if(data_len==28):
+            ts=pkg[1]
+            patch_state,rr_cl,hr_cl,bs_idx,main_tmp,env_tmp,rr,hr,vhr,bs,still_sleep,pose,status,act,bat_level,bat_voltage,charge_current_mA=struct.unpack("<BHHHHHHHHHHBBBBHB",ba)
+            free_mem=0
+            used_mem=0
+            total_mem=0
+            reset_reason=''
+        elif(data_len==28+12+32):
+            ts=pkg[1]
+            patch_state,rr_cl,hr_cl,bs_idx,main_tmp,env_tmp,rr,hr,vhr,bs,still_sleep,pose,status,act,bat_level,bat_voltage,charge_current_mA,free_mem,used_mem,total_mem=struct.unpack("<BHHHHHHHHHHBBBBHBLLL",ba[:-32])
+            reset_reason=ba[-32:].decode()
+            reset_reason=reset_reason.rstrip('\x00')
+        else:
+            return None
+
+        rr_cl=rr_cl/100
+        hr_cl=hr_cl/100
+        main_tmp=main_tmp/100
+        env_tmp=env_tmp/100
+        hr=hr/100
+        vhr=vhr/100
+        rr=rr/100
+        bat_voltage=bat_voltage/100
+
+        return (ts,patch_state,rr_cl,hr_cl,bs_idx,main_tmp,env_tmp,rr,hr,vhr,bs,still_sleep,pose,status,act,bat_level,bat_voltage,charge_current_mA,free_mem,used_mem,total_mem,reset_reason)
+
     def __prase_dual_mic_pkg(self,pkg):
         ba=pkg[2]
         len_ba=len(ba)
@@ -607,7 +696,19 @@ class Protocol:
         ts=pkg[1]
 
         return (ts,mic0,mic1)
+    
+    def __prase_odd_snd_data_pkg(self,pkg):
+        ba=pkg[2]
+        len_ba=len(ba)
+        if(len_ba!=130):
+            return None
 
+        ts=pkg[1]
+        pkg_idx=struct.unpack('<H',ba[0:2])[0]
+        data=struct.unpack('<'+'H'*int((len_ba-2)/2),ba[2:])[0]
+
+        return (ts,pkg_idx,data)
+    
     def __prase_mic_pkg(self,pkg):
         ba=pkg[2]
         len_ba=len(ba)
@@ -700,6 +801,8 @@ class Protocol:
         return (ts,ch,val_list)
 
     def __auto_prase_thd_fun(self,flag,rxq,crq):
+        last3dat = []
+        last3dat_idx = 0
         while(flag.is_set()):
             if(self.is_req_auto_prase_pkg==False):
                 time.sleep(0.5)
@@ -711,6 +814,7 @@ class Protocol:
 
             msg=rxq.get_nowait()
             try:
+                #print('get msg',len(msg))
                 pkg=self.decry_and_prase_to_pkg(msg)
             except:
                 continue
@@ -734,10 +838,30 @@ class Protocol:
                 if(pkg is not None):
                     self.sys_info_handler.handle_sys_info_pkg(pkg)
 
+
+            elif(pkg_type==self.MSG_TYPE_STATE_INFO and self.sys_info_handler is not None):
+                pkg=self.__prase_state_info_pkg(pkg)
+                if(pkg is not None):
+                    ts, dat = self.state_info_handler.handle_state_info_pkg(pkg)
+                    if len(last3dat) and last3dat[-1][1][-1] != dat[-1]:
+                        msg = ''
+                        for d in last3dat:
+                            msg += str(d) + "\n"
+                        msg += f"{ts},{dat}"
+                        print(msg, file=open('reset.log','a',newline=''))
+                    last3dat.append([ts,dat])
+                    if len(last3dat) > 3:
+                        del last3dat[0]
+
             elif(pkg_type==self.MSG_TYPE_DUAL_MIC and self.mic_data_handler is not None):
                 pkg=self.__prase_dual_mic_pkg(pkg)
                 if(pkg is not None):
                     self.mic_data_handler.handle_dual_mic_pkg(pkg)
+
+            elif(pkg_type==self.MSG_TYPE_ODD_SND_DATA and self.odd_snd_data_handler is not None):
+                pkg=self.__prase_odd_snd_data_pkg(pkg)
+                if(pkg is not None):
+                    self.odd_snd_data_handler.handle_odd_snd_data_pkg(pkg)
 
             elif(pkg_type==self.MSG_TYPE_MIC and self.mic_data_handler is not None):
                 pkg=self.__prase_mic_pkg(pkg)
