@@ -496,6 +496,12 @@ def getTsOfFn(fn,ti=0,ms=True):
         else:
             return float(bn[:-idx])/1000
 
+def isOnlyXXX(config):
+    for key in config.keys():
+        if 'only' in key:
+            return True
+    return False
+
 def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyChkTS=False, sx_dict={}):
     root = tk.Tk()
     root.withdraw()
@@ -566,11 +572,12 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
                     continue
         fns = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
                 if ((fn.endswith('.sxr') or fn.endswith('.sx')) and fn not in skip_list)]
-        if os.path.basename(fns[0]).startswith('log_'):
-            fns.sort(key=lambda x:int(os.path.basename(x).split('_')[1]))
-        else:
-            fns.sort(key=lambda x:os.path.basename(x).split('_')[-1])
-        if config['delzip']:
+        if len(fns):
+            if os.path.basename(fns[0]).startswith('log_'):
+                fns.sort(key=lambda x:int(os.path.basename(x).split('_')[1]))
+            else:
+                fns.sort(key=lambda x:os.path.basename(x).split('_')[-1])
+        if config['delzip'] and not isOnlyXXX(config):
             for fn in fns_list:
                 if fn.endswith('.zip'):
                     os.remove(fn)
@@ -876,7 +883,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20240202a')
+    print('version: 20240312a')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
