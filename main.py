@@ -498,7 +498,7 @@ def getTsOfFn(fn,ti=0,ms=True):
 
 def isOnlyXXX(config):
     for key in config.keys():
-        if 'only' in key and config[key]:
+        if key.startswith('only') and config[key]:
             return True
     return False
 
@@ -883,7 +883,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20240314a')
+    print('version: 20240314b')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
@@ -931,7 +931,7 @@ if __name__ == "__main__":
                     usersrcdirs.append(sxdict[fn]['user_srcdir'])
     else:
         print('select dir')
-        [print(i,path) for i,path in enumerate(config['dirToloadFile'])]
+        [print(i,path,i) for i,path in enumerate(config['dirToloadFile'])]
         o = input('which? ')
         if not o and o != 0:
             sys.exit()
@@ -945,7 +945,8 @@ if __name__ == "__main__":
                 if not input(f"append {thisdir} to dirToloadFile?  "):
                     config['dirToloadFile'].append(thisdir)
             if len(config['dirToloadFile']) > 16:
-                del config['dirToloadFile'][0]
+                del config['dirToloadFile'][1]
+            config['dirToloadFile'][0] = os.path.dirname(fns[0])
             updateConfig(config=config)
     if not config['onlyChkTS']:
         sxpool = ''
