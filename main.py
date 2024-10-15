@@ -218,6 +218,7 @@ class Engine:
             self.data_retriever.set_imu_data_handler(pkg_handler)
             self.data_retriever.set_ecg_data_handler(pkg_handler)
             self.data_retriever.set_endingTX_callback(self.endingTX_callback)
+            self.data_retriever.set_state_info_handler(pkg_handler)
             self.data_retriever.start()
             self.flag_checked_fileformat.clear()
             self.flag_imu_sr_checked.clear()
@@ -318,6 +319,7 @@ class Engine:
             self.data_retriever.set_imu_data_handler(pkg_handler)
             self.data_retriever.set_ecg_data_handler(pkg_handler)
             self.data_retriever.set_endingTX_callback(self.endingTX_callback)
+            self.data_retriever.set_state_info_handler(pkg_handler)
             if self.keyfn and not os.path.exists(self.keyfn) and self.config['key']:
                 with open(self.keyfn,'w',newline='') as f:
                     f.write(f"{self.config['key']},{self.config['iv']}")
@@ -883,7 +885,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20240314b')
+    print('version: 20241015a')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
@@ -958,7 +960,7 @@ if __name__ == "__main__":
         if config['onlyMerge'] or (config['prompt_convert'] and input('Enter:go  Others:quit ')):
             for fn in fns:
                 dstdir,wavfnkw_ts,userdir,dstdir2,userdir2 = engine.getDstdir(fn,'')
-                if config['moveSX'] or config['onlyMerge']:
+                if len(fns) > 1 and (config['moveSX'] or config['onlyMerge']):
                     sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
                     if not os.path.exists(sx_dstfn):
                         print('move sx to',sx_dstfn)
@@ -1021,7 +1023,7 @@ if __name__ == "__main__":
             with open(wavdictfn, 'w', newline='', encoding='utf-8-sig') as wavjson:
                 json.dump(wavdict, wavjson, indent=4, ensure_ascii=False)
 
-            if config['moveSX']:
+            if config['moveSX'] and len(fns) > 1:
                 sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
                 if not os.path.exists(sx_dstfn):
                     print('move sx to',sx_dstfn)

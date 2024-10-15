@@ -35,6 +35,10 @@ class PackageHandler:
         self.bleaddr = None
 
         self.waitingImuCnt = 0
+
+        self.flag_tempAttached = threading.Event()
+        self.flag_wellattached = threading.Event()
+        # self.flag_micAttached = threading.Event()
     
     def prepare_statistic_output(self):
         if(self.pre_ts==0):
@@ -69,6 +73,22 @@ class PackageHandler:
             self.mic_pkg_cnt=0
             self.pre_ts=curr_ts
     
+    def handle_state_info_pkg(self,dat):
+        # print('handle_state_info_pkg in package_handler:',dat)
+        # ts,patch_state,rr_cl,hr_cl,bs_idx,main_tmp,env_tmp,rr,hr,vhr,bs,still_sleep,pose,status,act,bat_level,bat_voltage,charge_current_mA,free_mem,used_mem,total_mem,reset_reason
+        if dat[1] == 32:
+            self.flag_tempAttached.set()
+            self.flag_wellattached.set()
+            # self.flag_micAttached.set()
+        elif dat[1] == 16:
+            self.flag_tempAttached.set()
+            self.flag_wellattached.clear()
+            # self.flag_micAttached.clear()
+        else:
+            self.flag_tempAttached.clear()
+            self.flag_wellattached.clear()
+            # self.flag_micAttached.clear()
+    
     def handle_sys_info_pkg(self,dat):
         ''' 
         [0]timestamp,               [1]firmware ver,    [2]hardware ver,    [3]battery level(%),
@@ -97,6 +117,8 @@ class PackageHandler:
             # self.engine.recThd_sysinfo.addData([dat[0],dat[3],self.engine.sysinfo[4],dat[7]])
             tmp = self.engine.sysinfo.copy()
             tmp[5] = tmp[5].hex()
+            tmp.extend([self.flag_tempAttached.is_set(), self.flag_wellattached.is_set()])
+            # print('ph sys_info',tmp)
             self.engine.recThd_sysinfo.addData(tmp)
 
     def handle_dual_mic_pkg(self,dat):

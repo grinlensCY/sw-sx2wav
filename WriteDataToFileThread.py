@@ -346,7 +346,9 @@ class RecThread(threading.Thread):
                 with open(self.filename_new[0], 'a', newline='') as csvfile:
                     writer = csv.writer(csvfile, delimiter='\t')
                     # writer.writerow(['time','bat(%)','temperature(degC)','bat(mV)'])
-                    writer.writerow(['time','fwVer','hwVer','bat(%)','temperature(degC)','ble','charging','bat(mV)','imuTemp(degC)','bat_vol_offset(mV)'])
+                    writer.writerow(['time','fwVer','hwVer','bat(%)','temperature(degC)','ble',
+                                     'charging','bat(mV)','imuTemp(degC)','bat_vol_offset(mV)',
+                                     'tempAttached','wellAttached'])
                     while not self._stop_event.is_set():
                         msg = ''
                         hasData = False
@@ -394,6 +396,8 @@ class RecThread(threading.Thread):
                         else:
                             emptyCnt = 0
                         if emptyCnt > 200:
+                            if len(buf):
+                                writer.writerows(buf)
                             print(f'end {self.job} recording due to emptyCnt=',emptyCnt)
                             self.stop()
         elif self.job != 'ecg':

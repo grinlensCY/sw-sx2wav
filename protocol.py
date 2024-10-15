@@ -842,16 +842,17 @@ class Protocol:
             elif(pkg_type==self.MSG_TYPE_STATE_INFO and self.sys_info_handler is not None):
                 pkg=self.__prase_state_info_pkg(pkg)
                 if(pkg is not None):
-                    ts, dat = self.state_info_handler.handle_state_info_pkg(pkg)
-                    if len(last3dat) and last3dat[-1][1][-1] != dat[-1]:
-                        msg = ''
-                        for d in last3dat:
-                            msg += str(d) + "\n"
-                        msg += f"{ts},{dat}"
-                        print(msg, file=open('reset.log','a',newline=''))
-                    last3dat.append([ts,dat])
-                    if len(last3dat) > 3:
-                        del last3dat[0]
+                    self.state_info_handler.handle_state_info_pkg(pkg)
+                    # ts, dat = self.state_info_handler.handle_state_info_pkg(pkg)
+                    # if len(last3dat) and last3dat[-1][1][-1] != dat[-1]:
+                    #     msg = ''
+                    #     for d in last3dat:
+                    #         msg += str(d) + "\n"
+                    #     msg += f"{ts},{dat}"
+                    #     print(msg, file=open('reset.log','a',newline=''))
+                    # last3dat.append([ts,dat])
+                    # if len(last3dat) > 3:
+                    #     del last3dat[0]
 
             elif(pkg_type==self.MSG_TYPE_DUAL_MIC and self.mic_data_handler is not None):
                 pkg=self.__prase_dual_mic_pkg(pkg)
