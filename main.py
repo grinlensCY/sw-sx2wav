@@ -459,10 +459,10 @@ class Engine:
 
 def updateConfig(engine=None, config=None):
     if config:
-        with open(f"{os.path.join(os.path.dirname(__file__),'config.json')}", 'w', encoding='utf-8-sig') as jout:
+        with open('config.json', 'w', encoding='utf-8-sig') as jout:
             json.dump(config, jout, indent=4, ensure_ascii=False)
     else:
-        with open(f"{os.path.join(os.path.dirname(__file__),'config.json')}", 'r', encoding='utf-8-sig') as reader:
+        with open('config.json', 'r', encoding='utf-8-sig') as reader:
             config = json.loads(reader.read())
         if engine is not None:
             engine.updateConfig(config)
@@ -885,7 +885,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20241015a')
+    print('version: 20241015b')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
