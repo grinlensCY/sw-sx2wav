@@ -36,9 +36,6 @@ class PackageHandler:
 
         self.waitingImuCnt = 0
 
-        self.flag_tempAttached = threading.Event()
-        self.flag_wellattached = threading.Event()
-        # self.flag_micAttached = threading.Event()
     
     def prepare_statistic_output(self):
         if(self.pre_ts==0):
@@ -77,16 +74,16 @@ class PackageHandler:
         # print('handle_state_info_pkg in package_handler:',dat)
         # ts,patch_state,rr_cl,hr_cl,bs_idx,main_tmp,env_tmp,rr,hr,vhr,bs,still_sleep,pose,status,act,bat_level,bat_voltage,charge_current_mA,free_mem,used_mem,total_mem,reset_reason
         if dat[1] == 32:
-            self.flag_tempAttached.set()
-            self.flag_wellattached.set()
+            self.engine.flag_tempAttached.set()
+            self.engine.flag_wellattached.set()
             # self.flag_micAttached.set()
         elif dat[1] == 16:
-            self.flag_tempAttached.set()
-            self.flag_wellattached.clear()
+            self.engine.flag_tempAttached.set()
+            self.engine.flag_wellattached.clear()
             # self.flag_micAttached.clear()
         else:
-            self.flag_tempAttached.clear()
-            self.flag_wellattached.clear()
+            self.engine.flag_tempAttached.clear()
+            self.engine.flag_wellattached.clear()
             # self.flag_micAttached.clear()
     
     def handle_sys_info_pkg(self,dat):
@@ -100,6 +97,8 @@ class PackageHandler:
         for d in dat:
             self.engine.sysinfo.append(d)
         self.sys_t = dat[8] if dat[8] is not None else dat[4]
+        imu_t = dat[8] if dat[8] is not None else 0
+        charging = dat[6] if len(dat) > 6 and dat[6] is not None else False
         # self.engine.sysinfo[4] = self.sys_t
         if not self.engine.flag_ble_addr.is_set():
             tmp = dat[5].hex()
@@ -117,9 +116,13 @@ class PackageHandler:
             # self.engine.recThd_sysinfo.addData([dat[0],dat[3],self.engine.sysinfo[4],dat[7]])
             tmp = self.engine.sysinfo.copy()
             tmp[5] = tmp[5].hex()
-            tmp.extend([self.flag_tempAttached.is_set(), self.flag_wellattached.is_set()])
-            # print('ph sys_info',tmp)
+            tmp.extend([self.engine.flag_tempAttached.is_set(), self.engine.flag_wellattached.is_set()])
+            print('package_handlder: flag_attach',tmp[-2:])
             self.engine.recThd_sysinfo.addData(tmp)
+
+            self.engine.qTempAttach.put_nowait([dat[0],self.sys_t,imu_t,charging])
+            if self.engine.qTempAttach.qsize() > 4:
+                self.engine.qTempAttach.queue.clear()
 
     def handle_dual_mic_pkg(self,dat):
         if not self.engine.flag_mic_sr_checked.is_set():
@@ -132,6 +135,7 @@ class PackageHandler:
                 self.engine.flag_4kHz.clear()
                 self.engine.datainfo['mic']['sr'] = 2000
                 print('dualmic: not 4kHz, pkg size=', len(dat[1]),'bleaddr=',self.bleaddr)
+            self.engine.datainfo['mic']['pkglen'] = len(dat[1])
             self.engine.flag_mic_sr_checked.set()
         if not self.engine.flag_checked_fileformat.is_set():
             if self.engine.flag_mic_sr_checked.is_set() and self.engine.flag_imu_sr_checked.is_set():
@@ -154,6 +158,7 @@ class PackageHandler:
             # print('\ndual dual')
             self.engine.recThd_audio.addData(dat)
             # print('mic_pkg',np.array(dat[:5]).shape)
+            self.engine.qMic.put_nowait(dat)
     
     def handle_mic_pkg(self,dat):
         if not self.engine.flag_mic_sr_checked.is_set():
@@ -182,6 +187,7 @@ class PackageHandler:
                 # self.engine.set_audio_sr(2000,pkglen)
             # else:
             #     self.engine.set_audio_sr(self.engine.datainfo['mic']['sr'],pkglen)  # to update tsHz
+            self.engine.datainfo['mic']['pkglen'] = pkglen
             self.engine.flag_mic_sr_checked.set()
             print('\nPackageHandler: mic sr/pkglen was confirmed!',self.engine.datainfo['mic']['sr'],'Hz /',pkglen,'bleaddr=',self.bleaddr)
         
@@ -204,6 +210,7 @@ class PackageHandler:
         if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog']:
             self.engine.recThd_audio.addData(dat)
             # print('mic_pkg',np.array(dat[:5]).shape)
+            self.engine.qMic.put_nowait(dat)
 
     def handle_ecg_raw_pkg(self,dat):
         if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog'] and not self.engine.config['onlyChkpkgloss']:
@@ -224,6 +231,10 @@ class PackageHandler:
         self.prepare_statistic_output()
         if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog'] and not self.engine.config['onlyChkpkgloss']:
             self.engine.recThd_acc.addData([dat[0],dat[2]], ch=dat[1])
+
+            self.engine.qAccAttach.put_nowait([dat[0],dat[2]])
+            if self.engine.qAccAttach.qsize() > 140:
+                self.engine.qAccAttach.queue.clear()
         
         # print('self.engine.flag_imu_sr_checked.is_set()',self.engine.flag_imu_sr_checked.is_set(),len(self.acc_sr_list))
         

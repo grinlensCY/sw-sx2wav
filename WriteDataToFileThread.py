@@ -61,6 +61,8 @@ class RecThread(threading.Thread):
                 self.filename_new.append(f'{self.filename_prefix}-{job}-{i+1:02d}.wav')
         elif job == 'ecg':
             self.filename_new.append(f'{self.filename_prefix}-{job}.wav')
+        print('recording the following files')
+        [print(fn) for fn in self.filename_new]
         if not self.config['onlytst0']:
             for fn in self.filename_new:
                 print('going to record',fn)
@@ -172,7 +174,7 @@ class RecThread(threading.Thread):
                     if not self.q.empty():
                         msg = ''
                         tmp = self.q.get_nowait()
-                        micdata = np.array(tmp[1:])/self.fullscale
+                        micdata = tmp[1:]   #np.array(tmp[1:])/self.fullscale
                         t0 = tmp[0]
                         pkglen = len(micdata[0])
                         tlast5 = np.array([0],dtype='uint32')
@@ -345,7 +347,6 @@ class RecThread(threading.Thread):
                 toffset = 0
                 with open(self.filename_new[0], 'a', newline='') as csvfile:
                     writer = csv.writer(csvfile, delimiter='\t')
-                    # writer.writerow(['time','bat(%)','temperature(degC)','bat(mV)'])
                     writer.writerow(['time','fwVer','hwVer','bat(%)','temperature(degC)','ble',
                                      'charging','bat(mV)','imuTemp(degC)','bat_vol_offset(mV)',
                                      'tempAttached','wellAttached'])

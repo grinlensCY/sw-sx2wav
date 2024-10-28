@@ -10,8 +10,11 @@ import protocol_6ch as PRO6ch
 import tkinter as tk
 from tkinter import filedialog
 from zipfile import ZipFile
+import queue
+import numpy as np
 
 from serialdb import SerialDB
+from detectors import Detector
 
 class Engine:
     def __init__(self,datainfo=None, config=None, stopped_flag=None):
@@ -23,8 +26,6 @@ class Engine:
         self.thd_rec_flag = threading.Event()
         self.stopped_flag = stopped_flag
 
-        self.reset()
-
         self.data_retriever = None
         self.recThd_audio = None
         self.recThd_acc = None
@@ -35,6 +36,7 @@ class Engine:
         self.recThd_sysinfo = None
         # self.recT0 = None
         self.input = ''
+
         self.flag_stop_ChkRecThd = threading.Event()
         self.flag_checked_fileformat = threading.Event()
         self.flag_imu_sr_checked = threading.Event()
@@ -42,16 +44,35 @@ class Engine:
         self.flag_4kHz = threading.Event()
         self.flag_dualmic = threading.Event()
         self.flag_ble_addr = threading.Event()
+
         self.strPkgSpd = ''
         self.bleaddr = None
         self.srcdir = ''
         self.thd_ChkRecThd = None
 
         self.keyfn = ''
+        self.dstdir = ''
+        self.sx_sysinfo_fn = '' # 在ntu NRE為了要儲存貼附狀態，遷就old tag FW，在記錄sysinfo，同步儲存出的檔案
+
+        self.qMic = queue.Queue()
+        self.flag_runDetectors = threading.Event()
+        self.thd_ch_proc = None
+        # attach detection
+        self.thd_attached = None
+        self.flag_runAttached = threading.Event()
+        self.flag_tempAttached = threading.Event()
+        self.flag_wellattached = threading.Event()
+        self.qMicAttach = queue.Queue()
+        self.qAccAttach = queue.Queue()
+        self.qTempAttach = queue.Queue()
+
+        self.reset()
+
 
     def start(self):
         print('engine start')
         self.data_retriever.start()
+        
         self.flag_stop_ChkRecThd.clear()
         self.thd_ChkRecThd = threading.Thread(target=self.chkRecThd, args=(self.flag_stop_ChkRecThd,),
                                                   name='thd_ChkRecThd')
@@ -59,6 +80,12 @@ class Engine:
 
     def reset(self):
         self.input = ''
+        self.flag_runDetectors.clear()
+        self.flag_tempAttached.clear()
+        self.flag_wellattached.clear()
+        self.qMicAttach.queue.clear()
+        self.qAccAttach.queue.clear()
+        self.qTempAttach.queue.clear()
 
     def depose(self):
         self.stop()
@@ -79,10 +106,53 @@ class Engine:
             self.data_retriever.stop()
             self.data_retriever=None
         
+        print('--stop thd_ch_proc')
+        if(self.thd_ch_proc is not None):
+            print(f"\tis_alive?{self.thd_ch_proc.is_alive()}")
+            self.thd_ch_proc=None
+        
+        print('--stop thd_attached')
+        if(self.thd_attached is not None):
+            print(f"\tis_alive?{self.thd_attached.is_alive()}")
+            self.thd_attached=None
+        
         self.reset()
         self.stopped_flag.set()
 
         print('engine stop')
+
+    def proc_ch(self,flag,q):
+        print("start proc_ch")
+        norm = 32768.0 #if not self.flag_noTimeStamp.is_set() else 1
+        datapack_idx_shift = 1  #1 if not self.flag_noTimeStamp.is_set() else 0
+        # print(f"\n\tdatapack_idx_shift={datapack_idx_shift}")
+        empty_cnt = 0
+        while flag.is_set():
+            if(q.empty()):
+                time.sleep(0.01)
+                empty_cnt += 1
+                if empty_cnt > 500:
+                    print(f'\nproc_ch empty > 200 => break\n')
+                    break
+                else:
+                    continue
+            empty_cnt = 0
+
+            data_pack=q.get_nowait()
+            data_pack_idx_list = range(len(data_pack)-datapack_idx_shift)
+            # print(f"\ndata_pack[0]={data_pack[0]}   [1]={data_pack[1]}  [-1]={data_pack[-1]}")
+            # print(f'\n\tproc_ch: data_pack_len={len(data_pack)}\tdata_pack_idx_list_len={len(data_pack_idx_list)}')
+            
+            # if not self.flag_noTimeStamp.is_set():  # data from sensor or sx file
+            ts = data_pack[0]
+            # else:   # data from wav file
+            #     ts = 0
+
+            for ch in data_pack_idx_list:
+                # print(f"ch={ch}")
+                ch_main_seg=(np.array(data_pack[datapack_idx_shift+ch],dtype=np.float32))/norm
+                if ch == 1:
+                    self.qMicAttach.put_nowait([ts,ch_main_seg])  # for hybrid attachment detection
     
     def chkRecThd(self, flag):
         print('start to ChkRecThd')
@@ -113,6 +183,10 @@ class Engine:
                     print(isRun,'self.recThd_mag.stopped()', self.recThd_mag.stopped())
                     isRun |= not self.recThd_quaternion.stopped()
                     print(isRun,'self.recThd_quaternion.stopped()', self.recThd_quaternion.stopped())
+                    isRun |= self.thd_ch_proc.is_alive()
+                    print(f"thd_ch_proc alive?{self.thd_ch_proc.is_alive()}")
+                    isRun |= self.thd_attached.is_alive()
+                    print(f"thd_attached alive?{self.thd_attached.is_alive()}")
             isRun |= not self.recThd_sysinfo.stopped()
             print(isRun,'self.recThd_sysinfo.stopped()', self.recThd_sysinfo.stopped())
             if not isRun:
@@ -169,7 +243,7 @@ class Engine:
                 userdir = f"{srcdir}/"
         dstdir = dstdir.replace('/merged','')
         userdir = userdir.replace('/merged','')
-        print(f'setRec: dstdir={dstdir}\nuserdir={userdir}')
+        print(f'getDstdir: dstdir={dstdir}\nuserdir={userdir}')
         if not os.path.exists(dstdir):
             os.makedirs(dstdir)
         # if not os.path.exists(dstdir2):
@@ -325,10 +399,19 @@ class Engine:
                     f.write(f"{self.config['key']},{self.config['iv']}")
                 print('write key/iv in',self.keyfn)
             # sys.exit()
+            print('Detectors Start')
+            self.detectors = Detector(self.ts_Hz, self.datainfo['mic']['sr'], self.datainfo['mic']['pkglen'])
+            # self.detectors.set_flag_tempAttached(self.flag_tempAttached)
+            # self.detectors.set_flag_wellattached(self.flag_wellattached)
+            self.detectors.set_qAccAttach(self.qAccAttach)
+            self.detectors.set_qTempAttach(self.qTempAttach)
+            self.detectors.set_qMicAttach(self.qMicAttach)
+            self.flag_runDetectors.set()
 
         go = self.setRec(dstdir,wavfnkw_ts)
         if go:
             print('going to start Engine again for recording!')
+            self.dstdir = dstdir
             self.start()
 
     def setRec(self,dstdir='',wavfnkw_ts=''):
@@ -393,10 +476,21 @@ class Engine:
                                                     self.datainfo['quaternion']['fullscale'],
                                                 self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
                     self.recThd_quaternion.start()
+
+                    self.thd_ch_proc=threading.Thread(target=self.proc_ch,
+                                            args=(self.flag_runDetectors,self.qMic,),
+                                            name='thd_ch_proc', daemon=True)
+                    self.thd_ch_proc.start()
+
+                    self.thd_attached = threading.Thread(target=self.detectors.proc_detect_attachment2,
+                                              args=(self.flag_runDetectors, self.flag_tempAttached, self.flag_wellattached),
+                                              name='thd_proc_detect_attachment2')
+                    self.thd_attached.start()
             self.recThd_sysinfo = RecThread(1,
                                             3, 0.09, dstfn_prefix, 'sysinfo',
                                             1,recT0=recT0,config=config,ts_Hz=self.ts_Hz)
             self.recThd_sysinfo.start()
+            
             self.thd_rec_flag.set()
             return True
         else:
@@ -428,6 +522,10 @@ class Engine:
                     self.recThd_quaternion.join(0.5)
                     # print('self.recThd_quaternion ',self.recThd_quaternion.is_alive())
                     self.recThd_quaternion = None
+            print(f'{self.sx_sysinfo_fn} exists? {os.path.exists(self.sx_sysinfo_fn)}')
+            if os.path.exists(self.sx_sysinfo_fn):
+                print(f'copy {self.sx_sysinfo_fn} to {self.dstdir}')
+                shutil.copyfile(self.sx_sysinfo_fn, f"{self.dstdir}/{os.path.basename(self.sx_sysinfo_fn)}")
             self.recThd_sysinfo.stop()
             self.recThd_sysinfo.join(0.5)
             self.recThd_sysinfo = None
@@ -885,7 +983,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20241015b')
+    print('version: 20241028a')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
@@ -899,7 +997,7 @@ if __name__ == "__main__":
                 print(item)
     if input('Are all parameters correct? Enter:contiune others:exit '):
         sys.exit()
-    datainfo = {'mic':{'fullscale':32768.0, 'sr':4000},
+    datainfo = {'mic':{'fullscale':32768.0, 'sr':4000, 'pkglen':64},
                 'ecg':{'fullscale':2000.0, 'sr':512},
                 'acc':{'fullscale':4.0, 'sr':112.5/2},
                 'gyro':{'fullscale':4.0, 'sr':112.5/2},
@@ -960,6 +1058,7 @@ if __name__ == "__main__":
         if config['onlyMerge'] or (config['prompt_convert'] and input('Enter:go  Others:quit ')):
             for fn in fns:
                 dstdir,wavfnkw_ts,userdir,dstdir2,userdir2 = engine.getDstdir(fn,'')
+                engine.sx_sysinfo_fn = fn.replace(".sx","-sysinfo.csv")
                 if len(fns) > 1 and (config['moveSX'] or config['onlyMerge']):
                     sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
                     if not os.path.exists(sx_dstfn):
@@ -985,6 +1084,7 @@ if __name__ == "__main__":
             userdirkw = usersrcdirs[i] if len(usersrcdirs) else ''
             thisdict = sxdict[os.path.basename(fn)] if len(sxdict) else {}
             # self.bleaddr, dstdir, userdir, self.flag_dualmic.is_set()
+            engine.sx_sysinfo_fn = fn.replace(".sx","-sysinfo.csv")
             bleaddr,dstdir,userdir,isdualmic,dstdir2,userdir2,wavfnkw_ts = engine.chk_files_format(sx_fn=fn,
                                                             cnt=i+1,userdir_kw=userdirkw,thisSXdict=thisdict)
             while not stop_flag.wait(2.5):
