@@ -184,9 +184,9 @@ class Engine:
                     isRun |= not self.recThd_quaternion.stopped()
                     print(isRun,'self.recThd_quaternion.stopped()', self.recThd_quaternion.stopped())
                     isRun |= self.thd_ch_proc.is_alive()
-                    print(f"thd_ch_proc alive?{self.thd_ch_proc.is_alive()}")
+                    print(f"{isRun} thd_ch_proc alive?{self.thd_ch_proc.is_alive()}")
                     isRun |= self.thd_attached.is_alive()
-                    print(f"thd_attached alive?{self.thd_attached.is_alive()}")
+                    print(f"{isRun} thd_attached alive?{self.thd_attached.is_alive()}")
             isRun |= not self.recThd_sysinfo.stopped()
             print(isRun,'self.recThd_sysinfo.stopped()', self.recThd_sysinfo.stopped())
             if not isRun:
@@ -401,8 +401,8 @@ class Engine:
             # sys.exit()
             print('Detectors Start')
             self.detectors = Detector(self.ts_Hz, self.datainfo['mic']['sr'], self.datainfo['mic']['pkglen'])
-            # self.detectors.set_flag_tempAttached(self.flag_tempAttached)
-            # self.detectors.set_flag_wellattached(self.flag_wellattached)
+            # self.detectors.set_flag_tempAttached(self.flag_tempAttached)  # 其實也可以用這樣，不一定要用參數來傳入function
+            self.detectors.set_flag_wellattached(self.flag_wellattached)
             self.detectors.set_qAccAttach(self.qAccAttach)
             self.detectors.set_qTempAttach(self.qTempAttach)
             self.detectors.set_qMicAttach(self.qMicAttach)
@@ -483,7 +483,7 @@ class Engine:
                     self.thd_ch_proc.start()
 
                     self.thd_attached = threading.Thread(target=self.detectors.proc_detect_attachment2,
-                                              args=(self.flag_runDetectors, self.flag_tempAttached, self.flag_wellattached),
+                                              args=(self.flag_runDetectors, self.flag_tempAttached,),
                                               name='thd_proc_detect_attachment2')
                     self.thd_attached.start()
             self.recThd_sysinfo = RecThread(1,

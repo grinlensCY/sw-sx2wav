@@ -117,7 +117,7 @@ class PackageHandler:
             tmp = self.engine.sysinfo.copy()
             tmp[5] = tmp[5].hex()
             tmp.extend([self.engine.flag_tempAttached.is_set(), self.engine.flag_wellattached.is_set()])
-            print('package_handlder: flag_attach',tmp[-2:])
+            print(f'package_handlder: {dat[0]/self.engine.ts_Hz:.1f} flag_attach {tmp[-2:]}')
             self.engine.recThd_sysinfo.addData(tmp)
 
             self.engine.qTempAttach.put_nowait([dat[0],self.sys_t,imu_t,charging])
