@@ -57,7 +57,7 @@ class Engine:
         self.qMic = queue.Queue()
         self.flag_runDetectors = threading.Event()
         self.thd_ch_proc = None
-        # attach detection
+        # attach detection alg
         self.thd_attached = None
         self.flag_runAttached = threading.Event()
         self.flag_tempAttached = threading.Event()
@@ -83,6 +83,7 @@ class Engine:
         self.flag_runDetectors.clear()
         self.flag_tempAttached.clear()
         self.flag_wellattached.clear()
+        self.flag_runAttached.clear()
         self.qMicAttach.queue.clear()
         self.qAccAttach.queue.clear()
         self.qTempAttach.queue.clear()
@@ -183,10 +184,12 @@ class Engine:
                     print(isRun,'self.recThd_mag.stopped()', self.recThd_mag.stopped())
                     isRun |= not self.recThd_quaternion.stopped()
                     print(isRun,'self.recThd_quaternion.stopped()', self.recThd_quaternion.stopped())
-                    isRun |= self.thd_ch_proc.is_alive()
-                    print(f"{isRun} thd_ch_proc alive?{self.thd_ch_proc.is_alive()}")
-                    isRun |= self.thd_attached.is_alive()
-                    print(f"{isRun} thd_attached alive?{self.thd_attached.is_alive()}")
+                    if self.flag_runAttached.is_set():
+                        isRun |= self.thd_ch_proc.is_alive()
+                        isRun |= self.thd_attached.is_alive()
+                        print(f"{isRun} thd_ch_proc alive?{self.thd_ch_proc.is_alive()}\n"
+                            f"{isRun} thd_attached alive?{self.thd_attached.is_alive()}")
+                    print(f"flag_runAttached?{self.flag_runAttached.is_set()}\n")
             isRun |= not self.recThd_sysinfo.stopped()
             print(isRun,'self.recThd_sysinfo.stopped()', self.recThd_sysinfo.stopped())
             if not isRun:
@@ -477,15 +480,16 @@ class Engine:
                                                 self.flag_dualmic.is_set(),recT0,config,self.ts_Hz)
                     self.recThd_quaternion.start()
 
-                    self.thd_ch_proc=threading.Thread(target=self.proc_ch,
-                                            args=(self.flag_runDetectors,self.qMic,),
-                                            name='thd_ch_proc', daemon=True)
-                    self.thd_ch_proc.start()
+                    if self.flag_runAttached.is_set():
+                        self.thd_ch_proc=threading.Thread(target=self.proc_ch,
+                                                args=(self.flag_runDetectors,self.qMic,),
+                                                name='thd_ch_proc', daemon=True)
+                        self.thd_ch_proc.start()
 
-                    self.thd_attached = threading.Thread(target=self.detectors.proc_detect_attachment2,
-                                              args=(self.flag_runDetectors, self.flag_tempAttached,),
-                                              name='thd_proc_detect_attachment2')
-                    self.thd_attached.start()
+                        self.thd_attached = threading.Thread(target=self.detectors.proc_detect_attachment2,
+                                                args=(self.flag_runDetectors, self.flag_tempAttached,),
+                                                name='thd_proc_detect_attachment2')
+                        self.thd_attached.start()
             self.recThd_sysinfo = RecThread(1,
                                             3, 0.09, dstfn_prefix, 'sysinfo',
                                             1,recT0=recT0,config=config,ts_Hz=self.ts_Hz)
@@ -983,7 +987,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20241028a')
+    print('version: 20241028b')
     config = updateConfig()
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):

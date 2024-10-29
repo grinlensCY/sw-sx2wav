@@ -110,6 +110,10 @@ class PackageHandler:
             # if dat[2] >= 32:
             #     self.engine.datainfo['acc']['sr'] = 104
             #     self.engine.datainfo['gyro']['sr'] = 104
+            if dat[1] <= int('137',16):
+                self.engine.flag_runAttached.set()
+            else:
+                self.engine.flag_runAttached.clear()
             self.bleaddr = addr.replace(':','').upper()
             self.engine.flag_ble_addr.set()
         if self.engine.thd_rec_flag.is_set():

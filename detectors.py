@@ -466,6 +466,7 @@ class Detector:
                     # ts0Sleep = tsO
                 ts = tsO + toffset - ts0Mic
                 if keepawake or isAttached:
+                    # print(f'got qMicAttach2 + isAttached?{isAttached}  max={np.max(snd):.5f}  len={len(snd)}')
                     idxMic += self.audioPkglen
                     tmp,_,_,zi_25lp = self.bwfilter(data_in=snd,b_filt=b_25lp,a_filt=a_25lp,
                                                     zf=zi_25lp)
@@ -526,9 +527,9 @@ class Detector:
             if gotTempDat:
                 self.myprint(f"{tsO/self.tsHz:.1f}sec:{movemsg}{heatmsg}"
                     f"byHolding/Attached/micAttached/WellAttached={byHolding}/{isAttached}/{micAttached}/{isWellAttached}\n"
-                        f"temp/temp_LL/temp_adap_LL/temp_adap_LL_tmp={temp:.3f}/{temp_LL:.1f}/{temp_adap_LL:.3f}/{temp_adap_LL_tmp:.1f}\n"
-                        f"byHeatingCnt/hasHeatCnt/risingTemp_score/sleepCnt={byHeatingCnt}/{hasHeatCnt}/{risingTemp_score:.1f}/{sleepCnt}\n"
-                        f"flag_tempAttached/flag_wellattached={flag_tempAttached.is_set()}/{self.flag_wellattached.is_set()}")
+                    f"temp/temp_LL/temp_adap_LL/temp_adap_LL_tmp={temp:.3f}/{temp_LL:.1f}/{temp_adap_LL:.3f}/{temp_adap_LL_tmp:.1f}\n"
+                    f"byHeatingCnt/hasHeatCnt/risingTemp_score/sleepCnt/has_snd_cnt={byHeatingCnt}/{hasHeatCnt}/{risingTemp_score:.1f}/{sleepCnt}/{has_snd_cnt}\n"
+                    f"flag_tempAttached/flag_wellattached={flag_tempAttached.is_set()}/{self.flag_wellattached.is_set()}")
         
         self.myprint(f"end of attachement2: thd_cal_flag?{thd_calc_flag.is_set()}\n")
             
