@@ -144,7 +144,7 @@ class Detector:
         hasHeatCnt_UL_sec = 52
         hasHeatCnt_UL = None    # 類似 維持 tempAttached 40sec (52是因為還要考慮 hasHeatCnt_th_sec), 如果溫度數據間隔約5.5sec，這數值 = 10
         hasHeatCnt_th_sec = 12
-        hasHeatCnt_th = None     # 類似 累績10sec的概念, 如果溫度數據間隔約5.5sec，這數值 = 2
+        hasHeatCnt_th = -1     # 類似 累績10sec的概念, 如果溫度數據間隔約5.5sec，這數值 = 2
         stepTemp = None     # 接近5sec的概念, 如果溫度數據間隔5.5sec，這數值 = 1
         # = reset
         # intervalTempTs = None
@@ -345,21 +345,23 @@ class Detector:
                 else:
                     sleepCnt = 0
 
-                if not charging and (keepawake or keepimuawake or not isSleep):
+                if not charging and (keepawake or keepimuawake or not isSleep) and hasHeatCnt_th < 7:
                     if tsPre_temp is None:
                         tsPre_temp = ts
                         tempPre = temp
-                    if stepTemp is None:    # to find out stepTemp  假如已經確認溫度資料時間間隔，就不需要這段
+                    if stepTemp is None:    # to calc stepTemp/hasHeatCnt_th/hasHeatCnt_UL
                         tDiff = ts - tsPre_temp
-                        if tDiff >= tStep_temp_th:    # tDiff >= 5sec
+                        # print(f"before: stepTemp={stepTemp}  {cntTemp=}  tDiff={tDiff/self.tsHz:.2f} tStep_temp_th={tStep_temp_th/self.tsHz:.2f} hasHeatCnt_th={hasHeatCnt_th}  hasHeatCnt_UL={hasHeatCnt_UL}")
+                        if cntTemp and tDiff >= tStep_temp_th:    # cntTemp非0(才有意義，也避免hasHeatCnt_th無限大) + tDiff >= 5sec
                             stepTemp = cntTemp
-                            tDiff_sec = tDiff/self.tsHz*cntTemp
-                            hasHeatCnt_th = round(hasHeatCnt_th_sec/tDiff_sec)
+                            tDiff_sec = tDiff/self.tsHz/cntTemp
+                            hasHeatCnt_th = np.floor(hasHeatCnt_th_sec/tDiff_sec)
                             hasHeatCnt_UL = round(hasHeatCnt_UL_sec/tDiff_sec)
-                            print(f"stepTemp={stepTemp}  hasHeatCnt_th={hasHeatCnt_th}  hasHeatCnt_UL={hasHeatCnt_UL}")
+                            # print(f"update stepTemp={stepTemp}  hasHeatCnt_th={hasHeatCnt_th}  hasHeatCnt_UL={hasHeatCnt_UL}  {hasHeatCnt_th_sec=}  {tDiff_sec=}")
                     elif cntTemp and not cntTemp%stepTemp:
                         temp_diff = temp-tempPre
                         ts_diff = ts-tsPre_temp
+                        # print(f"ts_diff={ts}-{tsPre_temp}={ts_diff/self.tsHz:.2f}")
                         slope = temp_diff/ts_diff
                         if temp_adap_LL_tmp:
                             risingTemp_score += temp-tempPre
@@ -434,6 +436,7 @@ class Detector:
                         # final_resTemp = np.vstack((final_resTemp,resTemp)) if len(final_resTemp) else resTemp.copy()
                         # updatedTemp = True
                     cntTemp += 1
+                    # print(f'{cntTemp=}')
                 else:   # sleep
                     # self.qTempAttach.queue.clear()    # 因為這裡都得進來讀ts，所以應該是不用這段
                     tsPre_temp = None
@@ -445,6 +448,10 @@ class Detector:
                     isAttached = False
                     byHeating = False
                     byHolding = False
+                    if hasHeatCnt_th >= 7:
+                        hasHeatCnt_th = -1
+                        stepTemp = None
+                        print('\n reset hasHeatCnt_th\n')
 
                     flag_tempAttached.clear()
                     # self.update_attached_callback('temp',self.flag_tempAttached.is_set())
