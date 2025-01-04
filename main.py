@@ -607,24 +607,28 @@ def isOnlyXXX(config):
     return False
 
 def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyChkTS=False, sx_dict={}):
-    root = tk.Tk()
-    root.withdraw()
+    global isAutoRun
 
-    srcdir = config['dirToloadFile'][0] if not srcdir else srcdir
-    
-    tfn = filedialog.askopenfilename(initialdir=sdir,filetypes=[("SX File",(f"*{kw}*.sxr",f"*{kw}*.sx",f"*{kw}*.zip"))])
-    if not tfn:
-        return ''
-    srcdir = os.path.dirname(tfn)
     ts_range = [0,0]
-    if len(config["ts_loadS3"]):
-        ts_range[0] = time.mktime(time.strptime(f'{config["ts_loadS3"][0]}', "%Y%m%d"))*1000
-        if config["ts_loadS3"][1] < config["ts_loadS3"][0]:
-            config["ts_loadS3"][1] = config["ts_loadS3"][0]+1
-        try:
-            ts_range[1] = time.mktime(time.strptime(f'{config["ts_loadS3"][1]+1}', "%Y%m%d"))*1000
-        except ValueError:
-            ts_range[1] = (config["ts_loadS3"][1]+1-config["ts_loadS3"][0])*60*60*24*1000+ts_range[0]
+    if not isAutoRun:
+        root = tk.Tk()
+        root.withdraw()
+
+        srcdir = config['dirToloadFile'][0] if not srcdir else srcdir
+        
+        tfn = filedialog.askopenfilename(initialdir=srcdir,filetypes=[("SX File",(f"*{kw}*.sxr",f"*{kw}*.sx",f"*{kw}*.zip"))])
+        if not tfn:
+            return ''
+        srcdir = os.path.dirname(tfn)
+        
+        if len(config["ts_loadS3"]):
+            ts_range[0] = time.mktime(time.strptime(f'{config["ts_loadS3"][0]}', "%Y%m%d"))*1000
+            if config["ts_loadS3"][1] < config["ts_loadS3"][0]:
+                config["ts_loadS3"][1] = config["ts_loadS3"][0]+1
+            try:
+                ts_range[1] = time.mktime(time.strptime(f'{config["ts_loadS3"][1]+1}', "%Y%m%d"))*1000
+            except ValueError:
+                ts_range[1] = (config["ts_loadS3"][1]+1-config["ts_loadS3"][0])*60*60*24*1000+ts_range[0]
     if len(config['ts_range_sx']):
         ts_range[0] = ts_range[0] if config['ts_range_sx'][0] == -1 else max(ts_range[0],config['ts_range_sx'][0])
         ts_range[1] = time.time()*1000 if config['ts_range_sx'][-1] == -1 or not ts_range[1] else min(ts_range[1],config['ts_range_sx'][-1])
@@ -794,7 +798,7 @@ def unzipS3(srcList,dst,tsRange,overwrite,onlyChkTS,sx_dict):
     return sx_list,usrsrcdir_list
 
 def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
-    global config
+    global config,isAutoRun
     if len(sxfns) < 2:
         return sxfns
     last_stop_ts = 0
@@ -828,7 +832,7 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                 basefn = os.path.basename(row[0])
                 tslog[f"{basefn}"] = {'start_ts':int(row[1]),'stop_ts':int(row[2])}
 
-    if input('start merging? Enter:go  Others:quit  '):
+    if not isAutoRun and input('start merging? Enter:go  Others:quit  '):
         shutil.rmtree(sxpool)
         sys.exit()
     for i,fn in enumerate(sxfns):
@@ -987,8 +991,14 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 202411226a')
+    print('version: 20250101b')
     config = updateConfig()
+
+    isAutoRun = bool(sys.argv[1]) if len(sys.argv) > 1 else False
+    if not isAutoRun:
+        isAutoRun = config['autoRun']['go']
+    print(f'autorun={isAutoRun}')
+
     for key in config.keys():
         if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
             if key in config['default'].keys() and config[key] != config['default'][key]:
@@ -999,7 +1009,7 @@ if __name__ == "__main__":
         elif key.startswith("dirList_load_S3zip"):
             for item in config[key]:
                 print(item)
-    if input('Are all parameters correct? Enter:contiune others:exit '):
+    if not isAutoRun and input('Are all parameters correct? Enter:contiune others:exit '):
         sys.exit()
     datainfo = {'mic':{'fullscale':32768.0, 'sr':4000, 'pkglen':64},
                 'ecg':{'fullscale':2000.0, 'sr':512},
@@ -1033,6 +1043,32 @@ if __name__ == "__main__":
                 if fn.endswith(".sx") and fn in sxdict:
                     fns.append(f'{dir_upzipS3}/{fn}')
                     usersrcdirs.append(sxdict[fn]['user_srcdir'])
+    elif isAutoRun:
+        fns_list = []
+        usersrcdirs_list = []
+        rawdata_root_path = config['autoRun']['path']
+        datafolders = [f'{rawdata_root_path}/{d}' for d in os.listdir(rawdata_root_path)]
+        for f in datafolders:
+            found = False
+            if len([d for d in os.listdir(f) if d.endswith('.zip')]):
+                print(f"{f} has unzipped files")
+                found = True
+            elif len([d for d in os.listdir(f) if d == 'merged']):
+                print(f'not finished merged folder in {f}')
+                found = True
+            else:
+                for r,dirs,files in os.walk(f):
+                    if len([fn for fn in dirs if fn=='merged']):
+                        found = True
+                        break
+                    if len([fn for fn in files if fn.endswith('.wav')]):
+                        found = False
+                        break
+                    found = True
+            if found:
+                fns_list.append(findFileset(datainfo, config,kw=kw,srcdir=f,loadall=config['load_all_sx'],
+                                            onlyChkTS=config['onlyChkTS'],sx_dict=sxdict))
+                usersrcdirs_list.append([os.path.basename(os.path.dirname(fn)) for fn in fns_list[-1]])
     else:
         print('select dir')
         [print(i,path,i) for i,path in enumerate(config['dirToloadFile'])]
@@ -1040,9 +1076,9 @@ if __name__ == "__main__":
         if not o and o != 0:
             sys.exit()
         sdir = config['dirToloadFile'][int(o)]
-        fns = findFileset(datainfo, config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
-                            onlyChkTS=config['onlyChkTS'],sx_dict=sxdict)
-        usersrcdirs = [os.path.basename(os.path.dirname(fn)) for fn in fns]
+        fns_list = [findFileset(datainfo, config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
+                                onlyChkTS=config['onlyChkTS'],sx_dict=sxdict)]
+        usersrcdirs_list = [[os.path.basename(os.path.dirname(fn)) for fn in fns]]
         if len(fns):
             thisdir = os.path.dirname(os.path.dirname(fns[0]))
             if not len([path for path in config['dirToloadFile'] if thisdir in path]) and 'compilation/IRB' not in thisdir:
@@ -1053,17 +1089,82 @@ if __name__ == "__main__":
             config['dirToloadFile'][0] = os.path.dirname(fns[0])
             updateConfig(config=config)
     if not config['onlyChkTS']:
-        sxpool = ''
-        if config['mergeNearby'] and len(fns)>1:
-            fns,usersrcdirs,sxpool = mergeSX(fns,usersrcdirs,last_merged_dict,sxdict)
-        [print('going to converting',fn) for fn in fns]
-        stop_flag = threading.Event()
-        engine = Engine(datainfo,config,stopped_flag=stop_flag)
-        if config['onlyMerge'] or (config['prompt_convert'] and input('Enter:go  Others:quit ')):
-            for fn in fns:
-                dstdir,wavfnkw_ts,userdir,dstdir2,userdir2 = engine.getDstdir(fn,'')
+        for fns,usersrcdirs in zip(fns_list,usersrcdirs_list):
+            sxpool = ''
+            if config['mergeNearby'] and len(fns)>1:
+                fns,usersrcdirs,sxpool = mergeSX(fns,usersrcdirs,last_merged_dict,sxdict)
+            [print('going to converting',fn) for fn in fns]
+            stop_flag = threading.Event()
+            engine = Engine(datainfo,config,stopped_flag=stop_flag)
+            if not isAutoRun and config['onlyMerge'] or (config['prompt_convert'] and input('Enter:go  Others:quit ')):
+                for fn in fns:
+                    dstdir,wavfnkw_ts,userdir,dstdir2,userdir2 = engine.getDstdir(fn,'')
+                    engine.sx_sysinfo_fn = fn.replace(".sx","-sysinfo.csv")
+                    if len(fns) > 1 and (config['moveSX'] or config['onlyMerge']):
+                        sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
+                        if not os.path.exists(sx_dstfn):
+                            print('move sx to',sx_dstfn)
+                            shutil.move(fn,sx_dstfn)
+                        elif fn != sx_dstfn:
+                            print(sx_dstfn,'exists! remove src!')
+                            os.remove(fn)
+                if config['delmergedSX']:
+                    shutil.rmtree(sxpool)
+                sys.exit()
+            
+            t0 = time.time()
+            for i,fn in enumerate(fns):
+                if os.path.getsize(fn)/20000 < 20:
+                    print(fn,'data duration maybe less than 20sec --> skip!\n')
+                    os.remove(fn)
+                    logfn = fn.replace('sxr','log').replace('sx','log')
+                    if os.path.exists(logfn):
+                        os.remove(logfn)
+                    continue
+                stop_flag.clear()
+                userdirkw = usersrcdirs[i] if len(usersrcdirs) else ''
+                thisdict = sxdict[os.path.basename(fn)] if len(sxdict) else {}
+                # self.bleaddr, dstdir, userdir, self.flag_dualmic.is_set()
                 engine.sx_sysinfo_fn = fn.replace(".sx","-sysinfo.csv")
-                if len(fns) > 1 and (config['moveSX'] or config['onlyMerge']):
+                bleaddr,dstdir,userdir,isdualmic,dstdir2,userdir2,wavfnkw_ts = engine.chk_files_format(sx_fn=fn,
+                                                                cnt=i+1,userdir_kw=userdirkw,thisSXdict=thisdict)
+                while not stop_flag.wait(2.5):
+                    print(f'is writing!')    # elapsed time: {time.time()-t0:.1f}sec')
+                if bleaddr is None or not dstdir:
+                    continue
+                ts = getTsOfFn(fn,ms=False)     #float(os.path.basename(fn)[:-3])/1000
+                if not ts:
+                    recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
+                    # msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
+                    #         f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+                else:
+                    recTime = 'SD_card_unknown'
+                    # msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
+                    #         f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+
+                print(f'{fn} was converted!')
+                datainfo['recTime'] = recTime
+                datainfo['sxfn'] = os.path.basename(fn)
+                if userdirkw:
+                    datainfo['user_srcdir'] = userdirkw
+
+                wavdictfn = f'{userdir}/{os.path.basename(userdir)}_fileinfo.json'
+                if os.path.exists(wavdictfn):
+                    with open(wavdictfn, 'r', newline='',encoding='utf-8-sig') as jf:
+                        wavdict = json.loads(jf.read())
+                else:
+                    wavdict = {}
+                wavdict[recTime] = {'ble': bleaddr,
+                                    'micsr': datainfo["mic"]["sr"],
+                                    'imusr': datainfo["acc"]["sr"],
+                                    'dualmic':isdualmic,
+                                    'sxfn': datainfo['sxfn'],
+                                    'duration': sxdict[datainfo['sxfn']]['duration'],
+                                    'duration_hhmmss': sxdict[datainfo['sxfn']]['duration_hhmmss']}
+                with open(wavdictfn, 'w', newline='', encoding='utf-8-sig') as wavjson:
+                    json.dump(wavdict, wavjson, indent=4, ensure_ascii=False)
+
+                if config['moveSX'] and len(fns) > 1 or isAutoRun:
                     sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
                     if not os.path.exists(sx_dstfn):
                         print('move sx to',sx_dstfn)
@@ -1071,88 +1172,30 @@ if __name__ == "__main__":
                     elif fn != sx_dstfn:
                         print(sx_dstfn,'exists! remove src!')
                         os.remove(fn)
-            if config['delmergedSX']:
-                shutil.rmtree(sxpool)
-            sys.exit()
-        
-        t0 = time.time()
-        for i,fn in enumerate(fns):
-            if os.path.getsize(fn)/20000 < 20:
-                print(fn,'data duration maybe less than 20sec --> skip!\n')
-                os.remove(fn)
-                logfn = fn.replace('sxr','log').replace('sx','log')
-                if os.path.exists(logfn):
-                    os.remove(logfn)
-                continue
-            stop_flag.clear()
-            userdirkw = usersrcdirs[i] if len(usersrcdirs) else ''
-            thisdict = sxdict[os.path.basename(fn)] if len(sxdict) else {}
-            # self.bleaddr, dstdir, userdir, self.flag_dualmic.is_set()
-            engine.sx_sysinfo_fn = fn.replace(".sx","-sysinfo.csv")
-            bleaddr,dstdir,userdir,isdualmic,dstdir2,userdir2,wavfnkw_ts = engine.chk_files_format(sx_fn=fn,
-                                                            cnt=i+1,userdir_kw=userdirkw,thisSXdict=thisdict)
-            while not stop_flag.wait(2.5):
-                print(f'is writing!')    # elapsed time: {time.time()-t0:.1f}sec')
-            if bleaddr is None or not dstdir:
-                continue
-            ts = getTsOfFn(fn,ms=False)     #float(os.path.basename(fn)[:-3])/1000
-            if not ts:
-                recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
-                # msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
-                #         f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
-            else:
-                recTime = 'SD_card_unknown'
-                # msg = (f'{os.path.basename(fn)}  recording start at:{recTime}  '
-                #         f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+                    keyfn = f"{dstdir}/{os.path.basename(engine.keyfn)}" if engine.keyfn else ''
+                    if engine.keyfn and not os.path.exists(keyfn):
+                        print(f"move keyfn to {dstdir}")
+                        shutil.copy2(engine.keyfn, dstdir)
+                
+                if isAutoRun and config['autoRun']['bakpath']:
+                    autobak_dstpath = f"{config['autoRun']['bakpath']}/{os.path.basename(dstdir).replace('-','')}_{bleaddr}"
+                    if not os.path.exists(autobak_dstpath):
+                        os.makedirs(autobak_dstpath)
+                    shutil.copytree(dstdir, autobak_dstpath)
 
-            print(f'{fn} was converted!')
-            datainfo['recTime'] = recTime
-            datainfo['sxfn'] = os.path.basename(fn)
-            if userdirkw:
-                datainfo['user_srcdir'] = userdirkw
-
-            wavdictfn = f'{userdir}/{os.path.basename(userdir)}_fileinfo.json'
-            if os.path.exists(wavdictfn):
-                with open(wavdictfn, 'r', newline='',encoding='utf-8-sig') as jf:
-                    wavdict = json.loads(jf.read())
-            else:
-                wavdict = {}
-            wavdict[recTime] = {'ble': bleaddr,
-                                'micsr': datainfo["mic"]["sr"],
-                                'imusr': datainfo["acc"]["sr"],
-                                'dualmic':isdualmic,
-                                'sxfn': datainfo['sxfn'],
-                                'duration': sxdict[datainfo['sxfn']]['duration'],
-                                'duration_hhmmss': sxdict[datainfo['sxfn']]['duration_hhmmss']}
-            with open(wavdictfn, 'w', newline='', encoding='utf-8-sig') as wavjson:
-                json.dump(wavdict, wavjson, indent=4, ensure_ascii=False)
-
-            if config['moveSX'] and len(fns) > 1:
-                sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
-                if not os.path.exists(sx_dstfn):
-                    print('move sx to',sx_dstfn)
-                    shutil.move(fn,sx_dstfn)
-                elif fn != sx_dstfn:
-                    print(sx_dstfn,'exists! remove src!')
+                if config['delSX'] and os.path.exists(fn):
                     os.remove(fn)
-                keyfn = f"{dstdir}/{os.path.basename(engine.keyfn)}" if engine.keyfn else ''
-                if engine.keyfn and not os.path.exists(keyfn):
-                    print(f"move keyfn to {dstdir}")
-                    shutil.copy2(engine.keyfn, dstdir)
+                    print('remove sx',os.path.basename(fn))
 
-            if config['delSX'] and os.path.exists(fn):
-                os.remove(fn)
-                print('remove sx',os.path.basename(fn))
-
-            if (config["dirList_load_S3zip"]
-                    and len(sxdict)
-                    and userdirkw in last_merged_dict and os.path.basename(fn) not in last_merged_dict[userdirkw]
-                    and (not config["onlyChkTS"] or not config["onlyChkFormat"]
-                            or not config["onlylog"] or not config["onlyMovelog"])):
-                with open(fn_log, 'w', encoding='utf-8-sig') as jout:
-                    json.dump(sxdict, jout, indent=4, ensure_ascii=False)
-        time.sleep(3)
-        if not config['onlytst0'] and len(sxpool) and config['delmergedSX']:
-            shutil.rmtree(sxpool)
+                if (config["dirList_load_S3zip"]
+                        and len(sxdict)
+                        and userdirkw in last_merged_dict and os.path.basename(fn) not in last_merged_dict[userdirkw]
+                        and (not config["onlyChkTS"] or not config["onlyChkFormat"]
+                                or not config["onlylog"] or not config["onlyMovelog"])):
+                    with open(fn_log, 'w', encoding='utf-8-sig') as jout:
+                        json.dump(sxdict, jout, indent=4, ensure_ascii=False)
+            time.sleep(3)
+            if not config['onlytst0'] and len(sxpool) and config['delmergedSX']:
+                shutil.rmtree(sxpool)
 
     print('threading.active=',threading.active_count(),threading.enumerate())

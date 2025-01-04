@@ -361,6 +361,8 @@ class Detector:
                     elif cntTemp and not cntTemp%stepTemp:
                         temp_diff = temp-tempPre
                         ts_diff = ts-tsPre_temp
+                        if not ts_diff:
+                            continue
                         # print(f"ts_diff={ts}-{tsPre_temp}={ts_diff/self.tsHz:.2f}")
                         slope = temp_diff/ts_diff
                         if temp_adap_LL_tmp:

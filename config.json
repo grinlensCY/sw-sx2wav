@@ -41,6 +41,11 @@
         "//192.168.1.119/SiriuXense數據庫/尚未整理",
         "G:/My Drive/Code/Rocket_Baby_4ch_in_QML/record/allwaysWellAttachedIssue"
     ],
+    "autoRun":{
+        "go":0,
+        "path": "D:/tag_rawdata",
+        "bakpath": "G:/My Drive/Experiment/compilation/FJ_baby"
+    },
     "//dirToloadFile": "G:/My Drive/Code/sx2wav/test_files",
     "dirList_load_S3zip": "",
     "//dirList_load_S3zip": [
