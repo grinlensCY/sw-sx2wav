@@ -1181,7 +1181,7 @@ if __name__ == "__main__":
                     autobak_dstpath = f"{config['autoRun']['bakpath']}/{os.path.basename(dstdir).replace('-','')}_{bleaddr}"
                     if not os.path.exists(autobak_dstpath):
                         os.makedirs(autobak_dstpath)
-                    shutil.copytree(dstdir, autobak_dstpath)
+                    shutil.copytree(dstdir, autobak_dstpath, dirs_exist_ok=True)
 
                 if config['delSX'] and os.path.exists(fn):
                     os.remove(fn)
