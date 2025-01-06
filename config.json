@@ -24,22 +24,22 @@
         "6ch": 0
     },
     "dirToloadFile": [
-        "P:/Backups/GoogleSX/Experiment/compilation/在家受測者/baby_001",
-        "P:/Backups/GoogleSX/Experiment/compilation/心音/誤判",
+        "D:/tag_rawdata/20241226_DD7B7969370D",
         "P:/Backups/GoogleSX/Experiment/compilation/FJ_baby/2y",
-        "G:/My Drive/Code/RocketBaby_no_gui_recording/record/test",
+        "C:/Users/SX/Downloads/zipTmp/sxFile",
         "P:/Backups/GoogleSX/Experiment/compilation/FJ_baby/4y",
         "P:/Backups/GoogleSX/Experiment/compilation/FJ_baby/成人",
         "P:/Backups/GoogleSX/Experiment/compilation/IRB",
         "P:/Backups/GoogleSX/Experiment/compilation/attach",
-        "C:/Users/user/Downloads",
+        "D:/tag_rawdata",
         "C:/Users/user/Downloads/unzipTmp",
-        "C:/Users/user/Downloads/unzipTmp/綠色貼片",
-        "G:/My Drive/Code/Rocket_Baby_4ch_in_QML/record/testWsx",
-        "G:/My Drive/shared/sw-Rocket_Baby_4ch_qml-dev_cy_t18/record/testWsx",
+        "G:/My Drive/Code/Rocket_Baby_4ch_in_QML/record",
         "P:/Backups/GoogleSX/Experiment/compilation/FJ_baby/3y",
-        "//192.168.1.119/SiriuXense數據庫/尚未整理",
-        "G:/My Drive/Code/Rocket_Baby_4ch_in_QML/record/allwaysWellAttachedIssue"
+        "Z:/尚未整理",
+        "Z:/寶寶音資料庫/2024.Q3 測試集",
+        "C:/Users/SiriuXense/Downloads/toEXE/tag_showRawData_qml/SX_tag_realtime_rawdata_show_20241025/record/test",
+        "G:/My Drive/Code/Rocket_Baby_4ch_in_QML/record/test",
+        "C:/Users/SiriuXense/Downloads/unzipTmp"
     ],
     "autoRun":{
         "go":0,
@@ -61,7 +61,11 @@
     "dir_upzipS3": "C:/Users/chenyikuo/downloads_S3",
     "6ch": 0,
     "ts_loadS3": [],
-    "ts_range_sx": [],
+    "//ts_range_sx": "-1:no limit, yyyymmdd",
+    "ts_range_sx": [
+        20240914,
+        -1
+    ],
     "load_all_sx": 10,
     "mergeNearby": 10,
     "maxMergeInterval_ms": 50000,
