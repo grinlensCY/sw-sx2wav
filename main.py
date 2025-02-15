@@ -991,7 +991,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20250101b')
+    print('version: 20250101c')
     config = updateConfig()
 
     isAutoRun = bool(sys.argv[1]) if len(sys.argv) > 1 else False
@@ -1078,15 +1078,15 @@ if __name__ == "__main__":
         sdir = config['dirToloadFile'][int(o)]
         fns_list = [findFileset(datainfo, config,kw=kw,srcdir=sdir,loadall=config['load_all_sx'],
                                 onlyChkTS=config['onlyChkTS'],sx_dict=sxdict)]
-        usersrcdirs_list = [[os.path.basename(os.path.dirname(fn)) for fn in fns]]
-        if len(fns):
-            thisdir = os.path.dirname(os.path.dirname(fns[0]))
+        usersrcdirs_list = [[os.path.basename(os.path.dirname(fn)) for fn in fns_list[-1]]]
+        if len(fns_list):
+            thisdir = os.path.dirname(os.path.dirname(fns_list[-1][0]))
             if not len([path for path in config['dirToloadFile'] if thisdir in path]) and 'compilation/IRB' not in thisdir:
                 if not input(f"append {thisdir} to dirToloadFile?  "):
                     config['dirToloadFile'].append(thisdir)
             if len(config['dirToloadFile']) > 16:
                 del config['dirToloadFile'][1]
-            config['dirToloadFile'][0] = os.path.dirname(fns[0])
+            config['dirToloadFile'][0] = os.path.dirname(fns_list[-1][0])
             updateConfig(config=config)
     if not config['onlyChkTS']:
         for fns,usersrcdirs in zip(fns_list,usersrcdirs_list):
