@@ -1,0 +1,1 @@
+cmd /c "workon env39 && g: && cd \My Drive\Code\sx2wav && python main.py 10"

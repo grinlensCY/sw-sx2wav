@@ -360,7 +360,7 @@ class Engine:
                 print('move log to',log_dstfn)
                 # shutil.move(log_srcfn,log_dstfn)
             elif os.path.exists(log_srcfn) and os.path.exists(log_dstfn):
-                print(f'{log_dstfn} exists. Removing {log_srcfn}.') 
+                print(f'{log_dstfn} exists. Removing {log_srcfn}.')
                 # if self.config['overwrite']:
                 os.remove(log_dstfn)
                 print('overwrite', log_dstfn)
@@ -925,8 +925,8 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                         os.remove(logfn)
                 if (fn == sxfns[-1]
                         or (not mustMerge and 'stop_ts' not in log.keys())):
-                    print((f'\n\tmerging {merged_sxfns} \n\t\tinto  {os.path.basename(first_sxfn)}'
-                            f'({first_user}: {cum_cnt} files,{cum_duration/1000/60:.2f}min)\n'))
+                    print((f'\n\tmerging {merged_sxfns} \n\t\tinto  {first_sxfn}\n'
+                            f'\t\t({first_user}: {cum_cnt} files,{cum_duration/1000/60:.2f}min)\n'))
                     with open(first_sxfn, "wb") as f:
                         f.write(cum_sxData)
                     with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='', encoding='utf-8-sig') as jf:
@@ -991,7 +991,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20250101c')
+    print('version: 20250101d')
     config = updateConfig()
 
     isAutoRun = bool(sys.argv[1]) if len(sys.argv) > 1 else False
@@ -1096,18 +1096,25 @@ if __name__ == "__main__":
             [print('going to converting',fn) for fn in fns]
             stop_flag = threading.Event()
             engine = Engine(datainfo,config,stopped_flag=stop_flag)
-            if not isAutoRun and config['onlyMerge'] or (config['prompt_convert'] and input('Enter:go  Others:quit ')):
+            if not isAutoRun and config['onlyMerge'] or (not config['prompt_convert'] or input('Enter:go  Others:quit ')):
                 for fn in fns:
                     dstdir,wavfnkw_ts,userdir,dstdir2,userdir2 = engine.getDstdir(fn,'')
                     engine.sx_sysinfo_fn = fn.replace(".sx","-sysinfo.csv")
-                    if len(fns) > 1 and (config['moveSX'] or config['onlyMerge']):
+                    if len(fns) >= 1 and (config['moveSX'] or config['onlyMerge']):
                         sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
                         if not os.path.exists(sx_dstfn):
                             print('move sx to',sx_dstfn)
-                            shutil.move(fn,sx_dstfn)
+                            #shutil.move(fn,sx_dstfn)
                         elif fn != sx_dstfn:
-                            print(sx_dstfn,'exists! remove src!')
-                            os.remove(fn)
+                            dstfsize = os.path.getsize(sx_dstfn)
+                            fsize = os.path.getsize(fn)
+                            if not input(f"{dstfsize=}  {fsize=}  Enter:replace {sx_dstfn}? "):
+                                print(f'replce {sx_dstfn} with {fn}')
+                                os.remove(sx_dstfn)
+                                shutil.move(fn,sx_dstfn)
+                            else:
+                                print(sx_dstfn,'exists! remove src!')
+                                os.remove(fn)
                 if config['delmergedSX']:
                     shutil.rmtree(sxpool)
                 sys.exit()
@@ -1170,8 +1177,14 @@ if __name__ == "__main__":
                         print('move sx to',sx_dstfn)
                         shutil.move(fn,sx_dstfn)
                     elif fn != sx_dstfn:
-                        print(sx_dstfn,'exists! remove src!')
-                        os.remove(fn)
+                        dstfsize = os.path.getsize(sx_dstfn)
+                        fsize = os.path.getsize(fn)
+                        print(f"{dstfsize=}  {fsize=}")
+                        if fsize >= dstfsize:
+                            print(f"replace {sx_dstfn} with {fn}")
+                        else:
+                            print(f'keep {sx_dstfn}!')
+                            os.remove(fn)
                     keyfn = f"{dstdir}/{os.path.basename(engine.keyfn)}" if engine.keyfn else ''
                     if engine.keyfn and not os.path.exists(keyfn):
                         print(f"move keyfn to {dstdir}")
