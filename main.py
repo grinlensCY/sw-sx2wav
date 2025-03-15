@@ -1096,7 +1096,7 @@ if __name__ == "__main__":
             [print('going to converting',fn) for fn in fns]
             stop_flag = threading.Event()
             engine = Engine(datainfo,config,stopped_flag=stop_flag)
-            if not isAutoRun and config['onlyMerge'] or (not config['prompt_convert'] or input('Enter:go  Others:quit ')):
+            if not isAutoRun and config['onlyMerge']:# or (not config['prompt_convert'] or input('Enter:go  Others:quit ')):
                 for fn in fns:
                     dstdir,wavfnkw_ts,userdir,dstdir2,userdir2 = engine.getDstdir(fn,'')
                     engine.sx_sysinfo_fn = fn.replace(".sx","-sysinfo.csv")
@@ -1194,6 +1194,10 @@ if __name__ == "__main__":
                     autobak_dstpath = f"{config['autoRun']['bakpath']}/{os.path.basename(dstdir).replace('-','')}_{bleaddr}"
                     if not os.path.exists(autobak_dstpath):
                         os.makedirs(autobak_dstpath)
+                    autobak_dstpath += f"/{os.path.basename(dstdir)}"
+                    if not os.path.exists(autobak_dstpath):
+                        os.makedirs(autobak_dstpath)
+                    print(f"copy tree from {dstdir} to {autobak_dstpath}")
                     shutil.copytree(dstdir, autobak_dstpath, dirs_exist_ok=True)
 
                 if config['delSX'] and os.path.exists(fn):
