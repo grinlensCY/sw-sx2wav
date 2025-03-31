@@ -991,7 +991,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20250101d')
+    print('version: 20250101e')
     config = updateConfig()
 
     isAutoRun = bool(sys.argv[1]) if len(sys.argv) > 1 else False
@@ -1171,7 +1171,7 @@ if __name__ == "__main__":
                 with open(wavdictfn, 'w', newline='', encoding='utf-8-sig') as wavjson:
                     json.dump(wavdict, wavjson, indent=4, ensure_ascii=False)
 
-                if config['moveSX'] and len(fns) > 1 or isAutoRun:
+                if (config['moveSX'] and len(fns)) or isAutoRun:
                     sx_dstfn = f"{dstdir}/{os.path.basename(fn)}"
                     if not os.path.exists(sx_dstfn):
                         print('move sx to',sx_dstfn)
@@ -1182,12 +1182,15 @@ if __name__ == "__main__":
                         print(f"{dstfsize=}  {fsize=}")
                         if fsize >= dstfsize:
                             print(f"replace {sx_dstfn} with {fn}")
+                            os.remove(sx_dstfn)
+                            time.sleep(1)
+                            shutil.move(fn,sx_dstfn)
                         else:
                             print(f'keep {sx_dstfn}!')
                             os.remove(fn)
                     keyfn = f"{dstdir}/{os.path.basename(engine.keyfn)}" if engine.keyfn else ''
                     if engine.keyfn and not os.path.exists(keyfn):
-                        print(f"move keyfn to {dstdir}")
+                        print(f"copy keyfn to {dstdir}")
                         shutil.copy2(engine.keyfn, dstdir)
                 
                 if isAutoRun and config['autoRun']['bakpath']:
