@@ -189,6 +189,11 @@ class RecThread(threading.Thread):
                 ts_diff_target = 0.016 * self.ts_Hz
                 max_ts_diff = ts_diff_target*1.4
                 abnormal_max_ts_diff = 51 * self.ts_Hz
+                # === debug
+                # tsintvls = []
+                # prets = -2
+                # tsi = -10
+                # tsf = -20
                 with sf.SoundFile(self.filename_new[0], mode='x',
                                     samplerate=self.sampleRate, channels=self.channels,
                                     subtype=self.subtype_audio) as file0,\
@@ -228,17 +233,24 @@ class RecThread(threading.Thread):
                                 msg = f'{self.job},t0_fw={t0},pkglen={micdata[0].size},tsHz={self.ts_Hz}'
                                 print(msg, file=open(self.fn_ts_t0_mic,'w',newline='',encoding='utf-8-sig'))
                                 print(msg+f"\nt0=tmp[0]={tmp[0]}={t0/self.ts_Hz:.1f}")
-                            tstmp = tmp[0] + toffset-t0
+                            ''' debug
+                                # tsi = tmp[0]  # debug
+                            # if prets > 0:
+                            #     tsintvls.append(tmp[0]-prets)
+                            # prets = tmp[0]
                             # if getCnt < 15 or len(self.err['pkgloss_ts']) < 2:
                             #     print(f"tstmp={tstmp}={tstmp/self.ts_Hz:.1f}  tmp[0]={tmp[0]}={tmp[0]/self.ts_Hz:.1f}  toffset={toffset}={toffset/self.ts_Hz:.1f}  t0={t0}={t0/self.ts_Hz:.1f}")
+                            '''
+                            tstmp = tmp[0] + toffset-t0
+                            tmpmsg = (f'\n{self.job} ts was reset because ')
+                            if tstmp - tlast5[-1] > abnormal_max_ts_diff:
+                                tmpmsg += f"tstmp({tstmp}={tstmp/self.ts_Hz:.2f}) - tlast5[-1]({tlast5[-1]}={tlast5[-1]/self.ts_Hz:.2f}) > abnormal_max_ts_diff({abnormal_max_ts_diff}={abnormal_max_ts_diff/self.ts_Hz:.2f})"
+                            else:
+                                tmpmsg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}  ')
+                                tmpmsg += f'tlast5[-3:]={tlast5[-3:]}  toffset={toffset}\n'
                             if (tstmp - tlast5[-1] > abnormal_max_ts_diff) or tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0:    # ts was reset
-                                msg += (f'\n{self.job} ts was reset because ')
-                                if tstmp - tlast5[-1] > abnormal_max_ts_diff:
-                                    msg += f"tstmp({tstmp}={tstmp/self.ts_Hz:.2f}) - tlast5[-1]({tlast5[-1]}={tlast5[-1]/self.ts_Hz:.2f}) > abnormal_max_ts_diff({abnormal_max_ts_diff}={abnormal_max_ts_diff/self.ts_Hz:.2f})"
-                                else:
-                                    msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}  ')
-                                    msg += f'tlast5[-3:]={tlast5[-3:]}  toffset={toffset}\n'
-                                
+                                msg += tmpmsg
+                            
                                 t0 = tmp[0]
                                 toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
                                 tstmp = tmp[0] + toffset-t0
@@ -263,6 +275,7 @@ class RecThread(threading.Thread):
                                 while tstmp - tlast5[-1] > max_ts_diff:
                                     tstmp2 = tlast5[-1] + ts_diff_target
                                     tlast5 = np.r_[tlast5, tstmp2]
+                                    # print(f'pkgloss updated {tlast5=}  ')
                                     if tlast5.size > 5:
                                         tlast5 = tlast5[-5:]
                                     ts = tstmp2 / self.ts_Hz
@@ -281,6 +294,7 @@ class RecThread(threading.Thread):
                             # if getCnt < 15 or len(self.err['pkgloss_ts']) < 2:
                             #     print(f"final tstmp={tstmp}={tstmp/self.ts_Hz:.1f}  tmp[0]={tmp[0]}={tmp[0]/self.ts_Hz:.1f}  toffset={toffset}={toffset/self.ts_Hz:.1f}  t0={t0}={t0/self.ts_Hz:.1f}")
                             tlast5 = np.r_[tlast5, tstmp]
+                            # print(f'updated {tlast5=}  ')
                             if tlast5.size > 5:
                                 tlast5 = tlast5[-5:]
                             buffer_ts[cnt] = (tstmp) / self.ts_Hz
@@ -311,6 +325,7 @@ class RecThread(threading.Thread):
                                 fileList[-1].write(buffer_ts)
                                 cnt = 0
                             emptyCnt = 0
+                            # tsf = tmp[0]  # debug
                         else:
                             emptyCnt += 1
                             if emptyCnt > 200:
@@ -331,6 +346,22 @@ class RecThread(threading.Thread):
                                 with open(self.fn_errJson, 'w', newline='') as jout:
                                     json.dump(self.err, jout, ensure_ascii=False)
                                 self.plt_pkgloss(self.fn_errJson)
+
+                                # === debug
+                                # #tsintvls = np.array(tsintvls)/self.ts_Hz
+                                # fig, axs = plt.subplots(1,figsize=(18,6))
+                                # axs = [axs]
+                                # axs[0].plot(tsintvls,marker='o',ls='',label=f'tsintvls  {tsi=}  {tsf=}  {(tsf-tsi)/32768=}  {getCnt=}')
+                                # for ax in axs:
+                                #     ax.grid(axis='both',which='both')
+                                #     ax.legend(loc='upper left')
+                                # # axs[0].grid(axis='both',which='both')
+                                # # axs[1].grid(axis='both',which='both')
+                                # plt.tight_layout()
+                                # pngfn = f'{self.filename_prefix}-mictsintvl2.png'
+                                # plt.savefig(pngfn)
+                                # plt.close()
+
                                 self.stop()
                             time.sleep(self.waitTime)
                             # break
