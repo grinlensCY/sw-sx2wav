@@ -158,7 +158,7 @@ class Engine:
     def chkRecThd(self, flag):
         print('start to ChkRecThd')
         t0 = time.time()
-        while not flag.wait(5):
+        while not flag.wait(10):
             if self.data_retriever.thd_run_flag is not None:  print(self.strPkgSpd)
             # print(f'chkRecThd: elapsed time={time.time()-t0:.2f}sec')
             isRun = False
@@ -208,10 +208,7 @@ class Engine:
         dstdir = ''
         dstdir2 = ''
         userdir2 = ''
-        if userdir_kw in self.config['fj_dir_kw']:
-            dstdir =  f"{self.config['dir_Export_fj']}/{self.bleaddr}/{str_date}"
-            userdir = f"{self.config['dir_Export_fj']}/{self.bleaddr}"
-        elif self.config['dir_Export'] == self.config['dir_savSX']:
+        if self.config['dir_Export'] == self.config['dir_savSX']:
             for folder in os.listdir(self.config['dir_Export']):
                 # if folder[-4:] == f"{self.bleaddr[-4:]}" or folder == userdir_kw or len(self.config['dirList_load_S3zip']):
                 if folder == userdir_kw:
@@ -284,7 +281,7 @@ class Engine:
                             tmp = res.split(',')
                             self.key = tmp[1]
                             self.iv = tmp[2]
-            drv = FD.Driver(sx_fn)
+            drv = FD.Driver(sx_fn, job='chk_files_format')
             pkg_handler = PackageHandler(self)
             # self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
             self.data_retriever = (PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
@@ -385,7 +382,7 @@ class Engine:
         fnstr = sx_fn.split("/")[-2:] if len(sx_fn.split("/"))>1 else sx_fn.split("\\")[-2:]
         self.input = '_'.join(fnstr)
         if self.srcdir and (sx_fn.endswith('sx') or sx_fn.endswith('sxr')):
-            drv = FD.Driver(sx_fn)
+            drv = FD.Driver(sx_fn,'set_files_source')
             pkg_handler = PackageHandler(self)
             # self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
             self.data_retriever = (PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
@@ -484,12 +481,14 @@ class Engine:
                         self.thd_ch_proc=threading.Thread(target=self.proc_ch,
                                                 args=(self.flag_runDetectors,self.qMic,),
                                                 name='thd_ch_proc', daemon=True)
-                        self.thd_ch_proc.start()
+                        if self.config['runDetector']:
+                            self.thd_ch_proc.start()
 
                         self.thd_attached = threading.Thread(target=self.detectors.proc_detect_attachment2,
                                                 args=(self.flag_runDetectors, self.flag_tempAttached,),
                                                 name='thd_proc_detect_attachment2')
-                        self.thd_attached.start()
+                        if self.config['runDetector']:
+                            self.thd_attached.start()
             self.recThd_sysinfo = RecThread(1,
                                             3, 0.09, dstfn_prefix, 'sysinfo',
                                             1,recT0=recT0,config=config,ts_Hz=self.ts_Hz)
@@ -991,7 +990,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20250101e')
+    print('version: 20250101f')
     config = updateConfig()
 
     isAutoRun = bool(sys.argv[1]) if len(sys.argv) > 1 else False
@@ -1000,7 +999,7 @@ if __name__ == "__main__":
     print(f'autorun={isAutoRun}')
 
     for key in config.keys():
-        if key != 'default' and (key == 'fj_dir_kw' or key == 'dir_Export_fj' or ('//' not in key and 'dir' not in key)):
+        if key != 'default' and ('//' not in key and 'dir' not in key):
             if key in config['default'].keys() and config[key] != config['default'][key]:
                 print(f"{key} {config[key]} ===> not default={config['default'][key]}")
                 # time.sleep(2)
@@ -1135,7 +1134,7 @@ if __name__ == "__main__":
                 engine.sx_sysinfo_fn = fn.replace(".sx","-sysinfo.csv")
                 bleaddr,dstdir,userdir,isdualmic,dstdir2,userdir2,wavfnkw_ts = engine.chk_files_format(sx_fn=fn,
                                                                 cnt=i+1,userdir_kw=userdirkw,thisSXdict=thisdict)
-                while not stop_flag.wait(2.5):
+                while not stop_flag.wait(5):
                     print(f'is writing!')    # elapsed time: {time.time()-t0:.1f}sec')
                 if bleaddr is None or not dstdir:
                     continue
@@ -1201,6 +1200,7 @@ if __name__ == "__main__":
                     if not os.path.exists(autobak_dstpath):
                         os.makedirs(autobak_dstpath)
                     print(f"copy tree from {dstdir} to {autobak_dstpath}")
+                    # input("any key to continue... ")
                     shutil.copytree(dstdir, autobak_dstpath, dirs_exist_ok=True)
 
                 if config['delSX'] and os.path.exists(fn):
