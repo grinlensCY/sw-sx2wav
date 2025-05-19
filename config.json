@@ -24,9 +24,7 @@
         "6ch": 0
     },
     "dirToloadFile": [
-        "D:/tag_rawdata/20241226_DD7B7969370D",
-        "P:/Backups/GoogleSX/Experiment/compilation/FJ_baby/2y",
-        "C:/Users/SX/Downloads/zipTmp/sxFile",
+        "G:/My Drive/Code/Rocket_Baby_4ch_in_QML/record/test/E94216C42A95",
         "P:/Backups/GoogleSX/Experiment/compilation/FJ_baby/4y",
         "P:/Backups/GoogleSX/Experiment/compilation/FJ_baby/成人",
         "P:/Backups/GoogleSX/Experiment/compilation/IRB",
@@ -39,24 +37,21 @@
         "Z:/寶寶音資料庫/2024.Q3 測試集",
         "C:/Users/SiriuXense/Downloads/toEXE/tag_showRawData_qml/SX_tag_realtime_rawdata_show_20241025/record/test",
         "G:/My Drive/Code/Rocket_Baby_4ch_in_QML/record/test",
-        "C:/Users/SiriuXense/Downloads/unzipTmp"
+        "C:/Users/SiriuXense/Downloads/unzipTmp",
+        "//desktop-iife87h/tag_rawdata/",
+        "C:/tmp/sxTest"
     ],
-    "autoRun":{
-        "go":0,
+    "autoRun": {
+        "go": 0,
+        "//path": "//desktop-iife87h/tag_rawdata",
+        "//bakpath": "C:/Users/SX/OneDrive - SiriuXense Inc/tag_rawdata",
         "path": "D:/tag_rawdata",
-        "bakpath": "G:/My Drive/Experiment/compilation/FJ_baby"
+        "bakpath": "D:/OneDrive - SiriuXense Inc/tag_rawdata"
     },
     "//dirToloadFile": "G:/My Drive/Code/sx2wav/test_files",
     "dirList_load_S3zip": "",
     "//dirList_load_S3zip": [
-        "//192.168.50.250/Amazon S3 (fetalmonitorc0a1663ff0db4172b5aa1b231e7b9fc3134550-de/private/UUUIJK~F",
-        "//192.168.50.250/Amazon S3 (fetalmonitorc0a1663ff0db4172b5aa1b231e7b9fc3134550-de/private/UFAE7Q~8",
-        "//192.168.50.250/Amazon S3 (fetalmonitorc0a1663ff0db4172b5aa1b231e7b9fc3134550-de/private/UZCLN0~8",
-        "//192.168.50.250/Amazon S3 (fetalmonitorc0a1663ff0db4172b5aa1b231e7b9fc3134550-de/private/UTC6II~Y",
-        "//192.168.50.250/Amazon S3 (fetalmonitorc0a1663ff0db4172b5aa1b231e7b9fc3134550-de/private/U3EV3W~6",
-        "//192.168.50.250/Amazon S3 (babymonitora160f79a3e9c4d3c937bbe8b8fd1622f173604-dev/private/AOIS3T~5",
-        "//192.168.50.250/Amazon S3 (babymonitora160f79a3e9c4d3c937bbe8b8fd1622f173604-dev/private/AO7G2X~7",
-        "//192.168.50.250/Amazon S3 (babymonitora160f79a3e9c4d3c937bbe8b8fd1622f173604-dev/private/A80PBY~0"
+        "//192.168.50.250/Amazon S3 (fetalmonitorc0a1663ff0db4172b5aa1b231e7b9fc3134550-de/private/UUUIJK~F"
     ],
     "dir_upzipS3": "C:/Users/chenyikuo/downloads_S3",
     "6ch": 0,
@@ -70,13 +65,6 @@
     "mergeNearby": 10,
     "maxMergeInterval_ms": 50000,
     "dir_Export": "G:/My Drive/Experiment/compilation/",
-    "fj_dir_kw": [],
-    "//fj_dir_kw": [
-        "AOIS3T~5",
-        "AO7G2X~7",
-        "A80PBY~0"
-    ],
-    "dir_Export_fj": "//192.168.50.250/SiriuXense數據庫/寶寶音資料庫/9M_baby_patch_DVT",
     "//dir_Export": "./",
     "dir_savSX": "G:/My Drive/Experiment/compilation/",
     "//onlySelectedBle": "F37D711D38E0",
@@ -97,7 +85,8 @@
     "delSX": 0,
     "moveSX": 10,
     "skipPkgCnt": 10,
-    "prompt_convert": 0,
+    "prompt_convert": 10,
     "key": "",
-    "iv": ""
+    "iv": "",
+    "runDetector": 0
 }
