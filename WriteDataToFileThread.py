@@ -224,7 +224,7 @@ class RecThread(threading.Thread):
                                 t0 = tmp[0]
                                 data_dim = len(micdata)
                                 pkglen = len(micdata[0])
-                                tlast5 = np.array([0],dtype='uint32')
+                                tlast5 = np.array([0])
                                 msg = f'{self.job},t0_fw={t0},pkglen={micdata[0].size},tsHz={self.ts_Hz}'
                                 print(msg, file=open(self.fn_ts_t0_mic,'w',newline='',encoding='utf-8-sig'))
                                 print(msg+f"\nt0=tmp[0]={tmp[0]}={t0/self.ts_Hz:.1f}")
