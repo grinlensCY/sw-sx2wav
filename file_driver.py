@@ -1,9 +1,10 @@
 import threading
 import queue
 import time
+import os
 
 class Driver:
-    def __init__(self,file_path):
+    def __init__(self,file_path,job=''):
         self.file_path=file_path
 
         self.thd=None
@@ -13,6 +14,7 @@ class Driver:
 
         self.isSXR = True if file_path.endswith('sxr') else False
         print('sx file drv: isSXR?',self.isSXR)
+        self.job = job
 
     def write(self,ba):
         pass
@@ -25,33 +27,42 @@ class Driver:
         return self.rx_queue.get_nowait()
 
     def __io_thd_fun__(self,flag,file_path,rxq):
-        ser=None
+        #ser=None
         fp=None
 
         try:
             fp=open(file_path,'rb')
-            print('drv: file opened')
+            file_size = os.path.getsize(file_path)
+            print(f'\ndrv:{self.job} file opened at {fp.tell()}  {file_size=}\n')
+            
         except:
             time.sleep(0.5)
             return
 
-        empty_cnt = 0
+        #empty_cnt = 0
+        read_cnt = 0
         while(flag.is_set()):
             try:
-                in_len=8000
-                dat=fp.read(in_len)
-                empty_cnt = 0
+                #in_len=8000
+                dat=fp.read(8000)
+                #empty_cnt = 0
             except:
                 time.sleep(0.5)
-                empty_cnt += 1
-                print('drv: read empty')
+                #empty_cnt += 1
+                print(f'drv:{self.job} read empty')
                 break
 
             in_len=len(dat)
             if(in_len>0):
+                read_cnt += 1
                 rxq.put_nowait(dat)
+            else:
+                print(f"\ndrv:{self.job} in_len(dat) == 0  {read_cnt=}  pos={fp.tell()}  {file_size=}  {fp.tell()==file_size=}\n")
+                if fp.tell()==file_size:
+                    break
             # print('in_len=',in_len)
             # time.sleep(0.018)
+        self.stop('__io_thd_fun__')
 
     def start(self):
         self.stop('drv_start')
@@ -65,9 +76,10 @@ class Driver:
 
         self.thd=threading.Thread(target = self.__io_thd_fun__, args =(self.thd_run_flag,self.file_path,self.rx_queue,))
         self.thd.start()
-        print('drv: start self.thd_run_flag:',self.thd_run_flag.is_set())
+        print(f'drv:{self.job}start {self.thd_run_flag.is_set()}')
 
     def stop(self,typ=''):
+        print(f'\ndrv:{self.job} stop by {typ}  {self.rx_queue.empty()=}  {self.rx_queue.qsize()=}\n')
         if(self.thd_run_flag is not None):
             self.thd_run_flag.clear()
             
@@ -80,7 +92,6 @@ class Driver:
         self.thd_run_flag=None
         self.thd=None
 
-        print('drv: stop by',typ)
 
 if __name__ == "__main__":
     drv = Driver('./android_test_file/D2_6A_EF_C4_5E_0D/1614135882794.sx')
