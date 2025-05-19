@@ -207,7 +207,7 @@ class Protocol:
 
         curr_ts=time.time()
         diff_ts=curr_ts-self.pre_statistic_ts
-        if(diff_ts>3):
+        if(diff_ts>10):
             self.data_spd=self.interval_data_amount/diff_ts
             print("{:.3f} kBps".format(self.data_spd/1000))
             self.interval_data_amount=0
@@ -538,6 +538,7 @@ class Protocol:
 
     def __decode_thd_fun(self,flag,drv,txq,rxq):
         emptyCnt = 0    # only for sx2wav, sxReport
+        rxCnt = 0
         while(flag.is_set()):
             print('protocol: t0   emptyCnt=', emptyCnt)
             get_esp=False
@@ -547,11 +548,12 @@ class Protocol:
                 is_busy=False
 
                 msg=drv.read()
-                if(msg is not None):
+                if(msg is not None):    # msg = None if self.rx_queue.empty()
                     is_busy=True
                     emptyCnt = 0
                     self.__estimate_io_spd(len(msg))
                     get_esp=self.__decode_bytes(get_esp,msg,rxq)
+                    rxCnt += 1
                     
                 if(not txq.empty()):
                     emptyCnt = 0
@@ -563,9 +565,11 @@ class Protocol:
                     # only for sx2wav, sxReport
                     # print('protocol not is_busy, emptyCnt=',emptyCnt)
                     emptyCnt += 1
-                    if emptyCnt > 200 and self.rx_queue.empty():
-                        print(f'protocol empty cnt={emptyCnt}  rxq_size={self.rx_queue.qsize()}')
-                        self.endingTX_callback()
+                    if emptyCnt > 210:
+                        print(f'protocol empty cnt={emptyCnt}  rxq_size={self.rx_queue.qsize()}  {rxCnt=}')
+                        if (drv.thd_run_flag is None or not drv.thd_run_flag.is_set()):
+                            self.endingTX_callback()
+                        
                     time.sleep(0.02)
 
             drv.stop()
