@@ -21,11 +21,15 @@
         "moveSX": 10,
         "skipPkgCnt": 10,
         "prompt_convert": 10,
-        "6ch": 0
+        "6ch": 0,
+        "debug": 0,
+        "autoRun": {
+            "go": 0,
+            "forceRunAll": 0
+        }
     },
     "dirToloadFile": [
-        "G:/My Drive/Code/Rocket_Baby_4ch_in_QML/record/test/E94216C42A95",
-        "P:/Backups/GoogleSX/Experiment/compilation/FJ_baby/4y",
+        "D:/tag_rawdata/TSKS-EAP/20250529_Night_1d4b9eb8dcb0b544",
         "P:/Backups/GoogleSX/Experiment/compilation/FJ_baby/成人",
         "P:/Backups/GoogleSX/Experiment/compilation/IRB",
         "P:/Backups/GoogleSX/Experiment/compilation/attach",
@@ -39,14 +43,17 @@
         "G:/My Drive/Code/Rocket_Baby_4ch_in_QML/record/test",
         "C:/Users/SiriuXense/Downloads/unzipTmp",
         "//desktop-iife87h/tag_rawdata/",
-        "C:/tmp/sxTest"
+        "C:/tmp/sxTest",
+        "D:/tag_rawdata/TSKS-EAP"
     ],
+    "debug": 0,
     "autoRun": {
-        "go": 0,
+        "go": 10,
+        "forceRunAll": 0,
         "//path": "//desktop-iife87h/tag_rawdata",
         "//bakpath": "C:/Users/SX/OneDrive - SiriuXense Inc/tag_rawdata",
-        "path": "D:/tag_rawdata",
-        "bakpath": "D:/OneDrive - SiriuXense Inc/tag_rawdata"
+        "path": "D:/tag_rawdata/TSKS-EAP",
+        "bakpath": "D:/OneDrive - SiriuXense Inc/tag_rawdata/TSKS-EAP"
     },
     "//dirToloadFile": "G:/My Drive/Code/sx2wav/test_files",
     "dirList_load_S3zip": "",

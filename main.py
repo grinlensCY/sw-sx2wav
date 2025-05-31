@@ -1001,7 +1001,12 @@ if __name__ == "__main__":
     for key in config.keys():
         if key != 'default' and ('//' not in key and 'dir' not in key):
             if key in config['default'].keys() and config[key] != config['default'][key]:
-                print(f"{key} {config[key]} ===> not default={config['default'][key]}")
+                if key == 'autoRun':
+                    for key2 in config['autoRun']:
+                        if key2 in config['default']['autoRun'].keys() and config['autoRun'][key2] != config['default']['autoRun'][key2]:
+                            print(f"config['autoRun']['{key2}'] = {config['autoRun'][key2]} ===> not default={config['default']['autoRun'][key2]}")
+                else:
+                    print(f"{key} {config[key]} ===> not default={config['default'][key]}")
                 # time.sleep(2)
             # else:
             #     print(f"{key} {config[key]}")
@@ -1046,7 +1051,7 @@ if __name__ == "__main__":
         fns_list = []
         usersrcdirs_list = []
         rawdata_root_path = config['autoRun']['path']
-        datafolders = [f'{rawdata_root_path}/{d}' for d in os.listdir(rawdata_root_path)]
+        datafolders = [f'{rawdata_root_path}/{d}' for d in os.listdir(rawdata_root_path) if os.path.isdir(f'{rawdata_root_path}/{d}')]
         for f in datafolders:
             found = False
             if len([d for d in os.listdir(f) if d.endswith('.zip')]):
@@ -1064,7 +1069,9 @@ if __name__ == "__main__":
                         found = False
                         break
                     found = True
-            if found:
+            if config['autoRun']['forceRunAll'] or found:
+                # if input(f"Enter:add files of {f} in fns_list  Others:skip "):
+                #     continue
                 fns_list.append(findFileset(datainfo, config,kw=kw,srcdir=f,loadall=config['load_all_sx'],
                                             onlyChkTS=config['onlyChkTS'],sx_dict=sxdict))
                 usersrcdirs_list.append([os.path.basename(os.path.dirname(fn)) for fn in fns_list[-1]])
@@ -1193,15 +1200,17 @@ if __name__ == "__main__":
                         shutil.copy2(engine.keyfn, dstdir)
                 
                 if isAutoRun and config['autoRun']['bakpath']:
-                    autobak_dstpath = f"{config['autoRun']['bakpath']}/{os.path.basename(dstdir).replace('-','')}_{bleaddr}"
+                    dstdir_base = dstdir.replace(config['autoRun']['path']+"/", "")
+                    autobak_dstpath = f"{config['autoRun']['bakpath']}/{dstdir_base}"
+                    # autobak_dstpath = f"{config['autoRun']['bakpath']}/{os.path.basename(dstdir).replace('-','')}_{bleaddr}"
                     if not os.path.exists(autobak_dstpath):
                         os.makedirs(autobak_dstpath)
-                    autobak_dstpath += f"/{os.path.basename(dstdir)}"
-                    if not os.path.exists(autobak_dstpath):
-                        os.makedirs(autobak_dstpath)
-                    print(f"copy tree from {dstdir} to {autobak_dstpath}")
+                    # autobak_dstpath += f"/{os.path.basename(dstdir)}"
+                    # if not os.path.exists(autobak_dstpath):
+                    #     os.makedirs(autobak_dstpath)
+                    print(f"copy tree from \n{dstdir} to \n{autobak_dstpath}")
                     # input("any key to continue... ")
-                    shutil.copytree(dstdir, autobak_dstpath, dirs_exist_ok=True)
+                    shutil.copytree(dstdir, autobak_dstpath, dirs_exist_ok=True, ignore=shutil.ignore_patterns('*.sx'))
 
                 if config['delSX'] and os.path.exists(fn):
                     os.remove(fn)
@@ -1218,4 +1227,8 @@ if __name__ == "__main__":
             if not config['onlytst0'] and len(sxpool) and config['delmergedSX']:
                 shutil.rmtree(sxpool)
 
+    if isAutoRun and config['autoRun']['forceRunAll']:
+        config['autoRun']['forceRunAll'] = 0
+        updateConfig(config=config)
+        print('assign forceRunAll = False')
     print('threading.active=',threading.active_count(),threading.enumerate())
