@@ -1070,8 +1070,8 @@ if __name__ == "__main__":
                         break
                     found = True
             if config['autoRun']['forceRunAll'] or found:
-                # if input(f"Enter:add files of {f} in fns_list  Others:skip "):
-                #     continue
+                if config['debug'] and input(f"Enter:add files of {f} in fns_list  Others:skip "):
+                    continue
                 fns_list.append(findFileset(datainfo, config,kw=kw,srcdir=f,loadall=config['load_all_sx'],
                                             onlyChkTS=config['onlyChkTS'],sx_dict=sxdict))
                 usersrcdirs_list.append([os.path.basename(os.path.dirname(fn)) for fn in fns_list[-1]])
