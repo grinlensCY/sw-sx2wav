@@ -990,7 +990,7 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20250101f')
+    print('version: 20250101g')
     config = updateConfig()
 
     isAutoRun = bool(sys.argv[1]) if len(sys.argv) > 1 else False
@@ -1050,31 +1050,67 @@ if __name__ == "__main__":
     elif isAutoRun:
         fns_list = []
         usersrcdirs_list = []
-        rawdata_root_path = config['autoRun']['path']
-        datafolders = [f'{rawdata_root_path}/{d}' for d in os.listdir(rawdata_root_path) if os.path.isdir(f'{rawdata_root_path}/{d}')]
-        for f in datafolders:
-            found = False
-            if len([d for d in os.listdir(f) if d.endswith('.zip')]):
-                print(f"{f} has unzipped files")
-                found = True
-            elif len([d for d in os.listdir(f) if d == 'merged']):
-                print(f'not finished merged folder in {f}')
-                found = True
-            else:
-                for r,dirs,files in os.walk(f):
-                    if len([fn for fn in dirs if fn=='merged']):
-                        found = True
-                        break
-                    if len([fn for fn in files if fn.endswith('.wav')]):
-                        found = False
-                        break
-                    found = True
-            if config['autoRun']['forceRunAll'] or found:
-                if config['debug'] and input(f"Enter:add files of {f} in fns_list  Others:skip "):
+        if not (isinstance(config['autoRun']['path'], list) and \
+                isinstance(config['autoRun']['bakpath'], list) and \
+                len(config['autoRun']['path']) == len(config['autoRun']['bakpath'])):
+            print("Error: config['autoRun']['path'] and config['autoRun']['bakpath'] must be lists of the same length.")
+            # Optionally, exit or set fns_list/usersrcdirs_list to empty
+            # import sys # Ensure sys is imported if you use sys.exit()
+            # sys.exit(1) 
+            fns_list = []
+            usersrcdirs_list = []
+        else:
+            fns_list_overall = []
+            usersrcdirs_list_overall = []
+            for current_rawdata_root_path in config['autoRun']['path']:
+                if not os.path.isdir(current_rawdata_root_path):
+                    print(f"Warning: Path {current_rawdata_root_path} is not a valid directory. Skipping.")
                     continue
-                fns_list.append(findFileset(datainfo, config,kw=kw,srcdir=f,loadall=config['load_all_sx'],
-                                            onlyChkTS=config['onlyChkTS'],sx_dict=sxdict))
-                usersrcdirs_list.append([os.path.basename(os.path.dirname(fn)) for fn in fns_list[-1]])
+                
+                datafolders = [f'{current_rawdata_root_path}/{d}' for d in os.listdir(current_rawdata_root_path) if os.path.isdir(f'{current_rawdata_root_path}/{d}')]
+                fns_list_for_current_root = []
+                usersrcdirs_list_for_current_root = []
+
+                for f_folder in datafolders:
+                    found = False
+                    if len([d for d in os.listdir(f_folder) if d.endswith('.zip')]):
+                        print(f"{f_folder} has zip files")
+                        found = True
+                    elif len([d for d in os.listdir(f_folder) if d == 'merged']):
+                        print(f'not finished merged folder in {f_folder}')
+                        found = True
+                    else:
+                        is_processed_with_wav = False
+                        has_merged_subdir = False
+                        for r_walk, dirs_walk, files_walk in os.walk(f_folder):
+                            if 'merged' in dirs_walk:
+                                has_merged_subdir = True
+                                break
+                            if any(fn_walk.endswith('.wav') for fn_walk in files_walk):
+                                is_processed_with_wav = True
+                                break
+                        
+                        if has_merged_subdir:
+                            print(f'not finished merged folder in {f_folder} (found in subdirectory)')
+                            found = True
+                        elif is_processed_with_wav:
+                            found = False
+                        else:
+                            found = True
+                    
+                    if config['autoRun']['forceRunAll'] or found:
+                        processed_files = findFileset(datainfo, config,kw=kw,srcdir=f_folder,loadall=config['load_all_sx'],
+                                                    onlyChkTS=config['onlyChkTS'],sx_dict=sxdict)
+                        if processed_files: # Ensure processed_files is not None and not empty
+                            fns_list_for_current_root.append(processed_files)
+                            usersrcdirs_list_for_current_root.append([os.path.basename(os.path.dirname(fn_item)) for fn_item in processed_files])
+
+                if fns_list_for_current_root:
+                    fns_list_overall.extend(fns_list_for_current_root)
+                    usersrcdirs_list_overall.extend(usersrcdirs_list_for_current_root)
+            
+            fns_list = fns_list_overall
+            usersrcdirs_list = usersrcdirs_list_overall
     else:
         print('select dir')
         [print(i,path,i) for i,path in enumerate(config['dirToloadFile'])]
@@ -1199,18 +1235,29 @@ if __name__ == "__main__":
                         print(f"copy keyfn to {dstdir}")
                         shutil.copy2(engine.keyfn, dstdir)
                 
-                if isAutoRun and config['autoRun']['bakpath']:
-                    dstdir_base = dstdir.replace(config['autoRun']['path']+"/", "")
-                    autobak_dstpath = f"{config['autoRun']['bakpath']}/{dstdir_base}"
-                    # autobak_dstpath = f"{config['autoRun']['bakpath']}/{os.path.basename(dstdir).replace('-','')}_{bleaddr}"
-                    if not os.path.exists(autobak_dstpath):
-                        os.makedirs(autobak_dstpath)
-                    # autobak_dstpath += f"/{os.path.basename(dstdir)}"
-                    # if not os.path.exists(autobak_dstpath):
-                    #     os.makedirs(autobak_dstpath)
-                    print(f"copy tree from \n{dstdir} to \n{autobak_dstpath}")
-                    # input("any key to continue... ")
-                    shutil.copytree(dstdir, autobak_dstpath, dirs_exist_ok=True, ignore=shutil.ignore_patterns('*.sx'))
+                if isAutoRun:
+                    if isinstance(config['autoRun']['path'], list) and \
+                       isinstance(config['autoRun']['bakpath'], list) and \
+                       len(config['autoRun']['path']) == len(config['autoRun']['bakpath']):
+                        for idx, run_path_entry in enumerate(config['autoRun']['path']):
+                            clean_run_path_entry = run_path_entry.rstrip('/')
+                            if dstdir == clean_run_path_entry or dstdir.startswith(clean_run_path_entry + "/"):
+                                current_bak_path_entry = config['autoRun']['bakpath'][idx]
+                                if dstdir == clean_run_path_entry:
+                                    dstdir_base = ""
+                                else:
+                                    dstdir_base = dstdir.replace(clean_run_path_entry + "/", "", 1)
+                                
+                                autobak_dstpath = os.path.join(current_bak_path_entry, dstdir_base)
+                                if not os.path.exists(autobak_dstpath):
+                                    os.makedirs(autobak_dstpath)
+                                print(f"Copying tree from \n{dstdir} to \n{autobak_dstpath}")
+                                shutil.copytree(dstdir, autobak_dstpath, dirs_exist_ok=True, ignore=shutil.ignore_patterns('*.sx'))
+                                break 
+                        else: # Executed if the loop completed without break
+                            print(f"Warning: Could not find a matching run_path_entry in config['autoRun']['path'] for dstdir: {dstdir}")
+                    else:
+                        print("Error: config['autoRun']['path'] and config['autoRun']['bakpath'] are not correctly configured as corresponding lists for backup operation.")
 
                 if config['delSX'] and os.path.exists(fn):
                     os.remove(fn)

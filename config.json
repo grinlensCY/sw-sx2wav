@@ -52,8 +52,8 @@
         "forceRunAll": 0,
         "//path": "//desktop-iife87h/tag_rawdata",
         "//bakpath": "C:/Users/SX/OneDrive - SiriuXense Inc/tag_rawdata",
-        "path": "D:/tag_rawdata/TSKS-EAP",
-        "bakpath": "D:/OneDrive - SiriuXense Inc/tag_rawdata/TSKS-EAP"
+        "path": ["D:/tag_rawdata/TSKS-EAP", "F:/other_rawdata/ProjectX"],
+        "bakpath": ["D:/OneDrive - SiriuXense Inc/tag_rawdata/TSKS-EAP", "G:/Backup/ProjectX_backup"]
     },
     "//dirToloadFile": "G:/My Drive/Code/sx2wav/test_files",
     "dirList_load_S3zip": "",
