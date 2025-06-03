@@ -248,6 +248,8 @@ class RecThread(threading.Thread):
                             else:
                                 tmpmsg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}  ')
                                 tmpmsg += f'tlast5[-3:]={tlast5[-3:]}  toffset={toffset}\n'
+                            
+                            empty_sec = 0
                             if (tstmp - tlast5[-1] > abnormal_max_ts_diff) or tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0:    # ts was reset
                                 msg += tmpmsg
                             
@@ -318,7 +320,7 @@ class RecThread(threading.Thread):
                                     time.sleep(0.01)
                                     print(msg, file=open(self.fn_errlog,'a',newline='',encoding='utf-8-sig'))
                             cnt += 1
-                            self.processedT += 0.016
+                            self.processedT += 0.016 + empty_sec
                             if cnt == seg_cnt:
                                 for i,q in enumerate(buffer_mic):
                                     fileList[i].write(q)
