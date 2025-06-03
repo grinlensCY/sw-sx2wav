@@ -187,6 +187,9 @@ class Protocol:
 
         # self.q_mic=queue.Queue()    # for QML,sxReport
         self.name = name
+        self.micpkg_cnt = 0
+        self.micpkg_ti = None
+        self.micpkg_tf = None
 
     def __encrypt_content(self,pkg):
         encryptor  = self.cipher.encryptor()
@@ -567,6 +570,8 @@ class Protocol:
                     emptyCnt += 1
                     if emptyCnt > 210:
                         print(f'protocol empty cnt={emptyCnt}  rxq_size={self.rx_queue.qsize()}  {rxCnt=}')
+                        tdiff = self.micpkg_tf - self.micpkg_ti
+                        print(f"{self.micpkg_cnt=}={self.micpkg_cnt*0.016:.1f}sec  {self.micpkg_ti=}  {self.micpkg_tf=}  {tdiff=}={tdiff/32768:.1f}sec")
                         if (drv.thd_run_flag is None or not drv.thd_run_flag.is_set()):
                             self.endingTX_callback()
                         
@@ -698,6 +703,10 @@ class Protocol:
             mic1.append(val[1])
 
         ts=pkg[1]
+        self.micpkg_cnt += 1
+        if self.micpkg_ti is None:
+            self.micpkg_ti = ts
+        self.micpkg_tf = ts
 
         return (ts,mic0,mic1)
     

@@ -29,7 +29,7 @@
         }
     },
     "dirToloadFile": [
-        "D:/tag_rawdata/TSKS-EAP/20250529_Night_1d4b9eb8dcb0b544",
+        "D:/tag_rawdata/TSKS-EAP/20250602_Day_952ac41642e9526e",
         "P:/Backups/GoogleSX/Experiment/compilation/FJ_baby/成人",
         "P:/Backups/GoogleSX/Experiment/compilation/IRB",
         "P:/Backups/GoogleSX/Experiment/compilation/attach",
@@ -46,14 +46,18 @@
         "C:/tmp/sxTest",
         "D:/tag_rawdata/TSKS-EAP"
     ],
-    "debug": 0,
+    "debug": 10,
     "autoRun": {
-        "go": 10,
+        "go": 0,
         "forceRunAll": 0,
         "//path": "//desktop-iife87h/tag_rawdata",
         "//bakpath": "C:/Users/SX/OneDrive - SiriuXense Inc/tag_rawdata",
-        "path": ["D:/tag_rawdata/TSKS-EAP", "F:/other_rawdata/ProjectX"],
-        "bakpath": ["D:/OneDrive - SiriuXense Inc/tag_rawdata/TSKS-EAP", "G:/Backup/ProjectX_backup"]
+        "path": [
+            "D:/tag_rawdata/TSKS-EAP"
+        ],
+        "bakpath": [
+            "D:/OneDrive - SiriuXense Inc/tag_rawdata/TSKS-EAP"
+        ]
     },
     "//dirToloadFile": "G:/My Drive/Code/sx2wav/test_files",
     "dirList_load_S3zip": "",
@@ -63,9 +67,9 @@
     "dir_upzipS3": "C:/Users/chenyikuo/downloads_S3",
     "6ch": 0,
     "ts_loadS3": [],
-    "//ts_range_sx": "-1:no limit, yyyymmdd",
+    "//ts_range_sx": "-1:no limit, yyyymmddHHMMss string",
     "ts_range_sx": [
-        20240914,
+        0,
         -1
     ],
     "load_all_sx": 10,

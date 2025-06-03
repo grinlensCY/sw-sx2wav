@@ -66,6 +66,8 @@ class Engine:
         self.qAccAttach = queue.Queue()
         self.qTempAttach = queue.Queue()
 
+        self.progress = 0
+
         self.reset()
 
 
@@ -158,7 +160,7 @@ class Engine:
     def chkRecThd(self, flag):
         print('start to ChkRecThd')
         t0 = time.time()
-        while not flag.wait(10):
+        while not flag.wait(25):
             if self.data_retriever.thd_run_flag is not None:  print(self.strPkgSpd)
             # print(f'chkRecThd: elapsed time={time.time()-t0:.2f}sec')
             isRun = False
@@ -167,11 +169,12 @@ class Engine:
                 print('\nisRun',isRun)
                 elapsedT = time.time()-t0
                 speed = self.recThd_audio.processedT/elapsedT
+                self.progress = self.recThd_audio.processedT/self.duration
                 print((f'self.recThd_audio.stopped() {self.recThd_audio.stopped()}\n'
                         f'elapsed time={elapsedT/60:.1f}mins  '
                         f'processed={self.recThd_audio.processedT/60:.1f}mins  '
                         f'speed={speed:.1f}  '
-                        f'progress={self.recThd_audio.processedT/self.duration:.1%}  '
+                        f'progress={self.progress:.1%}  '
                         f'processing Time_remaining= {(self.duration-self.recThd_audio.processedT)/speed/60:.1f}mins'))
                 if not self.config['onlyChkpkgloss']:
                     isRun |= not self.recThd_acc.stopped()
@@ -599,6 +602,67 @@ def getTsOfFn(fn,ti=0,ms=True):
         else:
             return float(bn[:-idx])/1000
 
+def getTSbyTimeStr(str_in):
+    '''
+    guess TimeStr format in order of yyyymmddHHMMSS or w/ separated by '-, _, :, " "'
+    extract real timeStr from str_in
+    return ts, real timeStr
+    '''
+    timeStr = str_in.replace("-","").replace("_","").replace(":","").replace(" ","")
+    timeStr_orig = ''
+    
+    int_idxi = 0
+    for i,s in enumerate(str_in):
+        try:
+            int(s)
+            break
+        except:
+            int_idxi += 1
+            continue
+    for i,s in enumerate(timeStr):
+        try:
+            int(s)
+        except:
+            # print(i,s)
+            timeStr = timeStr[:i]
+            int_idxf = str_in.index(s)
+            while str_in[int_idxf-1] in ['-','_',':',' ']:
+                int_idxf -= 1
+            timeStr_orig = str_in[int_idxi:int_idxf]
+            break
+    if not timeStr_orig:
+        timeStr_orig = str_in
+    
+    idx = 0
+    if len(timeStr) < 4:
+        print(f"Not able to analyze {timeStr}")
+        return None
+    tsFormat = ""
+    idx = 0
+    if len(timeStr) >= 4:
+        tsFormat += "%Y"
+        idx = 4
+    if len(timeStr) >= 6:
+        tsFormat += "%m"
+        idx = 6
+    if len(timeStr) >= 8:
+        tsFormat += "%d"
+        idx = 8
+    if len(timeStr) >= 10:
+        tsFormat += "%H"
+        idx = 10
+    if len(timeStr) >= 12:
+        tsFormat += "%M"
+        idx = 12
+    if len(timeStr) >= 14:
+        tsFormat += "%S"
+        idx = 14
+    try:
+        return time.mktime(time.strptime(timeStr[:idx],tsFormat)), timeStr_orig
+    except:
+        return None,None
+    
+
 def isOnlyXXX(config):
     for key in config.keys():
         if key.startswith('only') and config[key]:
@@ -629,8 +693,14 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
             except ValueError:
                 ts_range[1] = (config["ts_loadS3"][1]+1-config["ts_loadS3"][0])*60*60*24*1000+ts_range[0]
     if len(config['ts_range_sx']):
-        ts_range[0] = ts_range[0] if config['ts_range_sx'][0] == -1 else max(ts_range[0],config['ts_range_sx'][0])
-        ts_range[1] = time.time()*1000 if config['ts_range_sx'][-1] == -1 or not ts_range[1] else min(ts_range[1],config['ts_range_sx'][-1])
+        if config['ts_range_sx'][0] != -1 and config['ts_range_sx'][0] != 0:
+            config_ts_range0 = getTSbyTimeStr(config['ts_range_sx'][0])[0]*1000
+        else:
+            config_ts_range0 = 0
+        ts_range[0] = ts_range[0] if config['ts_range_sx'][0] == -1 else max(ts_range[0], config_ts_range0)
+        if config['ts_range_sx'][1] != -1:
+            config_ts_range1 =  getTSbyTimeStr(config['ts_range_sx'][1])[0]*1000
+        ts_range[1] = time.time()*1000 if config['ts_range_sx'][-1] == -1 or not ts_range[1] else min(ts_range[1], config_ts_range1)
     print('updated ts_range',ts_range)
     if loadall:
         fns_list = [f'{srcdir}/{fn}' for fn in os.listdir(srcdir)
@@ -701,26 +771,36 @@ def findFileset(datainfo, config, kw='audio-main',srcdir='', loadall=True, onlyC
         datainfo['sxfn'] = tfn
     print('final list is ...')
     user_srcdir = os.path.basename(srcdir) #srcdir.split('\\')[-1]
+    msg = f"{srcdir}\n"
     for fn in fns:
         ts = getTsOfFn(fn,ms=False)     #float(os.path.basename(fn)[:-3])/1000
         basefn = os.path.basename(fn)
+        logfn = fn.replace('.sx','.log')
+        filesize = os.path.getsize(fn)
+        duration_filesize = filesize/20000
         if ts:
-            recTime = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(ts))
-            msg = (f'{basefn}  recording start at:{recTime}  '
-                    f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+            recTime = time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(ts))
+            msg = (f'{basefn}  recording start at:{recTime}  ')
         else:
             recTime = 'SD_card_unknown'
-            msg = (f'{basefn}  recording start at:{recTime}  '
-                    f'file size:{os.path.getsize(fn)}=>{hhmmss(os.path.getsize(fn)/20000)}')
+            msg = (f'{basefn}  recording start at:{recTime}  ')
+        msg += f'{filesize=}=>{hhmmss(duration_filesize)}=>stop at {time.strftime("%Y-%m-%d-%H:%M:%S", time.localtime(ts+duration_filesize))}  '
+        if os.path.exists(logfn):
+            with open(logfn, 'r', newline='',encoding='utf-8-sig') as jf:
+                applog = json.loads(jf.read())
+            duration_applog = (applog['stop_ts']-applog['start_ts'])/1000
+            msg += (f"\tduration_byAPPlog={duration_applog}sec={hhmmss(duration_applog)}=>"
+                    f"stop at {time.strftime('%Y-%m-%d-%H:%M:%S', time.localtime(ts+duration_applog))}  ")
         print(msg)
+        print(msg, file=open('log.txt', 'a', newline='', encoding='utf-8-sig'))
         sx_dict[basefn] = {'user_srcdir':user_srcdir,
                             'recTime':recTime,
                             'ble':'',
                             'mic_sr':0,
                             'imu_sr':0,
                             'dualmic':False,
-                            'duration':os.path.getsize(fn)/20000,
-                            'duration_hhmmss':hhmmss(os.path.getsize(fn)/20000)}
+                            'duration':duration_filesize,
+                            'duration_hhmmss':hhmmss(duration_filesize)}
     fn_log = f'{srcdir}/{time.strftime("%Y-%m-%d", time.localtime())}.log'
     with open(fn_log, 'w', newline='', encoding='utf-8-sig') as jout:
         json.dump(sxdict, jout, indent=4, ensure_ascii=False)
@@ -924,8 +1004,10 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                         os.remove(logfn)
                 if (fn == sxfns[-1]
                         or (not mustMerge and 'stop_ts' not in log.keys())):
-                    print((f'\n\tmerging {merged_sxfns} \n\t\tinto  {first_sxfn}\n'
+                    msg = ((f'\n\tmerging {merged_sxfns} \n\t\tinto  {first_sxfn}\n'
                             f'\t\t({first_user}: {cum_cnt} files,{cum_duration/1000/60:.2f}min)\n'))
+                    print(msg)
+                    print(msg, file=open('log.txt', 'a', newline='', encoding='utf-8-sig'))
                     with open(first_sxfn, "wb") as f:
                         f.write(cum_sxData)
                     with open(first_sxfn.replace(".sxr",".log").replace(".sx",".log"), 'w', newline='', encoding='utf-8-sig') as jf:
@@ -934,8 +1016,10 @@ def mergeSX(sxfns,userlist,last_merged_dict,sx_dict):
                     merged_sxfns.append(first_sxbasefn)
             else:
                 if cum_cnt > 1 and not config['onlytst0']:
-                    print((f'merging {merged_sxfns} into\n\t{os.path.basename(first_sxfn)}'
+                    msg = ((f'merging {merged_sxfns} into\n\t{os.path.basename(first_sxfn)}'
                             f'({cum_cnt} files,{cum_duration/1000/60:.2f}min)'))
+                    print(msg)
+                    print(msg, file=open('log.txt', 'a', newline='', encoding='utf-8-sig'))
                     sx_dict[first_sxbasefn]['duration'] = cum_duration/1000
                     cum_logdata['duration'] = cum_duration/1000
                     with open(first_sxfn, "wb") as f:
@@ -990,7 +1074,8 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20250101g')
+    print('version: 20250101e')
+    print('version: 20250101e', file=open('log.txt', 'w', newline='', encoding='utf-8-sig'))
     config = updateConfig()
 
     isAutoRun = bool(sys.argv[1]) if len(sys.argv) > 1 else False
@@ -1270,6 +1355,12 @@ if __name__ == "__main__":
                                 or not config["onlylog"] or not config["onlyMovelog"])):
                     with open(fn_log, 'w', encoding='utf-8-sig') as jout:
                         json.dump(sxdict, jout, indent=4, ensure_ascii=False)
+                
+                if engine.progress < 0.9 or config['debug']:
+                    targetfn = sx_dstfn if (config['moveSX'] and len(fns)) or isAutoRun else fn
+                    print(f"{fn}:{engine.progress:.3f}  {engine.duration=:.1f}={hhmmss(engine.duration)}  duration_byFilesize{hhmmss(os.path.getsize(targetfn)/20000)}",
+                          file=open('errlog.txt','a',newline='', encoding='utf-8-sig'))
+
             time.sleep(3)
             if not config['onlytst0'] and len(sxpool) and config['delmergedSX']:
                 shutil.rmtree(sxpool)
