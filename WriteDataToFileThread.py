@@ -42,12 +42,12 @@ class RecThread(threading.Thread):
         self.err = {'reset_ts':[], 'pkgloss_ts':[], 'pkgloss_duration':[]}
         self.fn_errJson = f'{self.filename_prefix}-errlog_{job}.json'
         try:
-            print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
+            print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'w',newline='', encoding='utf-8-sig'))
         except Exception as e:
             print(f'{self.job}: {e}')
             time.sleep(0.01)
             self.fn_errlog = self.fn_errlog.replace('.txt','.log')
-            print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'a',newline='', encoding='utf-8-sig'))
+            print(f'start recording at {fn_prefix}', file=open(self.fn_errlog,'w',newline='', encoding='utf-8-sig'))
         if job == 'mic':
             self.filename_new.append(f'{self.filename_prefix}-audio-main01.wav')
             self.filename_new.append(f'{self.filename_prefix}-audio-env01.wav')
@@ -186,8 +186,8 @@ class RecThread(threading.Thread):
             else:
                 self.processedT = 0
                 sr_PatchTS = int(1/0.016)
-                ts_diff_target = 0.016 * self.ts_Hz
-                max_ts_diff = ts_diff_target*1.4
+                ts_diff_target = int(0.016 * self.ts_Hz)
+                max_ts_diff = int(ts_diff_target*1.4)
                 abnormal_max_ts_diff = 51 * self.ts_Hz
                 # === debug
                 # tsintvls = []
@@ -242,55 +242,56 @@ class RecThread(threading.Thread):
                             #     print(f"tstmp={tstmp}={tstmp/self.ts_Hz:.1f}  tmp[0]={tmp[0]}={tmp[0]/self.ts_Hz:.1f}  toffset={toffset}={toffset/self.ts_Hz:.1f}  t0={t0}={t0/self.ts_Hz:.1f}")
                             '''
                             tstmp = tmp[0] + toffset-t0
-                            tmpmsg = (f'\n{self.job} ts was reset because ')
-                            if tstmp - tlast5[-1] > abnormal_max_ts_diff:
-                                tmpmsg += f"tstmp({tstmp}={tstmp/self.ts_Hz:.2f}) - tlast5[-1]({tlast5[-1]}={tlast5[-1]/self.ts_Hz:.2f}) > abnormal_max_ts_diff({abnormal_max_ts_diff}={abnormal_max_ts_diff/self.ts_Hz:.2f})"
-                            else:
-                                tmpmsg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}  ')
-                                tmpmsg += f'tlast5[-3:]={tlast5[-3:]}  toffset={toffset}\n'
-                            
                             empty_sec = 0
-                            if (tstmp - tlast5[-1] > abnormal_max_ts_diff) or tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0:    # ts was reset
-                                msg += tmpmsg
-                            
-                                t0 = tmp[0]
-                                toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
-                                tstmp = tmp[0] + toffset-t0
-                                ts_sec = tstmp/self.ts_Hz
-                                msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={ts_sec:.3f} = '
-                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+ts_sec))}')
-                                self.err['reset_ts'].append(ts_sec)
-                                # if len(self.err['reset_ts']) < 2:
-                                #     print(msg)
-                            elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
-                                ts_sec = tstmp/self.ts_Hz
-                                empty_sec = (tstmp - tlast5[-1])/self.ts_Hz
-                                ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
-                                msg += (f'\nmic pkgloss at {ts_sec:.3f}(tmp[0]={tmp[0]}={tmp[0]/self.ts_Hz:.1f} toffset={toffset}={toffset/self.ts_Hz:.1f}  t0={t0}) {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+ts_sec))}')
-                                msg += (f'\t{tstmp}({ts_sec:.3f}) - {tlast5[-1]}({tlast5[-1]/self.ts_Hz:.3f})'
-                                        f' = {tstmp - tlast5[-1]}={empty_sec:.2f}sec > {max_ts_diff}')
-                                add_cnt = 1
-                                self.err['pkgloss_ts'].append(ts_sec)
-                                self.err['pkgloss_duration'].append(empty_sec)
-                                if len(self.err['pkgloss_ts']) < 2:
-                                    print(msg)
-                                while tstmp - tlast5[-1] > max_ts_diff:
-                                    tstmp2 = tlast5[-1] + ts_diff_target
-                                    tlast5 = np.r_[tlast5, tstmp2]
-                                    # print(f'pkgloss updated {tlast5=}  ')
-                                    if tlast5.size > 5:
-                                        tlast5 = tlast5[-5:]
-                                    ts = tstmp2 / self.ts_Hz
-                                    # msg += (f'\tadd {add_cnt} ts:{tstmp2} {ts:.3f}')
-                                    add_cnt += 1
-                                    buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = np.zeros((data_dim,seglen))
-                                    buffer_ts[cnt] = ts
-                                    cnt += 1
-                                    if cnt == seg_cnt:
-                                        for i,q in enumerate(buffer_mic):
-                                            fileList[i].write(q)
-                                        fileList[-1].write(buffer_ts)
-                                        cnt = 0
+                            if tlast5[-1]:
+                                tmpmsg = (f'\n{self.job} ts was reset because ')
+                                if tstmp - tlast5[-1] > abnormal_max_ts_diff:
+                                    tmpmsg += f"tstmp({tstmp}={tstmp/self.ts_Hz:.2f}) - tlast5[-1]({tlast5[-1]}={tlast5[-1]/self.ts_Hz:.2f}) > abnormal_max_ts_diff({abnormal_max_ts_diff}={abnormal_max_ts_diff/self.ts_Hz:.2f})"
+                                else:
+                                    tmpmsg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}  ')
+                                    tmpmsg += f'tlast5[-3:]={tlast5[-3:]}  toffset={toffset}\n'
+                                
+                                if (tstmp - tlast5[-1] > abnormal_max_ts_diff) or tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0:    # ts was reset
+                                    msg += tmpmsg
+                                
+                                    t0 = tmp[0]
+                                    toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1] + ts_diff_target
+                                    tstmp = tmp[0] + toffset-t0
+                                    ts_sec = tstmp/self.ts_Hz
+                                    msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={ts_sec:.3f} = '
+                                            f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+ts_sec))}')
+                                    self.err['reset_ts'].append(ts_sec)
+                                    # if len(self.err['reset_ts']) < 2:
+                                    #     print(msg)
+                                elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
+                                    ts_sec = tstmp/self.ts_Hz
+                                    empty_sec = (tstmp - tlast5[-1])/self.ts_Hz
+                                    # ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
+                                    msg += (f'\nmic pkgloss at {ts_sec:.3f}(tmp[0]={tmp[0]}={tmp[0]/self.ts_Hz:.1f} toffset={toffset}={toffset/self.ts_Hz:.1f}  t0={t0}) {time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+ts_sec))}')
+                                    msg += (f'\t{tstmp}({ts_sec:.3f}) - {tlast5[-1]}({tlast5[-1]/self.ts_Hz:.3f})'
+                                            f' = {tstmp - tlast5[-1]}={empty_sec:.2f}sec > {max_ts_diff}')
+                                    add_cnt = 1
+                                    self.err['pkgloss_ts'].append(ts_sec)
+                                    self.err['pkgloss_duration'].append(empty_sec)
+                                    # if len(self.err['pkgloss_ts']) < 2:
+                                    #     print(msg)
+                                    while tstmp - tlast5[-1] > max_ts_diff:
+                                        tstmp2 = tlast5[-1] + ts_diff_target
+                                        tlast5 = np.r_[tlast5, tstmp2]
+                                        # print(f'pkgloss updated {tlast5=}  ')
+                                        if tlast5.size > 5:
+                                            tlast5 = tlast5[-5:]
+                                        ts = tstmp2 / self.ts_Hz
+                                        # msg += (f'\tadd {add_cnt} ts:{tstmp2} {ts:.3f}')
+                                        add_cnt += 1
+                                        buffer_mic[:,cnt*seglen:(cnt+1)*seglen] = np.zeros((data_dim,seglen))
+                                        buffer_ts[cnt] = ts
+                                        cnt += 1
+                                        if cnt == seg_cnt:
+                                            for i,q in enumerate(buffer_mic):
+                                                fileList[i].write(q)
+                                            fileList[-1].write(buffer_ts)
+                                            cnt = 0
 
                             tstmp = tmp[0] + toffset-t0
                             # if getCnt < 15 or len(self.err['pkgloss_ts']) < 2:
@@ -486,32 +487,33 @@ class RecThread(threading.Thread):
                                     msg = f'{self.job},t0_fw={t0},pkglen={len(tmp[1])},tsHz={self.ts_Hz}'
                                     print(msg, file=open(self.fn_ts_t0_acc,'w',newline='',encoding='utf-8-sig'))
                             tstmp = tmp[0] + toffset-t0
-                            if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0: # ts was reset
-                                msg += (f'\n{self.job} ts was reset because')
-                                msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}  ')
-                                msg += f'tlast5={tlast5}  toffset={toffset}\n'
-                                t0 = tmp[0]
-                                toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
-                                tstmp = tmp[0] + toffset-t0
-                                msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={tstmp/self.ts_Hz:.3f} = '
-                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp/self.ts_Hz))}')
-                            elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
-                                ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
-                                msg += (f'\n\t{self.job} pkgloss at {tstmp/self.ts_Hz:.3f} '
-                                        f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp/self.ts_Hz))}')
-                                msg += (f'\t{tstmp}({tstmp/self.ts_Hz:.3f}) - {tlast5[-1]}({tlast5[-1]/self.ts_Hz:.3f})'
-                                        f' = {tstmp - tlast5[-1]}={(tstmp - tlast5[-1])/self.ts_Hz:.2f}sec > {max_ts_diff}')
-                                add_cnt = 1
-                                while tstmp - tlast5[-1] > max_ts_diff:
-                                    tstmp2 = tlast5[-1] + ts_diff_target
-                                    tlast5 = np.r_[tlast5, tstmp2]
-                                    if tlast5.size > 5:
-                                        tlast5 = tlast5[-5:]
-                                    ts = np.linspace(tstmp2, tstmp2+ts_diff_target, pkglen, endpoint=False)/self.ts_Hz
-                                    fileList[0].write(
-                                        np.block([[ts],
-                                                [np.array(tmp[1])[0].reshape((3,1))*np.ones((data_dim,pkglen))/self.fullscale]]).T)
-                                    add_cnt += 1
+                            if tlast5[-1]:
+                                if tmp[0] < t0 or tstmp < tlast5[-1] or tstmp < 0: # ts was reset
+                                    msg += (f'\n{self.job} ts was reset because')
+                                    msg += (f'\ttmp[0]={tmp[0]} < t0={t0} or tstmp={tstmp} < tpre={tlast5[-1]}  ')
+                                    msg += f'tlast5={tlast5}  toffset={toffset}\n'
+                                    t0 = tmp[0]
+                                    toffset = tlast5[-1]+np.mean(np.diff(tlast5)) if len(tlast5) > 1 and np.diff(tlast5).any() else tlast5[-1]
+                                    tstmp = tmp[0] + toffset-t0
+                                    msg += (f'\tcorrected t0={t0}  toffset={toffset} tstmp={tstmp/self.ts_Hz:.3f} = '
+                                            f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp/self.ts_Hz))}')
+                                elif tstmp - tlast5[-1] > max_ts_diff: # pkgloss (ts_now >> ts_pre)
+                                    # ts_diff_target = np.median(np.diff(tlast5)) if len(tlast5)>1 and np.diff(tlast5).any() else ts_diff_target
+                                    msg += (f'\n\t{self.job} pkgloss at {tstmp/self.ts_Hz:.3f} '
+                                            f'{time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime(self.recT0+tstmp/self.ts_Hz))}')
+                                    msg += (f'\t{tstmp}({tstmp/self.ts_Hz:.3f}) - {tlast5[-1]}({tlast5[-1]/self.ts_Hz:.3f})'
+                                            f' = {tstmp - tlast5[-1]}={(tstmp - tlast5[-1])/self.ts_Hz:.2f}sec > {max_ts_diff}')
+                                    add_cnt = 1
+                                    while tstmp - tlast5[-1] > max_ts_diff:
+                                        tstmp2 = tlast5[-1] + ts_diff_target
+                                        tlast5 = np.r_[tlast5, tstmp2]
+                                        if tlast5.size > 5:
+                                            tlast5 = tlast5[-5:]
+                                        ts = np.linspace(tstmp2, tstmp2+ts_diff_target, pkglen, endpoint=False)/self.ts_Hz
+                                        fileList[0].write(
+                                            np.block([[ts],
+                                                    [np.array(tmp[1])[0].reshape((3,1))*np.ones((data_dim,pkglen))/self.fullscale]]).T)
+                                        add_cnt += 1
                             tstmp = tmp[0] + toffset-t0
                             # if tstmp < 0 or tlast5[-1] < 0:
                             #     msg += (f'{self.job} before tlast5({tlast5[-1]}) < 0 at {tstmp/self.ts_Hz} tstmp={tstmp}  tmp[0]={tmp[0]}  toffset={toffset}  t0={t0}\n')
