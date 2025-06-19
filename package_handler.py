@@ -35,6 +35,10 @@ class PackageHandler:
         self.bleaddr = None
 
         self.waitingImuCnt = 0
+        # debug
+        self.gotMic_flag=threading.Event()
+        self.gotAcc_flag=threading.Event()
+        self.gotSysinfo_flag=threading.Event()
 
     
     def prepare_statistic_output(self):
@@ -157,12 +161,17 @@ class PackageHandler:
 
         self.mic_pkg_cnt+=1
         self.prepare_statistic_output()
+    
         # == rec
         if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog']:
-            # print('\ndual dual')
-            self.engine.recThd_audio.addData(dat)
-            # print('mic_pkg',np.array(dat[:5]).shape)
-            self.engine.qMic.put_nowait(dat)
+            if not self.gotMic_flag.is_set():
+                print(f"packageHandler_handle_dual_mic_pkg: first ts {dat[0]}  {len(dat[1])=}  {dat[1][:3]=}  {dat[2][:3]=}")
+                self.gotMic_flag.set()
+            if dat[0] or len([i for i in dat[1][:3] if i]) or len([i for i in dat[2][:3] if i]):    # 不知道為何 有時候會有all 0
+                # print('\ndual dual')
+                self.engine.recThd_audio.addData(dat)
+                # print('mic_pkg',np.array(dat[:5]).shape)
+                self.engine.qMic.put_nowait(dat)
     
     def handle_mic_pkg(self,dat):
         if not self.engine.flag_mic_sr_checked.is_set():
@@ -234,6 +243,9 @@ class PackageHandler:
         self.cumm_accpkgCnt += 1
         self.prepare_statistic_output()
         if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog'] and not self.engine.config['onlyChkpkgloss']:
+            if not self.gotAcc_flag.is_set():
+                print(f"packageHandler handle_imu_acc_pkg: first ts {dat[0]}  {len(dat[2])=}  {dat[2][:3]=}")   # 20 x 3
+                self.gotAcc_flag.set()
             self.engine.recThd_acc.addData([dat[0],dat[2]], ch=dat[1])
 
             self.engine.qAccAttach.put_nowait([dat[0],dat[2]])
