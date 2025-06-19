@@ -81,6 +81,7 @@ class Protocol:
     PKG_FRAME_FINISH_BYTE           =0xf0
 
     MSG_TYPE_DUAL_MIC               =0xD0
+    MSG_TYPE_ODD_SND_INFO           =0xD8
     MSG_TYPE_ODD_SND_DATA           =0xD9
     MSG_TYPE_MIC                    =0xDA
     MSG_TYPE_QUAT                   =0xDB
@@ -92,16 +93,23 @@ class Protocol:
     MSG_TYPE_ECG_RAW_DATA           =0xE3
 
     MSG_TYPE_SYS_INFO               =0xF0
-    MSG_TYPE_ALG_RES                =0xFA
     MSG_TYPE_STATE_INFO             =0xF1
+    MSG_TYPE_ALG_RES                =0xFA
 
     CMD_TYPE_CHANGE_PW              =0xC0
     CMD_TYPE_CHANGE_GAIN            =0xC1
     CMD_TYPE_SENSOR_CONTROL         =0xC2
 
+    CMD_TYPE_GET_FULL_ODD_SND       =0xC3
+    CMD_TYPE_GET_ODD_SND_PKG        =0xC4
+    CMD_TYPE_ERASE_ODD_SND          =0xC5
+
+    CMD_TYPE_READ_ALG_PARAM         =0xC6
     CMD_TYPE_CONFIG_SHIPPING_MODE    =0xCA
-    CMD_TYPE_TX_POWER                =0xCE
-    CMD_TYPE_ECHO                    =0xCF
+    CMD_TYPE_WRITE_ALG_PARAM        =0xC7
+
+    CMD_TYPE_TX_POWER               =0xCE
+    CMD_TYPE_ECHO                   =0xCF
 
     ALG_TYPE_ACC_RR                 =0x01
     ALG_TYPE_ACC_HR                 =0x02
@@ -109,7 +117,9 @@ class Protocol:
     ALG_TYPE_SND_HR                 =0x12
     ALG_TYPE_BOWEL                  =0x21
     ALG_TYPE_POSTURE                =0x31
-    #20231213 new cmd
+    ALG_TYPE_SYNC_HR			    =0x41
+    ALG_TYPE_ATTACH				    =0x51
+
     CMD_TYPE_OUTPUT_CTRL             =0x00
     CMD_TYPE_PKG_REQUIRE             =0x01
 
@@ -117,8 +127,16 @@ class Protocol:
     int_to_status_map={}
     int_to_act_map={}
 
-    def __init__(self,drv,name,skipPkgCnt,key='',iv=''): #skipPkgCnt only for sx2wav/sxReport
+    def __init__(self,drv,name,skipPkgCnt=0,key='',iv='',dec_file=None): #skipPkgCnt only for sx2wav/sxReport
+        print(f"this protocol at {__file__}")
         self.driver=drv
+
+        self.dec_output_file=dec_file
+        self.dec_output_buf=bytearray()
+
+        if(dec_file!=None):
+            if os.path.exists(dec_file):
+                os.remove(dec_file)
 
         if(type(drv) is FD.Driver and not drv.isSXR):
             self.read_file_mode=True
@@ -143,7 +161,7 @@ class Protocol:
         self.set_sys_info_handler(SimpleSysInfoHandler())
         self.set_state_info_handler(SimpleStateInfoHandler())
         self.set_mic_data_handler(SimpleMicDataHandler())
-        self.set_odd_snd_data_handler(SimpleOddSndDataHandler())
+        #self.set_odd_snd_data_handler(SimpleOddSndDataHandler())
         self.set_ecg_data_handler(SimpleEcgDataHandler())
         self.set_imu_data_handler(SimpleImuDataHandler())
 
@@ -153,6 +171,8 @@ class Protocol:
 
         self.pkgcnt = 0
         self.skipPkgCnt = skipPkgCnt
+        # self.pkgloss_len = 0
+        self.duration = 0
 
         '''
         static uint8_t protocol_iv_key[16] = {'S', 'i', 'r', 'i', 'u', 'X', 'e', 'n', 
@@ -185,11 +205,15 @@ class Protocol:
         self.int_to_act_map[3]='large_motion'
         self.int_to_act_map[4]='gentle_motion'
 
-        # self.q_mic=queue.Queue()    # for QML,sxReport
+        # self.pre_mic_ts=0
+        self.flag_drv_empty = threading.Event() # make sure drv read all
+        self.flag_empty = threading.Event() # make sure finishing all packets
+        self.flag_finishstop = threading.Event()    # check if stop is finished, to avoid unexpected stop
         self.name = name
-        self.micpkg_cnt = 0
+        self.micpkg_cnt = 0     # debug: how many mic pkg
         self.micpkg_ti = None
         self.micpkg_tf = None
+        self.gotMic_flag = threading.Event()    # debug msg
 
     def __encrypt_content(self,pkg):
         encryptor  = self.cipher.encryptor()
@@ -210,11 +234,14 @@ class Protocol:
 
         curr_ts=time.time()
         diff_ts=curr_ts-self.pre_statistic_ts
-        if(diff_ts>10):
+        if(diff_ts>120):
             self.data_spd=self.interval_data_amount/diff_ts
             print("{:.3f} kBps".format(self.data_spd/1000))
             self.interval_data_amount=0
             self.pre_statistic_ts=curr_ts
+
+    def set_odd_snd_handler(self,h):
+        self.odd_snd_handler=h
 
     def set_alg_res_handler(self,h):
         self.alg_res_handler=h
@@ -228,9 +255,6 @@ class Protocol:
     def set_mic_data_handler(self,h):
         self.mic_data_handler=h
 
-    def set_odd_snd_data_handler(self,h):
-        self.odd_snd_data_handler=h
-        
     def set_ecg_data_handler(self,h):
         self.ecg_data_handler=h
 
@@ -249,6 +273,9 @@ class Protocol:
                 continue
             
             pkg=self.cmd_resp_queue.get_nowait()
+            if(pkg==None):
+                time.sleep(0.01)
+                continue
             if(pkg[0] == cmd_type):
                 return pkg
             else:
@@ -285,7 +312,7 @@ class Protocol:
                     self.iv= iv
                     self.cipher = Cipher(algorithms.AES(self.key), modes.CBC(self.iv),backend=default_backend())
                     return True
-                
+
     def output_control(self,req_mic,req_imu,req_alg,req_sys):
         ba=bytearray()
         ba.append(self.CMD_TYPE_OUTPUT_CTRL)
@@ -293,29 +320,6 @@ class Protocol:
         ba.append(1 if req_imu else 0)
         ba.append(1 if req_alg else 0)
         ba.append(1 if req_sys else 0)
-
-        self.write(ba)
-
-    def require_package(self,req_odd_snd,is_req_state):
-        ba=bytearray()
-        ba.append(self.CMD_TYPE_PKG_REQUIRE)
-        ba.append(req_odd_snd)
-        ba.append(1 if is_req_state else 0)
-
-        self.write(ba)
-                    
-    def enable_shipping_mode(self):
-        ba=bytearray()
-        ba.append(self.CMD_TYPE_CONFIG_SHIPPING_MODE)
-        ba.append(1)
-
-        self.write(ba)
-            
-    def disable_shipping_mode(self):
-        ba=bytearray()
-        ba.append(self.CMD_TYPE_CONFIG_SHIPPING_MODE)
-        ba.append(0)
-
         self.write(ba)
 
     def set_mic_gain(self,ch1,ch2,ch3,ch4):
@@ -329,6 +333,95 @@ class Protocol:
         self.write(ba)
 
         pkg=self.wait_cmd_resp(self.CMD_TYPE_CHANGE_GAIN,3)
+        if(pkg is not None):
+            print(pkg)
+
+    def require_package(self,req_odd_snd,is_req_state):
+        ba=bytearray()
+        ba.append(self.CMD_TYPE_PKG_REQUIRE)
+        ba.append(req_odd_snd)
+        ba.append(1 if is_req_state else 0)
+
+        self.write(ba)
+
+    def enable_shipping_mode(self):
+        ba=bytearray()
+        ba.append(self.CMD_TYPE_CONFIG_SHIPPING_MODE)
+        ba.append(1)
+
+        self.write(ba)
+
+    def disable_shipping_mode(self):
+        ba=bytearray()
+        ba.append(self.CMD_TYPE_CONFIG_SHIPPING_MODE)
+        ba.append(0)
+
+        self.write(ba)
+
+    def get_odd_snd(self):
+        ba=bytearray()
+        ba.append(self.CMD_TYPE_GET_FULL_ODD_SND)
+        ba.append(0)
+
+        self.write(ba)
+
+        pkg=self.wait_cmd_resp(self.CMD_TYPE_GET_FULL_ODD_SND,600)
+        if(pkg is not None):
+            print(pkg)
+
+    def get_odd_snd_pkg_by_list(self,idx_list):
+        ba=bytearray()
+        ba.append(self.CMD_TYPE_GET_ODD_SND_PKG)
+        ba.append(0)
+
+        ba+=struct.pack("<"+"H"*len(idx_list),*idx_list)
+
+        self.write(ba)
+
+        print(ba.hex())
+
+        pkg=self.wait_cmd_resp(self.CMD_TYPE_GET_ODD_SND_PKG,30)
+        if(pkg is not None):
+            print(pkg)
+
+    def get_erase_odd_snd(self):
+        ba=bytearray()
+        ba.append(self.CMD_TYPE_ERASE_ODD_SND)
+        ba.append(0)
+
+        self.write(ba)
+
+        pkg=self.wait_cmd_resp(self.CMD_TYPE_ERASE_ODD_SND,3)
+        if(pkg is not None):
+            print(pkg)
+
+    def get_read_alg_param(self):
+        ba=bytearray()
+        ba.append(self.CMD_TYPE_READ_ALG_PARAM)
+
+        self.write(ba)
+
+        pkg=self.wait_cmd_resp(self.CMD_TYPE_READ_ALG_PARAM,3)
+        if(pkg is not None):
+            print(pkg)
+
+    def get_write_alg_param(self,param_ba):
+        ba_len=len(param_ba)
+        if(ba_len>128):
+            print('param should not longer than 128 bytes')
+            return 
+        
+        if(ba_len!=128):
+            padding_ba=bytearray(128-ba_len)
+            param_ba+=padding_ba
+
+        ba=bytearray()
+        ba.append(self.CMD_TYPE_WRITE_ALG_PARAM)
+        ba+=param_ba
+
+        self.write(ba)
+
+        pkg=self.wait_cmd_resp(self.CMD_TYPE_WRITE_ALG_PARAM,3)
         if(pkg is not None):
             print(pkg)
 
@@ -372,7 +465,7 @@ class Protocol:
 
         pkg=self.wait_cmd_resp(self.CMD_TYPE_SENSOR_CONTROL,3)
         if(pkg is not None):
-            print(pkg)
+            print('set_sensor_output',pkg)
             
     def test_echo(self):
         ba=bytearray()
@@ -381,7 +474,7 @@ class Protocol:
         self.write(ba)
         pkg=self.wait_cmd_resp(self.CMD_TYPE_ECHO,3)
         if(pkg is not None):
-            print(pkg)
+            print('test_echo',pkg)
 
     def set_tx_power(self,pwr):
         ba=bytearray()
@@ -390,7 +483,7 @@ class Protocol:
         self.write(ba)
         pkg=self.wait_cmd_resp(self.CMD_TYPE_TX_POWER,3)
         if(pkg is not None):
-            print(pkg)
+            print('set_tx_power',pkg)
 
     def get_available_tx_power(self):
         return [-40,-20,-16,-12,-8,-4,0,3,4]
@@ -406,7 +499,8 @@ class Protocol:
         encoded_pkg.append(self.PKG_FRAME_START_BYTE)
         self.__encode_bytes(en_pkg,encoded_pkg)
         encoded_pkg.append(self.PKG_FRAME_FINISH_BYTE)
-        print(list(encoded_pkg))
+
+        print('protocol write:',list(encoded_pkg))
         self.tx_queue.put_nowait(encoded_pkg)
 
     def read(self):
@@ -436,9 +530,36 @@ class Protocol:
         out_ba.append(checksum)
         return out_ba
 
+    def flush_output_buf(self):
+        if(self.dec_output_file==None):
+            return
+
+        with open(self.dec_output_file, 'ab') as f:
+            f.write(self.dec_output_buf)
+        self.dec_output_buf.clear()
+
+    def output_to_file(self,cxt):
+        res_ba=struct.pack('<H',len(cxt))
+        checksum=sum(cxt)
+        checksum=(checksum & 0x00ff)
+        res_ba+=cxt
+        res_ba+=struct.pack('B',checksum)
+
+        encoded_pkg=bytearray()
+
+        encoded_pkg.append(self.PKG_FRAME_START_BYTE)#usb cdc lost first 0xA0
+        self.__encode_bytes(res_ba,encoded_pkg)
+        encoded_pkg.append(self.PKG_FRAME_FINISH_BYTE)
+
+        self.dec_output_buf+=encoded_pkg
+        if(len(self.dec_output_buf)>1024*1024):
+            self.flush_output_buf()
+        
+
     def decry_and_prase_to_pkg(self,ba):#without header and footer
         self.pkgcnt += 1
         if self.pkgcnt < self.skipPkgCnt:
+            print(f"protocol_decry_and_prase_to_pkg: {self.pkgcnt=} < {self.skipPkgCnt=} ==> skip")
             return None
         pkg_len=len(ba)
         cxt_len=struct.unpack('<H',ba[0:2])[0]
@@ -459,6 +580,9 @@ class Protocol:
             return None
 
         dec_ba=dec_ba[:cxt_len]
+
+        if(self.dec_output_file!=None):
+            self.output_to_file(dec_ba)
 
         msg_type=dec_ba[0]
         ts_in_4us=struct.unpack('<I',dec_ba[1:5])[0]
@@ -539,14 +663,16 @@ class Protocol:
 
         return get_esp
 
-    def __decode_thd_fun(self,flag,drv,txq,rxq):
+    def __decode_thd_fun(self,flag,drv,txq,rxq,tEnd=0):
         emptyCnt = 0    # only for sx2wav, sxReport
+        print(f"protocol start __decode_thd_fun: {flag.is_set()=}")
         rxCnt = 0
-        while(flag.is_set()):
-            print('protocol: t0   emptyCnt=', emptyCnt)
+        self.flag_drv_empty.clear()
+        while(flag.is_set() and not self.flag_drv_empty.is_set()):
             get_esp=False
-            drv.start()
-
+            drv.start('protocol __decode_thd_fun',tEnd)
+            
+            print(f'protocol after drv.start: {emptyCnt=}  {flag.is_set()=}')
             while(flag.is_set()):
                 is_busy=False
 
@@ -569,15 +695,23 @@ class Protocol:
                     # print('protocol not is_busy, emptyCnt=',emptyCnt)
                     emptyCnt += 1
                     if emptyCnt > 210:
-                        print(f'protocol empty cnt={emptyCnt}  rxq_size={self.rx_queue.qsize()}  {rxCnt=}')
+                        print(f'protocol empty cnt={emptyCnt}  rxq_size={self.rx_queue.qsize()}  {rxCnt=}  {rxCnt==drv.read_cnt=}')
                         tdiff = self.micpkg_tf - self.micpkg_ti
                         print(f"{self.micpkg_cnt=}={self.micpkg_cnt*0.016:.1f}sec  {self.micpkg_ti=}  {self.micpkg_tf=}  {tdiff=}={tdiff/32768:.1f}sec")
                         if (drv.thd_run_flag is None or not drv.thd_run_flag.is_set()):
-                            self.endingTX_callback()
+                            self.flag_drv_empty.set()
+                            break
                         
                     time.sleep(0.02)
 
-            drv.stop()
+            drv.stop(f'protocol:end of 2nd while  {self.flag_drv_empty.is_set()=}')
+            print(f"protocol: call drv.stop()  {flag.is_set()=}  {rxCnt=}  {rxCnt==drv.read_cnt=}")
+
+        print(f'protocol: exit __decode_thd_fun  {flag.is_set()=}  {rxCnt=}  {rxCnt==drv.read_cnt=}')
+        if self.name != 'chk_files_format' and rxCnt != drv.read_cnt:
+            raise RuntimeError('rxCnt != drv.read_cnt')
+        # if self.duration:
+        #     print(f'protocol:{self.pkgloss_len/32768=:.3f}  {self.duration=:.3f}  ratio={self.pkgloss_len/self.duration:.2%}')
 
     def __prase_alg_res_pkg(self,pkg):
         ba=pkg[2]
@@ -588,8 +722,6 @@ class Protocol:
 
         ts=pkg[1]
         alg_type=ba[0]
-
-        
 
         if(alg_type==self.ALG_TYPE_ACC_RR):
             val=struct.unpack('<ddd',ba[1:(1+8*3)])
@@ -708,6 +840,10 @@ class Protocol:
             self.micpkg_ti = ts
         self.micpkg_tf = ts
 
+        if not self.gotMic_flag.is_set():
+            print(f"PRO___prase_dual_mic_pkg: first ts={ts} {mic0[:2]=} {mic1[:2]=}\n")
+            self.gotMic_flag.set()
+
         return (ts,mic0,mic1)
     
     def __prase_odd_snd_data_pkg(self,pkg):
@@ -721,7 +857,7 @@ class Protocol:
         data=struct.unpack('<'+'H'*int((len_ba-2)/2),ba[2:])[0]
 
         return (ts,pkg_idx,data)
-    
+
     def __prase_mic_pkg(self,pkg):
         ba=pkg[2]
         len_ba=len(ba)
@@ -814,14 +950,20 @@ class Protocol:
         return (ts,ch,val_list)
 
     def __auto_prase_thd_fun(self,flag,rxq,crq):
-        last3dat = []
-        last3dat_idx = 0
+        # last3dat = []
+        # last3dat_idx = 0
+        emptyCnt = 0
         while(flag.is_set()):
             if(self.is_req_auto_prase_pkg==False):
                 time.sleep(0.5)
                 continue
 
             if(rxq.empty()):
+                emptyCnt += 1
+                if emptyCnt > 200 and self.flag_drv_empty.is_set():
+                    self.flag_empty.set()
+                    flag.clear()
+                    break
                 time.sleep(0.01)
                 continue
 
@@ -919,8 +1061,14 @@ class Protocol:
     # def get_mic_data_q(self): # for QML
     #     return self.q_mic
 
-    def start(self):
-        self.stop()
+    def start(self,tEnd=0):
+        self.flag_finishstop.clear()
+        self.stop("protocol start")
+
+        while not self.flag_finishstop.is_set():
+            time.sleep(0.01)
+        self.flag_finishstop.clear()
+        self.flag_empty.clear()
 
         self.thd_run_flag=threading.Event()
         self.thd_run_flag.set()
@@ -931,21 +1079,26 @@ class Protocol:
         self.rx_queue=queue.Queue()
         self.cmd_resp_queue=queue.Queue()
 
-        self.thd=threading.Thread(target=self.__decode_thd_fun,
-                                    args =(self.thd_run_flag,self.driver,self.tx_queue,self.rx_queue,),
-                                    name='protocol_decode_thd_fun')
-        # self.thd.setDaemon(True)
+        self.thd=threading.Thread(target = self.__decode_thd_fun, name="protocol:__decode_thd_fun",
+                                  args =(self.thd_run_flag,self.driver,self.tx_queue,self.rx_queue,tEnd))
         self.thd.start()
 
-        self.auto_prase_thd=threading.Thread(target=self.__auto_prase_thd_fun,
-                                                args=(self.thd_run_flag,self.rx_queue,self.cmd_resp_queue,),
-                                                name='protocol_auto_prase_thd')
-        # self.auto_prase_thd.setDaemon(True)
+        self.auto_prase_thd=threading.Thread(target = self.__auto_prase_thd_fun, name="protocol:__auto_prase_thd_fun",
+                                             args =(self.thd_run_flag,self.rx_queue,self.cmd_resp_queue,))
         self.auto_prase_thd.start()
 
-    def stop(self):
-        if(self.thd_run_flag is not None):
+    def wait_proc(self):
+        while(self.thd_run_flag is not None):
+            if(self.rx_queue.empty()):
+                break
+
+    def stop(self,job=""):
+        print(f"\nprotocol: going to stop for {job}\n\t{self.thd_run_flag.is_set() if self.thd_run_flag else self.thd_run_flag =}\n\t"
+              f"{self.rx_queue.qsize() if self.rx_queue else self.rx_queue =}")
+        if(self.thd_run_flag is not None and self.rx_queue.qsize()):
             self.thd_run_flag.clear()
+            self.flag_empty.set()
+            print(f"protocol stop: clear thd_run_flag")
             
             if(self.thd is not None):
                 try:
@@ -962,6 +1115,8 @@ class Protocol:
         self.thd_run_flag=None
         self.thd=None
         self.auto_prase_thd=None
+        self.flag_finishstop.set()
+        print(f'Protocol stopped by {job}',threading.enumerate())
 
     def set_endingTX_callback(self, cb):    # only for sx2wav
         self.endingTX_callback = cb

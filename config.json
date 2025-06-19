@@ -20,6 +20,7 @@
         "delSX": 0,
         "moveSX": 10,
         "skipPkgCnt": 10,
+        "skipBytes_sec": 0,
         "prompt_convert": 10,
         "6ch": 0,
         "debug": 0,
@@ -29,8 +30,7 @@
         }
     },
     "dirToloadFile": [
-        "D:/tag_rawdata/TSKS-EAP/20250602_Day_952ac41642e9526e",
-        "P:/Backups/GoogleSX/Experiment/compilation/FJ_baby/成人",
+        "D:/tag_rawdata/TSKS-EAP/20250617_Day_8a32d0c065d0f041",
         "P:/Backups/GoogleSX/Experiment/compilation/IRB",
         "P:/Backups/GoogleSX/Experiment/compilation/attach",
         "D:/tag_rawdata",
@@ -44,7 +44,8 @@
         "C:/Users/SiriuXense/Downloads/unzipTmp",
         "//desktop-iife87h/tag_rawdata/",
         "C:/tmp/sxTest",
-        "D:/tag_rawdata/TSKS-EAP"
+        "D:/tag_rawdata/TSKS-EAP",
+        "G:/My Drive/Code/sw_sxReport_wCpp/sample_sxdir/20250529_Night_1d4b9eb8dcb0b544"
     ],
     "debug": 10,
     "autoRun": {
@@ -95,7 +96,8 @@
     "delzip": 10,
     "delSX": 0,
     "moveSX": 10,
-    "skipPkgCnt": 10,
+    "skipPkgCnt": 0,
+    "skipBytes_sec": 50,
     "prompt_convert": 10,
     "key": "",
     "iv": "",

@@ -284,12 +284,12 @@ class Engine:
                             tmp = res.split(',')
                             self.key = tmp[1]
                             self.iv = tmp[2]
-            drv = FD.Driver(sx_fn, job='chk_files_format')
+            drv = FD.Driver(sx_fn, job='chk_files_format', skip_bytes=20*1024*self.config['skipBytes_sec'])
             pkg_handler = PackageHandler(self)
             # self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
-            self.data_retriever = (PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
+            self.data_retriever = (PRO.Protocol(drv,'chk_files_format',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
                                     if not self.config['6ch']
-                                    else PRO6ch.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv))
+                                    else PRO6ch.Protocol(drv,'chk_files_format',self.config['skipPkgCnt'],key=self.key,iv=self.iv))
             self.data_retriever.set_sys_info_handler(pkg_handler)
             self.data_retriever.set_mic_data_handler(pkg_handler)
             self.data_retriever.set_imu_data_handler(pkg_handler)
@@ -385,7 +385,7 @@ class Engine:
         fnstr = sx_fn.split("/")[-2:] if len(sx_fn.split("/"))>1 else sx_fn.split("\\")[-2:]
         self.input = '_'.join(fnstr)
         if self.srcdir and (sx_fn.endswith('sx') or sx_fn.endswith('sxr')):
-            drv = FD.Driver(sx_fn,'set_files_source')
+            drv = FD.Driver(sx_fn,'set_files_source', skip_bytes=20*1024*self.config['skipBytes_sec'])
             pkg_handler = PackageHandler(self)
             # self.data_retriever = PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
             self.data_retriever = (PRO.Protocol(drv,'sxFile',self.config['skipPkgCnt'],key=self.key,iv=self.iv)
@@ -416,6 +416,10 @@ class Engine:
             print('going to start Engine again for recording!')
             self.dstdir = dstdir
             self.start()
+
+            while not self.data_retriever.flag_empty.is_set():
+                time.sleep(0.1)
+            self.data_retriever.stop("by Engine set_files_source")
 
     def setRec(self,dstdir='',wavfnkw_ts=''):
         if not self.thd_rec_flag.is_set():
