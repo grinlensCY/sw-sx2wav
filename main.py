@@ -17,7 +17,7 @@ from serialdb import SerialDB
 from detectors import Detector
 
 class Engine:
-    def __init__(self,datainfo=None, config=None, stopped_flag=None):
+    def __init__(self,datainfo=None, config=None, stopped_flag=None, autoRun=False):
         self.datainfo = datainfo
 
         self.config = config
@@ -67,6 +67,7 @@ class Engine:
         self.qTempAttach = queue.Queue()
 
         self.progress = 0
+        self.isAutoRun = autoRun
 
         self.reset()
 
@@ -228,7 +229,11 @@ class Engine:
                 for i,s in enumerate(self.bleaddr):
                     if i%2: continue
                     str_bleaddr_2 += self.bleaddr[i:i+2]+'_' if i!=10 else self.bleaddr[i:i+2]
-                if self.bleaddr in self.srcdir or str_bleaddr_2 in self.srcdir:
+                if self.isAutoRun:
+                    dstdir = (f"{self.srcdir}/"
+                                f'{self.bleaddr}')
+                    userdir = f"{self.srcdir}/"
+                elif self.bleaddr in self.srcdir or str_bleaddr_2 in self.srcdir:
                     # if int(str_date[:4]) < 2020:
                     #     dstdir = f"{self.srcdir}"
                     dstdir = (f"{self.srcdir}/"
@@ -507,6 +512,7 @@ class Engine:
             print('stop rec')
             self.thd_rec_flag.clear()
             if not self.config['onlylog']:
+                self.micProcessedT = self.recThd_audio.processedT
                 self.recThd_audio.stop()
                 self.recThd_audio.join(0.5)
                 # print('self.recThd_audio ',self.recThd_audio.is_alive())
@@ -1078,8 +1084,8 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    print('version: 20250101e')
-    print('version: 20250101e', file=open('log.txt', 'w', newline='', encoding='utf-8-sig'))
+    version = '20250619a'
+    print(f'{version=}', file=open('log.txt', 'w', newline='', encoding='utf-8-sig'))
     config = updateConfig()
 
     isAutoRun = bool(sys.argv[1]) if len(sys.argv) > 1 else False
@@ -1226,7 +1232,7 @@ if __name__ == "__main__":
                 fns,usersrcdirs,sxpool = mergeSX(fns,usersrcdirs,last_merged_dict,sxdict)
             [print('going to converting',fn) for fn in fns]
             stop_flag = threading.Event()
-            engine = Engine(datainfo,config,stopped_flag=stop_flag)
+            engine = Engine(datainfo,config,stopped_flag=stop_flag,autoRun=isAutoRun)
             if not isAutoRun and config['onlyMerge']:# or (not config['prompt_convert'] or input('Enter:go  Others:quit ')):
                 for fn in fns:
                     dstdir,wavfnkw_ts,userdir,dstdir2,userdir2 = engine.getDstdir(fn,'')
@@ -1360,9 +1366,10 @@ if __name__ == "__main__":
                     with open(fn_log, 'w', encoding='utf-8-sig') as jout:
                         json.dump(sxdict, jout, indent=4, ensure_ascii=False)
                 
-                if engine.progress < 0.9 or config['debug']:
+                progress = engine.micProcessedT / engine.duration
+                if progress < 0.9 or config['debug']:
                     targetfn = sx_dstfn if (config['moveSX'] and len(fns)) or isAutoRun else fn
-                    print(f"{fn}:{engine.progress:.3f}  {engine.duration=:.1f}={hhmmss(engine.duration)}  duration_byFilesize{hhmmss(os.path.getsize(targetfn)/20000)}",
+                    print(f"{fn}:{progress:.3f}  {engine.micProcessedT=:.1f}={hhmmss(engine.micProcessedT)}  {engine.duration=:.1f}={hhmmss(engine.duration)}  duration_byFilesize{hhmmss(os.path.getsize(targetfn)/20000)}",
                           file=open('errlog.txt','a',newline='', encoding='utf-8-sig'))
 
             time.sleep(3)
