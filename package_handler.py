@@ -243,6 +243,9 @@ class PackageHandler:
         self.cumm_accpkgCnt += 1
         self.prepare_statistic_output()
         if self.engine.thd_rec_flag.is_set() and not self.engine.config['onlylog'] and not self.engine.config['onlyChkpkgloss']:
+            if not (dat[0] or len([xyz for xyz in dat[2][:3] if len([j for j in xyz if j])])):  # check if meaningful data exist
+                print(f"skip this acc: not ({dat[0]=} or {len([xyz for xyz in dat[2][:3] if len([j for j in xyz if j])])=})")
+                return
             if not self.gotAcc_flag.is_set():
                 print(f"packageHandler handle_imu_acc_pkg: first ts {dat[0]}  {len(dat[2])=}  {dat[2][:3]=}")   # 20 x 3
                 self.gotAcc_flag.set()
