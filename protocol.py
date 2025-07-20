@@ -696,7 +696,7 @@ class Protocol:
                     emptyCnt += 1
                     if emptyCnt > 210:
                         print(f'protocol empty cnt={emptyCnt}  rxq_size={self.rx_queue.qsize()}  {rxCnt=}  {rxCnt==drv.read_cnt=}')
-                        tdiff = self.micpkg_tf - self.micpkg_ti
+                        tdiff = self.micpkg_tf - self.micpkg_ti if self.micpkg_tf and self.micpkg_ti else 0
                         print(f"{self.micpkg_cnt=}={self.micpkg_cnt*0.016:.1f}sec  {self.micpkg_ti=}  {self.micpkg_tf=}  {tdiff=}={tdiff/32768:.1f}sec")
                         if (drv.thd_run_flag is None or not drv.thd_run_flag.is_set()):
                             self.flag_drv_empty.set()
